@@ -2,10 +2,13 @@
 
 %{
     #include "lexLib.h"
+    #define YY_DECL int alpha_yylex(void* yylval)
+    void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt);
 %}
 
 %option noyywrap
 %option yylineno
+%option header-file = "al.h"
 
 ID      [a-zA-Z][a-zA-Z0-9]*
 INT     [0-9]+
@@ -18,11 +21,11 @@ WSPACE  [ \n\t]
 
 %%
 
-"if"        {
-                count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval,yylineno,count,yytext,"KEYWORD","IF");
-            }
+"if"            {
+                    count++;
+                    token_cont_t tt = {yytext,"IF","KEYWORD"}
+                    add_token(yylval,yylineno,count,tt);
+                }
 
 "else"      {
                 count++;
@@ -246,7 +249,22 @@ WSPACE  [ \n\t]
                 add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "STRING");
             }
 {WSPACE}    {
-                count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "WSPACE");
             }
+<<EOF>>     {return 2;}
+
+%%
+
+int main(int argc, char* argv[]){
+    if(argc!=2){
+        printf("error opeing file\n");
+    }
+    alpha_token_t* token = NULL;
+    if(!(yyin=fopen(argv[1],"r"))){
+        printf("error sto diavasma\n");
+    }
+    while(1){
+        token = (alpha_token_t*)malloc(sizeof(alpha_token_t));
+        if(alpha_yylex(curr)==2) break;
+    }
+    return 0;
+}

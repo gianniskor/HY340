@@ -18,6 +18,8 @@ void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt){
     strcpy(yylval->cont->val, tt.val);
     strcpy(yylval->cont->type, tt.type);
 
+    printf("line %d, val %s",yylval->cont->val);
+
     // "if"        {
     //             count++;
     //             token_cont_t tt = {yytext,"IF","KEYWORD"}
