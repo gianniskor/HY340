@@ -8,5 +8,5 @@ typedef struct alpha_token_t{
     int line;
     int count;
     token_cont_t *cont;
-    token_t *next;
-}token_t;
+    alpha_token_t *next;
+}alpha_token_t;
