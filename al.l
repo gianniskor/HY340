@@ -1,5 +1,3 @@
-%%
-
 %{
     #include "lexLib.h"
     #define YY_DECL int alpha_yylex(void* yylval)
@@ -21,238 +19,258 @@ WSPACE  [ \n\t]
 
 %%
 
-"if"            {
-                    count++;
-                    token_cont_t tt = {yytext,"IF","KEYWORD"}
-                    add_token(yylval,yylineno,count,tt);
-                }
+"if"        {
+                count++;
+                token_cont_t tt = {yytext,"IF","KEYWORD"};
+                add_token(yylval,yylineno, count, tt);
+            }
 
 "else"      {
                 count++;
-                token_cont_t tt = "<-enumerated";
+                token_cont_t tt = {yytext,"ELSE","KEYWORD"};
                 add_token(yylval, yylineno, count, yytext, "KEYWORD", "ELSE");
             }
 "while"     {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "WHILE");
+                token_cont_t tt = {yytext,"WHILE","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "for"       {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "FOR");
+                token_cont_t tt = {yytext,"for","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "function"  {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "FUNCTION");
+                token_cont_t tt = {yytext,"FUNCTION","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "return"    {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "RETURN");
+                token_cont_t tt = {yytext,"RETURN","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "break"     {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "BREAK");
+                token_cont_t tt = {yytext,"BREAK","KEYWORD"};
+                add_token(yylval, yylineno, count, tt");
             }
 "continue"  {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "CONTINUE");
+                token_cont_t tt = {yytext,"CONTINUE","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "and"       {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "AND");
+                token_cont_t tt = {yytext,"AND","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "not"       {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "NOT");
+                token_cont_t tt = {yytext,"NOT","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "or"        {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "OR");
+                token_cont_t tt = {yytext,"OR","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "local"     {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "LOCAL");
+                token_cont_t tt = {yytext,"LOCAL","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "true"      {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "TRUE");
+                token_cont_t tt = {yytext,"TRUE","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "false"     {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "FALSE");
+                token_cont_t tt = {yytext,"FALSE","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "nil"       {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "NIL");
+                token_cont_t tt = {yytext,"NIL","KEYWORD"};
+                add_token(yylval, yylineno, count, tt);
             }
 "="         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "OPERATOR", "ASSIGN");
+                token_cont_t tt = {yytext,"ASSIGN","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "+"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "OPERATOR", "PLUS");
+                token_cont_t tt = {yytext,"PLUS","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "-"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "OPERATOR", "MINUS");
+                token_cont_t tt = {yytext,"MINUS","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "*"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "OPERATOR", "MULTIPLY");
+                token_cont_t tt = {yytext,"MULTIPLY","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "/"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "OPERATOR", "DIVISION");
+                token_cont_t tt = {yytext,"DIVISION","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "%"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "OPERATOR", "MODULO");
+                token_cont_t tt = "{yytext,"MODULO","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "=="        {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "OPERATOR", "EQUAL");
+                token_cont_t tt = {yytext,"EQUAL","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "!="        {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "OPERATOR", "NONEQUAL");
+                token_cont_t tt = {yytext,"NONEQUAL","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "++"        {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "OPERATOR", "PLUS_PLUS");
+                token_cont_t tt = {yytext,"PLUS_PLUS","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "--"        {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "OPERATOR", "MINUS_MINUS");
+                token_cont_t tt = {yytext,"MINUS_MINUS","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 ">"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "GREATER_THAN");
+                token_cont_t tt = {yytext,"GREATER_THAN","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "<"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "LESSER_THAN");
+                token_cont_t tt = {yytext,"LESS_THAN","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 ">="        {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "GREATER_EQUAL_THAN");
+                token_cont_t tt = {yytext,"GREATER_EQUAL_THAN","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "<="        {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "LESSER_EQUAL_THAN");
+                token_cont_t tt = {yytext,"LESS_EQUAL_THAN","OPERATOR"};
+                add_token(yylval, yylineno, count, tt);
             }
 "{"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "LEFT_BRACE");
+                token_cont_t tt = {yytext,"PUNCTUATION","LEFT_BRACE"};
+                add_token(yylval, yylineno, count, tt);
             }
 "}"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "RIGHT_BRACE");
+                token_cont_t tt = {yytext,"PUNCTUATION","RIGHT_BRACE"};
+                add_token(yylval, yylineno, count, tt);
             }
 "["         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "LEFT_BRACKET");
+                token_cont_t tt = {yytext,"PUNCTUATION","LEFT_BRACKET"};
+                add_token(yylval, yylineno, count, tt);
             }
 "]"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "RIGHT_BRACKET");
+                token_cont_t tt = {yytext,"PUNCTUATION","RIGHT_BRACKET"};
+                add_token(yylval, yylineno, count, tt);
             }
 "("         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "LEFT_PARENTHESIS");
+                token_cont_t tt = {yytext,"PUNCTUATION","LEFT_PARENTHESIS"};
+                add_token(yylval, yylineno, count, tt);
             }
 ")"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "RIGHT_PARENTHESIS");
+                token_cont_t tt = {yytext,"PUNCTUATION","RIGHT_PARENTHESIS"};
+                add_token(yylval, yylineno, count, tt);
             }
 ";"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "SEMICOLON");
+                token_cont_t tt = {yytext,"PUNCTUATION","SEMICOLON"};
+                add_token(yylval, yylineno, count, tt);
             }
 ","         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "COMMA");
+                token_cont_t tt = {yytext,"PUNCTUATION","COMMA"};
+                add_token(yylval, yylineno, count, tt);
             }
 ":"         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "END_PARENTHESES");
+                token_cont_t tt = {yytext,"PUNCTUATION","COLON"};
+                add_token(yylval, yylineno, count, tt);
             }
 "::"        {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "DOUBLE_END_PARENTHESES");
+                token_cont_t tt = {yytext,"PUNCTUATION","DOUBLE_COLON"};
+                add_token(yylval, yylineno, count, tt);
             }
 "."         {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "POINT");
+                token_cont_t tt = {yytext,"PUNCTUATION","PERIOD"};
+                add_token(yylval, yylineno, count, tt);
             }
 ".."        {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "DOUBLE_POINT");
+                token_cont_t tt = {yytext,"PUNCTUATION","DOUBLE_PERIOD"};
+                add_token(yylval, yylineno, count, tt);
             }
 
 {ID}        {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "ID");
+                token_cont_t tt = {yytext,"IDENTIFIER","ID"};
+                add_token(yylval, yylineno, count, tt);
             }
 {INT}       {
                 count++;
-                token_cont_t tt = "<-integer";
-                add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "INT");
+                token_cont_t tt = {yytext,"IDENTIFIER","INT"};
+                add_token(yylval, yylineno, count, tt);
             }
 {REAL}      {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "REAL");
+                token_cont_t tt = {yytext,"IDENTIFIER","REAL"};
+                add_token(yylval, yylineno, count, tt);
             }
 {STRING}    {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "STRING");
+                token_cont_t tt = {yytext,"IDENTIFIER","STRING"};
+                add_token(yylval, yylineno, count, tt);
             }
 {WSPACE}    {
             }
 <<EOF>>     {return 2;}
 
 %%
+
+void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt){
+    int sizeClass = strlen(tt.class_type)+1;
+    int sizeType = strlen(tt.type)+1;
+    int sizeVal = strlen(tt.val)+1;
+
+    yylval->line = line;
+    yylval->count = count;
+
+    yylval->cont->class_type = (char *)malloc((sizeClass)*sizeof(char));
+    yylval->cont->type = (char *)malloc((sizeType)*sizeof(char));
+    yylval->cont->val = (char *)malloc((sizeVal)*sizeof(char));
+
+    strcpy(yylval->cont->class_type, tt.class_type);
+    strcpy(yylval->cont->val, tt.val);
+    strcpy(yylval->cont->type, tt.type);
+
+    printf("line %d, val %s",yylval->cont->val);
+}
+
 
 int main(int argc, char* argv[]){
     if(argc!=2){
