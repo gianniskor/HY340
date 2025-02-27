@@ -263,6 +263,7 @@ int main(int argc, char* argv[]){
     }
     while(1){
         token = (alpha_token_t*)malloc(sizeof(alpha_token_t));
+        token->cont = NULL;
         if(alpha_yylex(token)==2) break;
     }
     return 0;
