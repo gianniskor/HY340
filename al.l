@@ -97,156 +97,156 @@ WSPACE  [ \n\t]
 "="         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "ASSIGN");
+                add_token(yylval, yylineno, count, yytext, "OPERATOR", "ASSIGN");
             }
 "+"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "PLUS");
+                add_token(yylval, yylineno, count, yytext, "OPERATOR", "PLUS");
             }
 "-"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "MINUS");
+                add_token(yylval, yylineno, count, yytext, "OPERATOR", "MINUS");
             }
 "*"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "MULTIPLY");
+                add_token(yylval, yylineno, count, yytext, "OPERATOR", "MULTIPLY");
             }
 "/"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "DIVISION");
+                add_token(yylval, yylineno, count, yytext, "OPERATOR", "DIVISION");
             }
 "%"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "MODULO");
+                add_token(yylval, yylineno, count, yytext, "OPERATOR", "MODULO");
             }
 "=="        {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "EQUAL");
+                add_token(yylval, yylineno, count, yytext, "OPERATOR", "EQUAL");
             }
 "!="        {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "NONEQUAL");
+                add_token(yylval, yylineno, count, yytext, "OPERATOR", "NONEQUAL");
             }
 "++"        {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "PLUS_PLUS");
+                add_token(yylval, yylineno, count, yytext, "OPERATOR", "PLUS_PLUS");
             }
 "--"        {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "MINUS_MINUS");
+                add_token(yylval, yylineno, count, yytext, "OPERATOR", "MINUS_MINUS");
             }
 ">"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "GREATER_THAN");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "GREATER_THAN");
             }
 "<"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "LESSER_THAN");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "LESSER_THAN");
             }
 ">="        {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "GREATER_EQUAL_THAN");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "GREATER_EQUAL_THAN");
             }
 "<="        {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "LESSER_EQUAL_THAN");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "LESSER_EQUAL_THAN");
             }
 "{"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "LEFT_BRACE");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "LEFT_BRACE");
             }
 "}"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "RIGHT_BRACE");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "RIGHT_BRACE");
             }
 "["         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "LEFT_BRACKET");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "LEFT_BRACKET");
             }
 "]"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "RIGHT_BRACKET");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "RIGHT_BRACKET");
             }
 "("         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "LEFT_PARENTHESIS");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "LEFT_PARENTHESIS");
             }
 ")"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "RIGHT_PARENTHESIS");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "RIGHT_PARENTHESIS");
             }
 ";"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "SEMICOLON");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "SEMICOLON");
             }
 ","         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "COMMA");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "COMMA");
             }
 ":"         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "END_PARENTHESES");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "END_PARENTHESES");
             }
 "::"        {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "DOUBLE_END_PARENTHESES");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "DOUBLE_END_PARENTHESES");
             }
 "."         {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "POINT");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "POINT");
             }
 ".."        {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "DOUBLE_POINT");
+                add_token(yylval, yylineno, count, yytext, "PUNCTUATION", "DOUBLE_POINT");
             }
 
 {ID}        {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "ID");
+                add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "ID");
             }
 {INT}       {
                 count++;
-                token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "INT");
+                token_cont_t tt = "<-integer";
+                add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "INT");
             }
 {REAL}      {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "REAL");
+                add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "REAL");
             }
 {STRING}    {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "STRING");
+                add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "STRING");
             }
 {WSPACE}    {
                 count++;
                 token_cont_t tt = "<-enumerated";
-                add_token(yylval, yylineno, count, yytext, "KEYWORD", "WSPACE");
+                add_token(yylval, yylineno, count, yytext, "IDENTIFIER", "WSPACE");
             }
