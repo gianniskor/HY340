@@ -10,7 +10,7 @@ void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt){
     int sizeClass = strlen(tt.class_type)+1;
     int sizeType = strlen(tt.type)+1;
     int sizeVal = strlen(tt.val)+1;
-    
+
     if (yylval->cont == NULL) {
         yylval->cont = (token_cont_t*)malloc(sizeof(token_cont_t));
     }
@@ -25,5 +25,5 @@ void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt){
     strcpy(yylval->cont->val, tt.val);
     strcpy(yylval->cont->type, tt.type);
     
-    printf("line %d, val %s\n", line, yylval->cont->val);
+    printf("line %d, val %s, type %s, classtype %s\n", line, yylval->cont->val,yylval->cont->type,yylval->cont->class_type);
 }
