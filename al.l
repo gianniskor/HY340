@@ -3,6 +3,8 @@
     #define YY_DECL int alpha_yylex(void* yylval)
     int count = 0;
     void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt);
+    token_list_t* head;
+    token_list_t* tail;
 %}
 
 %option noyywrap
@@ -264,6 +266,9 @@ COMMENT_REGEX "/*"
                     BEGIN(INITIAL);
                 }
 <LINE_COMMENT>. {}
+<COMMENT_REGEX> {
+
+                }
 %%
 
 int main(int argc, char* argv[]){

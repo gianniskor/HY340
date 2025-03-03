@@ -33,6 +33,6 @@ void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt){
         strcpy(yylval->cont->val, tt.val);
         strcpy(yylval->cont->type, tt.type);
     }
-    
+
     printf("line %d, val %s, type %s, classtype %s\n", line, yylval->cont->val,yylval->cont->type,yylval->cont->class_type);
 }
