@@ -20,10 +20,19 @@ void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt){
     yylval->cont->class_type = (char*)malloc(sizeClass * sizeof(char));
     yylval->cont->type = (char*)malloc(sizeType * sizeof(char));
     yylval->cont->val = (char*)malloc(sizeVal * sizeof(char));
-    
-    strcpy(yylval->cont->class_type, tt.class_type);
-    strcpy(yylval->cont->val, tt.val);
-    strcpy(yylval->cont->type, tt.type);
+
+    if((strcmp(tt.class_type,"LINE_COMMENT"))==0){
+        free(yylval->cont->val);
+        int sizeN = sizeof("\"comment_value\"");
+        yylval->cont->val = (char*)malloc(sizeN*sizeof(char));
+        strcpy(yylval->cont->val, "\"comment_value\"");
+        strcpy(yylval->cont->class_type, tt.class_type);
+        strcpy(yylval->cont->type, tt.type);
+    }else{
+        strcpy(yylval->cont->class_type, tt.class_type);
+        strcpy(yylval->cont->val, tt.val);
+        strcpy(yylval->cont->type, tt.type);
+    }
     
     printf("line %d, val %s, type %s, classtype %s\n", line, yylval->cont->val,yylval->cont->type,yylval->cont->class_type);
 }

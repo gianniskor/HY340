@@ -14,7 +14,7 @@ INT     [0-9]+
 REAL    [0-9]+\.+[0-9]+
 STRING  \"([^"\\]|\\.|\\\n)*\"
 WSPACE  [ \n\t\v]
-LINE_REGEX "\\".*
+LINE_REGEX "//"
 COMMENT_REGEX "/*"
 
 %x      COMMENT
@@ -257,13 +257,13 @@ COMMENT_REGEX "/*"
                     BEGIN(LINE_COMMENT);
                 }
 
-<LINE_COMMENT>\n{
-                    yylineno--;
+<LINE_COMMENT>\n {
                     count++;
-                    token_cont_t tt = {yytext,"COMMENT","LINE_COMMENT"}
-                    add_token(yylval,yylineno,count,tt);
+                    token_cont_t tt = {yytext,"COMMENT","LINE_COMMENT"};
+                    add_token(yylval,yylineno-1,count,tt);
+                    BEGIN(INITIAL);
                 }
-
+<LINE_COMMENT>. {}
 %%
 
 int main(int argc, char* argv[]){
