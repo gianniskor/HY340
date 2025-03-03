@@ -10,3 +10,8 @@ typedef struct alpha_token_t{
     struct token_cont_t *cont;
     struct alpha_token_t *next;
 }alpha_token_t;
+
+typedef struct token_list{
+    alpha_token_t *t;
+    struct token_list *next;
+}token_list_t;
