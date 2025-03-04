@@ -264,6 +264,10 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,yytext,"STRING"};
                     add_token(yylval, yylineno, count, tt);
                 }
+\"[^\"]*        {
+                  printf("Error, Unclosed String.\n");
+                    return -1;
+                }
 {WSPACE}        {}
 
 {LINE_REGEX}    {
