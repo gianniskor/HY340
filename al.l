@@ -312,6 +312,10 @@ COMMENT_REGEX "/*"
 <<EOF>>         {
                     return 2;
                 }
+<*>.            {
+                    printf("unknown token at %d\n",yylineno);
+                    return 2;
+                }
 %%
 
 int main(int argc, char* argv[]) {
