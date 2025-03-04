@@ -7,6 +7,7 @@
 extern int count;
 
 void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt){
+    
     int sizeClass = strlen(tt.class_type)+1;
     int sizeType = strlen(tt.type)+1;
     int sizeVal = strlen(tt.val)+1;
@@ -35,4 +36,42 @@ void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt){
     }
 
     printf("line %d, val %s, type %s, classtype %s\n", line, yylval->cont->val,yylval->cont->type,yylval->cont->class_type);
+}
+char* replace_chars(char* str){
+    char* new_str = (char*)malloc(strlen(str) + 1);
+    int i = 0;
+    int j = 0;
+    while(str[i]){
+        if(str[i] == '\\'){
+            i++;
+            switch(str[i]){
+                case 'n':
+                    new_str[j] = '\n';
+                    break;
+                case 't':
+                    new_str[j] = '\t';
+                    break;
+                case '\\':
+                    new_str[j] = '\\';
+                    break;
+                case '\'':
+                    new_str[j] = '\'';
+                    break;
+                case '\"':
+                    new_str[j] = '\"';
+                    break;
+                default:
+                    new_str[j] = str[i];
+                    break;
+            }
+        }else{
+            new_str[j] = str[i];
+        }
+        i++;
+        j++;
+    }
+    new_str[j] = '\0';
+    strcpy(str,new_str);
+    free(new_str);
+    return str;
 }

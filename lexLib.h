@@ -15,3 +15,9 @@ typedef struct token_list{
     alpha_token_t *t;
     struct token_list *next;
 }token_list_t;
+
+typedef struct comment_list{
+    int line;
+    int closing;
+    struct comment_list* next;
+}comment_list_t;

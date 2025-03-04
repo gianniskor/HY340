@@ -3,8 +3,14 @@
     #define YY_DECL int alpha_yylex(void* yylval)
     int count = 0;
     void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt);
+    void comment_push(int yylineno);
+    void comment_delete();
+    char* replace_chars(char* str);
+    char *comment_line(int start, int end);
     token_list_t* head;
     token_list_t* tail;
+    comment_list_t* comment_head = NULL;
+    comment_list_t* comment_tail = NULL;
 %}
 
 %option noyywrap
@@ -248,13 +254,16 @@ COMMENT_REGEX "/*"
                 }
 {STRING}        {
                     count++;
+                    // remove quotes
+                    char* str = strdup(yytext + 1);
+                    str[strlen(str) - 1] = '\0';
+                    str = replace_chars(str);
+                    yytext = str;
                     token_cont_t tt = {yytext,"IDENTIFIER","STRING"};
                     add_token(yylval, yylineno, count, tt);
                 }
 {WSPACE}        {}
-<<EOF>>         {
-                    return 2;
-                }
+
 {LINE_REGEX}    {
                     BEGIN(LINE_COMMENT);
                 }
@@ -266,8 +275,40 @@ COMMENT_REGEX "/*"
                     BEGIN(INITIAL);
                 }
 <LINE_COMMENT>. {}
-<COMMENT_REGEX> {
-
+{COMMENT_REGEX} {
+                    comment_push(yylineno);
+                    BEGIN(COMMENT);
+                }
+<COMMENT>"/*"   {
+                    comment_push(yylineno);
+                }
+<COMMENT>"*/"   {
+    if (comment_head != NULL && comment_head->next == NULL) {
+        count++;
+        char *str = comment_line(comment_tail->line, yylineno);
+        token_cont_t tt = {str, "COMMENT", "BLOCK_COMMENT"};
+        add_token(yylval, comment_tail->line, count, tt);
+        //otan kanw print meta bgalw to free
+        free(str);
+        comment_delete();
+        BEGIN(INITIAL);
+    } else {
+        count++;
+        char *str = comment_line(comment_tail->line, yylineno);
+        token_cont_t tt = {str, "COMMENT", "NESTED_COMMENT"};
+        add_token(yylval, comment_tail->line, count, tt);
+        //otan kanw print meta bgalw to free
+        free(str);
+        comment_delete();
+    }
+}
+<COMMENT><<EOF>> {
+    printf("error, block comment not closed.\n");
+    return 2;
+}
+<COMMENT>.|\n {}
+<<EOF>>         {
+                    return 2;
                 }
 %%
 
