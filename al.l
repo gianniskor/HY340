@@ -7,8 +7,10 @@
     void comment_delete();
     char* replace_chars(char* str);
     char *comment_line(int start, int end);
-    token_list_t* head;
-    token_list_t* tail;
+    void print_tokens();
+    void free_token_list();
+    token_list_t* head = NULL;
+    token_list_t* tail = NULL;
     comment_list_t* comment_head = NULL;
     comment_list_t* comment_tail = NULL;
 %}
@@ -312,18 +314,23 @@ COMMENT_REGEX "/*"
                 }
 %%
 
-int main(int argc, char* argv[]){
-    if(argc!=2){
-        printf("error opeing file\n");
+int main(int argc, char* argv[]) {
+    if(argc != 2) {
+        printf("Error opening file\n");
+        return 1;
     }
     alpha_token_t* token = NULL;
-    if(!(yyin=fopen(argv[1],"r"))){
-        printf("error sto diavasma\n");
+    if(!(yyin = fopen(argv[1], "r"))) {
+        printf("Error reading file\n");
+        return 1;
     }
-    while(1){
+    while(1) {
         token = (alpha_token_t*)malloc(sizeof(alpha_token_t));
         token->cont = NULL;
-        if(alpha_yylex(token)==2) break;
+        if(alpha_yylex(token) == 2) break;
     }
+    print_tokens();
+    free_token_list();
+    fclose(yyin);
     return 0;
 }

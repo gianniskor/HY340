@@ -4,39 +4,57 @@
 #include <string.h>
 #include <stdio.h>
 
+extern token_list_t* head;
+extern token_list_t* tail;
 extern int count;
 
-void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt){
-    
-    int sizeClass = strlen(tt.class_type)+1;
-    int sizeType = strlen(tt.type)+1;
-    int sizeVal = strlen(tt.val)+1;
+void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt) {
+    token_list_t* new_node = (token_list_t*)malloc(sizeof(token_list_t));
+    new_node->t = (alpha_token_t*)malloc(sizeof(alpha_token_t));
 
-    if (yylval->cont == NULL) {
-        yylval->cont = (token_cont_t*)malloc(sizeof(token_cont_t));
+    new_node->t->line = line;
+    new_node->t->count = count;
+    new_node->t->cont = (token_cont_t*)malloc(sizeof(token_cont_t));
+
+    int sizeClass = strlen(tt.class_type) + 1;
+    int sizeType = strlen(tt.type) + 1;
+    int sizeVal = strlen(tt.val) + 1;
+    
+    new_node->t->cont->class_type = (char*)malloc(sizeClass * sizeof(char));
+    new_node->t->cont->type = (char*)malloc(sizeType * sizeof(char));
+    new_node->t->cont->val = (char*)malloc(sizeVal * sizeof(char));
+
+    if (strcmp(tt.class_type, "LINE_COMMENT") == 0) {
+        strcpy(new_node->t->cont->val, "");
+    } else {
+        strcpy(new_node->t->cont->val, tt.val);
     }
     
-    yylval->line = line;
-    yylval->count = count;
-    yylval->cont->class_type = (char*)malloc(sizeClass * sizeof(char));
-    yylval->cont->type = (char*)malloc(sizeType * sizeof(char));
-    yylval->cont->val = (char*)malloc(sizeVal * sizeof(char));
-
-    if((strcmp(tt.class_type,"LINE_COMMENT"))==0){
-        free(yylval->cont->val);
-        int sizeN = sizeof("\"comment_value\"");
-        yylval->cont->val = (char*)malloc(sizeN*sizeof(char));
-        strcpy(yylval->cont->val, "\"comment_value\"");
-        strcpy(yylval->cont->class_type, tt.class_type);
-        strcpy(yylval->cont->type, tt.type);
-    }else{
-        strcpy(yylval->cont->class_type, tt.class_type);
-        strcpy(yylval->cont->val, tt.val);
-        strcpy(yylval->cont->type, tt.type);
+    strcpy(new_node->t->cont->class_type, tt.class_type);
+    strcpy(new_node->t->cont->type, tt.type);
+    new_node->next = NULL;
+    
+    if (head == NULL) {
+        head = new_node;
+        tail = new_node;
+    } else {
+        tail->next = new_node;
+        tail = new_node;
     }
-
-    printf("line %d, val %s, type %s, classtype %s\n", line, yylval->cont->val,yylval->cont->type,yylval->cont->class_type);
 }
+
+void print_tokens() {
+    token_list_t* current = head;    
+    while (current != NULL) {
+        printf("line %d, val %s, type %s, classtype %s\n", 
+               current->t->line,
+               current->t->cont->val,
+               current->t->cont->type,
+               current->t->cont->class_type);
+        current = current->next;
+    }
+}
+
 char* replace_chars(char* str){
     char* new_str = (char*)malloc(strlen(str) + 1);
     int i = 0;
@@ -74,4 +92,23 @@ char* replace_chars(char* str){
     strcpy(str,new_str);
     free(new_str);
     return str;
+}
+
+void free_token_list(){
+    token_list_t* current = head;
+    
+    while (current != NULL) {
+        token_list_t* temp = current;
+
+        free(current->t->cont->class_type);
+        free(current->t->cont->type);
+        free(current->t->cont->val);
+        free(current->t->cont);
+        free(current->t);
+        
+        current = current->next;
+        free(temp);
+    }
+    head = NULL;
+    tail = NULL;
 }
