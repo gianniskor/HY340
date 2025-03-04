@@ -261,7 +261,7 @@ COMMENT_REGEX "/*"
                     str[strlen(str) - 1] = '\0';
                     str = replace_chars(str);
                     yytext = str;
-                    token_cont_t tt = {yytext,"IDENTIFIER","STRING"};
+                    token_cont_t tt = {yytext,yytext,"STRING"};
                     add_token(yylval, yylineno, count, tt);
                 }
 {WSPACE}        {}

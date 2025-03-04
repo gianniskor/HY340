@@ -44,13 +44,27 @@ void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt) {
 }
 
 void print_tokens() {
+    printf("----------------|\tLEXICAL ANALYSIS \t|----------------\n\n");
     token_list_t* current = head;    
     while (current != NULL) {
-        printf("line %d, val %s, type %s, classtype %s\n", 
+        printf("%d:\t#%d\t%s\t%s\t%s\t",
                current->t->line,
+               current->t->count,
                current->t->cont->val,
-               current->t->cont->type,
-               current->t->cont->class_type);
+               current->t->cont->class_type,
+               current->t->cont->type);
+        if (strcmp(current->t->cont->class_type, "LINE_COMMENT") == 0 || strcmp(current->t->cont->class_type, "COMMENT") == 0 ||
+            strcmp(current->t->cont->class_type, "BLOCK_COMMENT") == 0 || strcmp(current->t->cont->class_type, "NESTED_COMMENT") == 0) {
+            printf("\n");
+        }else if (strcmp(current->t->cont->class_type, "ID") == 0 || strcmp(current->t->cont->class_type, "STRING") == 0) {
+            printf("<- char*\n");
+        }else if (strcmp(current->t->cont->class_type, "INT") == 0) {
+            printf("<- int\n");
+        }else if (strcmp(current->t->cont->class_type, "REAL") == 0) {
+            printf("<- float\n");
+        }else {
+            printf("<- enumerated\n");
+        }
         current = current->next;
     }
 }
