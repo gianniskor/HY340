@@ -180,78 +180,78 @@ COMMENT_REGEX "/*"
                 }
 "{"             {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","LEFT_BRACE"};
+                    token_cont_t tt = {yytext,"LEFT_BRACE","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 "}"             {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","RIGHT_BRACE"};
+                    token_cont_t tt = {yytext,"RIGHT_BRACE","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 "["             {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","LEFT_BRACKET"};
+                    token_cont_t tt = {yytext,"LEFT_BRACKET","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 "]"             {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","RIGHT_BRACKET"};
+                    token_cont_t tt = {yytext,"RIGHT_BRACKET","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 "("             {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","LEFT_PARENTHESIS"};
+                    token_cont_t tt = {yytext,"LEFT_PARENTHESIS","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 ")"             {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","RIGHT_PARENTHESIS"};
+                    token_cont_t tt = {yytext,"RIGHT_PARENTHESIS","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 ";"             {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","SEMICOLON"};
+                    token_cont_t tt = {yytext,"SEMICOLON","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 ","             {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","COMMA"};
+                    token_cont_t tt = {yytext,"COMMA","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 ":"             {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","COLON"};
+                    token_cont_t tt = {yytext,"COLON","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 "::"            {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","DOUBLE_COLON"};
+                    token_cont_t tt = {yytext,"DOUBLE_COLON","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 "."             {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","PERIOD"};
+                    token_cont_t tt = {yytext,"PERIOD","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 ".."            {
                     count++;
-                    token_cont_t tt = {yytext,"PUNCTUATION","DOUBLE_PERIOD"};
+                    token_cont_t tt = {yytext,"DOUBLE_PERIOD","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
                 }
 
 {ID}            {
                     count++;
-                    token_cont_t tt = {yytext,"IDENTIFIER","ID"};
+                    token_cont_t tt = {yytext,"ID","IDENTIFIER"};
                     add_token(yylval, yylineno, count, tt);
                 }
 {INT}           {
                     count++;
-                    token_cont_t tt = {yytext,"IDENTIFIER","INT"};
+                    token_cont_t tt = {yytext,"INT","IDENTIFIER"};
                     add_token(yylval, yylineno, count, tt);
                 }
 {REAL}          {
                     count++;
-                    token_cont_t tt = {yytext,"IDENTIFIER","REAL"};
+                    token_cont_t tt = {yytext,"REAL","IDENTIFIER"};
                     add_token(yylval, yylineno, count, tt);
                 }
 {STRING}        {
