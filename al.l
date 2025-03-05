@@ -246,12 +246,12 @@ COMMENT_REGEX "/*"
                 }
 {INT}           {
                     count++;
-                    token_cont_t tt = {yytext,"INT","IDENTIFIER"};
+                    token_cont_t tt = {yytext,"INT","INTCONST"};
                     add_token(yylval, yylineno, count, tt);
                 }
 {REAL}          {
                     count++;
-                    token_cont_t tt = {yytext,"REAL","IDENTIFIER"};
+                    token_cont_t tt = {yytext,"REAL","REALCONST"};
                     add_token(yylval, yylineno, count, tt);
                 }
 {STRING}        {
@@ -268,19 +268,19 @@ COMMENT_REGEX "/*"
                   printf("Error, Unclosed String.\n");
                     return -1;
                 }
-{WSPACE}        {}
-
+{WSPACE}        {
+                }
 {LINE_REGEX}    {
                     BEGIN(LINE_COMMENT);
                 }
-
 <LINE_COMMENT>\n {
                     count++;
                     token_cont_t tt = {yytext,"COMMENT","LINE_COMMENT"};
                     add_token(yylval,yylineno-1,count,tt);
                     BEGIN(INITIAL);
                 }
-<LINE_COMMENT>. {}
+<LINE_COMMENT>. {
+                }
 {COMMENT_REGEX} {
                     comment_push(yylineno);
                     BEGIN(COMMENT);
@@ -289,37 +289,36 @@ COMMENT_REGEX "/*"
                     comment_push(yylineno);
                 }
 <COMMENT>"*/"   {
-    if (comment_head != NULL && comment_head->next == NULL) {
-        count++;
-        char *str = comment_line(comment_tail->line, yylineno);
-        token_cont_t tt = {str, "COMMENT", "BLOCK_COMMENT"};
-        add_token(yylval, comment_tail->line, count, tt);
-        //otan kanw print meta bgalw to free
-        free(str);
-        comment_delete();
-        BEGIN(INITIAL);
-    } else {
-        count++;
-        char *str = comment_line(comment_tail->line, yylineno);
-        token_cont_t tt = {str, "COMMENT", "NESTED_COMMENT"};
-        add_token(yylval, comment_tail->line, count, tt);
-        //otan kanw print meta bgalw to free
-        free(str);
-        comment_delete();
-    }
-}
-<COMMENT><<EOF>> {
-    printf("error, block comment not closed.\n");
-    return 2;
-}
-<COMMENT>.|\n {}
-<<EOF>>         {
-                    return 2;
+                if (comment_head != NULL && comment_head->next == NULL) {
+                    count++;
+                    char *str = comment_line(comment_tail->line, yylineno);
+                    token_cont_t tt = {str, "COMMENT", "BLOCK_COMMENT"};
+                    add_token(yylval, comment_tail->line, count, tt);
+                    free(str);
+                    comment_delete();
+                    BEGIN(INITIAL);
+                } else {
+                    count++;
+                    char *str = comment_line(comment_tail->line, yylineno);
+                    token_cont_t tt = {str, "COMMENT", "NESTED_COMMENT"};
+                    add_token(yylval, comment_tail->line, count, tt);
+                    free(str);
+                    comment_delete();
                 }
-<*>.            {
-                    printf("unknown token at %d\n",yylineno);
-                    return 2;
                 }
+<COMMENT><<EOF>>    {
+                        printf("error, block comment not closed.\n");
+                        return 2;
+                    }
+<COMMENT>.|\n       {
+                    }
+<<EOF>>             {
+                        return 2;
+                    }
+<*>.                {
+                        printf("unknown token at %d\n",yylineno);
+                        return 2;
+                    }
 %%
 
 int main(int argc, char* argv[]) {

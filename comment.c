@@ -39,7 +39,6 @@ void comment_delete() {
     comment_tail = p;
     comment_tail->next = NULL;
 }
-/**/
 
 char *comment_line(int start, int end) {
     char *str = malloc(20);

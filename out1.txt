@@ -1,0 +1,113 @@
+----------------|	LEXICAL ANALYSIS 	|----------------
+
+1:	#1		LINE_COMMENT	COMMENT	
+3:	#2	3 - 5	BLOCK_COMMENT	COMMENT	
+7:	#3	7 - 7	BLOCK_COMMENT	COMMENT	
+11:	#4	11 - 13	NESTED_COMMENT	COMMENT	
+9:	#5	9 - 15	BLOCK_COMMENT	COMMENT	
+17:	#6		LINE_COMMENT	COMMENT	
+19:	#7	19 - 20	BLOCK_COMMENT	COMMENT	
+22:	#8		LINE_COMMENT	COMMENT	
+25:	#9	25 - 25	NESTED_COMMENT	COMMENT	
+26:	#10	26 - 26	NESTED_COMMENT	COMMENT	
+24:	#11	24 - 27	BLOCK_COMMENT	COMMENT	
+31:	#12	31 - 31	NESTED_COMMENT	COMMENT	
+30:	#13	30 - 32	NESTED_COMMENT	COMMENT	
+29:	#14	29 - 33	BLOCK_COMMENT	COMMENT	
+35:	#15		LINE_COMMENT	COMMENT	
+37:	#16	37 - 38	BLOCK_COMMENT	COMMENT	
+40:	#17	*	OPERATOR	MULTIPLY	<- enumerated
+40:	#18	/	OPERATOR	DIVISION	<- enumerated
+43:	#19	12.2	IDENTIFIER	REAL	<- enumerated
+45:	#20	8.0	IDENTIFIER	REAL	<- enumerated
+46:	#21		LINE_COMMENT	COMMENT	
+47:	#22	.	PUNCTUATION	PERIOD	<- enumerated
+47:	#23	123	IDENTIFIER	INT	<- enumerated
+47:	#24	.	PUNCTUATION	PERIOD	<- enumerated
+47:	#25	889	IDENTIFIER	INT	<- enumerated
+49:	#26	.	PUNCTUATION	PERIOD	<- enumerated
+49:	#27	7700	IDENTIFIER	INT	<- enumerated
+51:	#28	0.423	IDENTIFIER	REAL	<- enumerated
+53:	#29	0012.123	IDENTIFIER	REAL	<- enumerated
+56:	#30	the	IDENTIFIER	ID	<- enumerated
+58:	#31	brown	IDENTIFIER	ID	<- enumerated
+58:	#32	fox	IDENTIFIER	ID	<- enumerated
+58:	#33	is	IDENTIFIER	ID	<- enumerated
+58:	#34	extra_heavy	IDENTIFIER	ID	<- enumerated
+60:	#35	tNrAin	IDENTIFIER	ID	<- enumerated
+62:	#36	go4_sky_diving___	IDENTIFIER	ID	<- enumerated
+63:	#37	12	IDENTIFIER	INT	<- enumerated
+65:	#38	13	IDENTIFIER	INT	<- enumerated
+65:	#39	7700	IDENTIFIER	INT	<- enumerated
+67:	#40	00912	IDENTIFIER	INT	<- enumerated
+69:	#41	00	IDENTIFIER	INT	<- enumerated
+72:	#42	if	KEYWORD	IF	<- enumerated
+72:	#43	else	KEYWORD	ELSE	<- enumerated
+74:	#44	while	KEYWORD	WHILE	<- enumerated
+74:	#45	for	KEYWORD	for	<- enumerated
+76:	#46	function	KEYWORD	FUNCTION	<- enumerated
+76:	#47	return	KEYWORD	RETURN	<- enumerated
+78:	#48	break	KEYWORD	BREAK	<- enumerated
+78:	#49	continue	KEYWORD	CONTINUE	<- enumerated
+80:	#50	and	KEYWORD	AND	<- enumerated
+80:	#51	not	KEYWORD	NOT	<- enumerated
+80:	#52	or	KEYWORD	OR	<- enumerated
+82:	#53	local	KEYWORD	LOCAL	<- enumerated
+82:	#54	true	KEYWORD	TRUE	<- enumerated
+82:	#55	false	KEYWORD	FALSE	<- enumerated
+82:	#56	nil	KEYWORD	NIL	<- enumerated
+85:	#57	+	OPERATOR	PLUS	<- enumerated
+85:	#58	=	OPERATOR	ASSIGN	<- enumerated
+85:	#59	-	OPERATOR	MINUS	<- enumerated
+87:	#60	*	OPERATOR	MULTIPLY	<- enumerated
+87:	#61	/	OPERATOR	DIVISION	<- enumerated
+87:	#62	%	OPERATOR	MODULO	<- enumerated
+89:	#63	++	OPERATOR	PLUS_PLUS	<- enumerated
+89:	#64	--	OPERATOR	MINUS_MINUS	<- enumerated
+91:	#65	!=	OPERATOR	NONEQUAL	<- enumerated
+91:	#66	==	OPERATOR	EQUAL	<- enumerated
+93:	#67	<	OPERATOR	LESS_THAN	<- enumerated
+93:	#68	>	OPERATOR	GREATER_THAN	<- enumerated
+95:	#69	<=	OPERATOR	LESS_EQUAL_THAN	<- enumerated
+95:	#70	>=	OPERATOR	GREATER_EQUAL_THAN	<- enumerated
+97:	#71	++	OPERATOR	PLUS_PLUS	<- enumerated
+97:	#72	+	OPERATOR	PLUS	<- enumerated
+97:	#73	-	OPERATOR	MINUS	<- enumerated
+97:	#74	==	OPERATOR	EQUAL	<- enumerated
+97:	#75	==	OPERATOR	EQUAL	<- enumerated
+97:	#76	!=	OPERATOR	NONEQUAL	<- enumerated
+97:	#77	=	OPERATOR	ASSIGN	<- enumerated
+97:	#78	<	OPERATOR	LESS_THAN	<- enumerated
+97:	#79	-	OPERATOR	MINUS	<- enumerated
+97:	#80	*	OPERATOR	MULTIPLY	<- enumerated
+100:	#81	{	PUNCTUATION	LEFT_BRACE	<- enumerated
+100:	#82	}	PUNCTUATION	RIGHT_BRACE	<- enumerated
+100:	#83	[	PUNCTUATION	LEFT_BRACKET	<- enumerated
+100:	#84	]	PUNCTUATION	RIGHT_BRACKET	<- enumerated
+102:	#85	(	PUNCTUATION	LEFT_PARENTHESIS	<- enumerated
+102:	#86	)	PUNCTUATION	RIGHT_PARENTHESIS	<- enumerated
+102:	#87	;	PUNCTUATION	SEMICOLON	<- enumerated
+102:	#88	,	PUNCTUATION	COMMA	<- enumerated
+104:	#89	:	PUNCTUATION	COLON	<- enumerated
+104:	#90	.	PUNCTUATION	PERIOD	<- enumerated
+106:	#91	:	PUNCTUATION	COLON	<- enumerated
+106:	#92	:	PUNCTUATION	COLON	<- enumerated
+106:	#93	.	PUNCTUATION	PERIOD	<- enumerated
+106:	#94	.	PUNCTUATION	PERIOD	<- enumerated
+108:	#95	::	PUNCTUATION	DOUBLE_COLON	<- enumerated
+108:	#96	..	PUNCTUATION	DOUBLE_PERIOD	<- enumerated
+110:	#97	::	PUNCTUATION	DOUBLE_COLON	<- enumerated
+110:	#98	:	PUNCTUATION	COLON	<- enumerated
+110:	#99	..	PUNCTUATION	DOUBLE_PERIOD	<- enumerated
+110:	#100	.	PUNCTUATION	PERIOD	<- enumerated
+113:	#101	String 01	STRING	String 01	<- char*
+115:	#102	2nd string	STRING	2nd string	<- char*
+117:	#103	3rd	STRING	3rd	<- char*
+117:	#104	4rth	STRING	4rth	<- char*
+119:	#105		Tab test, test backslash: \
+And new line test	STRING		Tab test, test backslash: \
+And new line test	<- char*
+121:	#106	Double quotes test: "	STRING	Double quotes test: "	<- char*
+124:	#107	Multi line
+string test	STRING	Multi line
+string test	<- char*
