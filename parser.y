@@ -4,10 +4,11 @@
     #include <string>
     #include "symtable.h"
 
-    extern FILE* yyin;
+    extern FILE* yacout;
     extern int yyparse();
     extern int yylineno;
 
+    int yylex();
     int scope = 0;
     int max_scope = 0;
 
@@ -27,52 +28,52 @@
 %token <intConst> INT 
 %token <realConst> REAL 
 
-%token LEFT_PARENTHESIS "("
-%token RIGHT_PARENTHESIS ")"
-%token LEFT_BRACKET "["
-%token RIGHT_BRACKET "]"
-%token LEFT_CBRACKET "{"
-%token RIGHT_CBRACKET "}"
+%token LEFT_PARENTHESIS
+%token RIGHT_PARENTHESIS
+%token LEFT_BRACKET
+%token RIGHT_BRACKET
+%token LEFT_CBRACKET
+%token RIGHT_CBRACKET
 
-%token SEMICOLON ";"
-%token COMMA ","
-%token COLON ":"
-%token DOUBLE_COLON "::"
-%token PERIOD "."
-%token DOUBLE_PERIOD ".."
+%token SEMICOLON
+%token COMMA
+%token COLON
+%token DOUBLE_COLON
+%token PERIOD
+%token DOUBLE_PERIOD
 
-%token PLUS "+"
-%token MINUS "-"
-%token MULTIPLY "*"
-%token DIVIDE "/"
-%token PLUS_PLUS "++"
-%token MINUS_MINUS "--"
-%token MOD "%"
-%token EQUALS "="
+%token PLUS
+%token MINUS
+%token MULTIPLY
+%token DIVIDE
+%token PLUS_PLUS
+%token MINUS_MINUS
+%token MOD
+%token EQUALS
 
-%token DOUBLE_EQUALS "=="
-%token NOT_EQUALS "!="
-%token LESS "<"
-%token GREATER ">"
-%token LESS_EQUALS "<="
-%token GREATER_EQUALS ">="
+%token DOUBLE_EQUALS
+%token NOT_EQUALS
+%token LESS
+%token GREATER
+%token LESS_EQUALS
+%token GREATER_EQUALS
 
-%token AND "and"
-%token NOT "not"
-%token OR "or"
+%token AND
+%token NOT
+%token OR
 
-%token IF "if"
-%token ELSE "else"
-%token WHILE "while"
-%token TRUE "true"
-%token FALSE "false"
-%token NIL "nil"
-%token RETURN "return"
-%token FUNCTION "function"
-%token BREAK "break"
-%token CONTINUE "continue"
-%token LOCAL "local"
-%token FOR "for"
+%token IF
+%token ELSE
+%token WHILE
+%token TRUE
+%token FALSE
+%token NIL
+%token RETURN
+%token FUNCTION
+%token BREAK
+%token CONTINUE
+%token LOCAL
+%token FOR
 
 %right EQUALS
 %left OR
