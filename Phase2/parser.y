@@ -1,21 +1,22 @@
 %{
-    #include <cstdio>
-    #include <cstdlib>
-    #include <string>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
     #include "symtable.h"
 
-    extern FILE* yacout;
+    extern FILE* yaccout;
+    extern FILE* yyin;
     extern int yyparse();
     extern int yylineno;
-
-    int yylex();
+    void yyerror(const char* msg);
+    extern int yylex();
     int scope = 0;
     int max_scope = 0;
 
 %}
 
 %union {
-    string stringConst;
+    std::string* stringConst;
     int intConst;
     double realConst;
     struct expr* exprV;
@@ -78,7 +79,7 @@
 %right EQUALS
 %left OR
 %left AND
-%nonassoc EQUALS NOT_EQUALS
+%nonassoc DOUBLE_EQUALS NOT_EQUALS
 %nonassoc LESS LESS_EQUALS GREATER GREATER_EQUALS
 %left PLUS MINUS
 %left MULTIPLY DIVIDE MOD
@@ -142,7 +143,7 @@ expression: INT                                         { fprintf(yaccout, "expr
             | MINUS expr %prec NOT                      { fprintf(yaccout, "expression -> MINUS expr\n"); }
             ;
 
-expr:       expression SEMICOLON                        { fprintf(yaccout, "expr -> expression SEMICOLON")}
+expr:       expression SEMICOLON                        { fprintf(yaccout, "expr -> expression SEMICOLON"); }
 
 term:       LEFT_PARENTHESIS expr RIGHT_PARENTHESIS     { fprintf(yaccout, "term -> LEFT_PARENTHESIS expr RIGHT_PARENTHESIS\n"); }
             | MINUS expr                                { fprintf(yaccout, "term -> MINUS expr\n"); }
@@ -266,12 +267,11 @@ returnstmt: RETURN expr SEMICOLON                        { fprintf(yaccout, "ret
 
 %%
 
-int yyerror(const char* msg) {
+void yyerror(const char* msg) {
     std::fprintf(stderr, "Error at line %d: %s\n", yylineno, msg);
-    return 0;
 }
 
-int main(int argc, char** argv) {
+int parser_main(int argc, char** argv) {
     if (argc > 1) {
         yyin = std::fopen(argv[1], "r");
         if (!yyin) {
