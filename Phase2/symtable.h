@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -10,27 +11,35 @@ struct Symbol{
     string name;
     int scope;
     int line;
-    string type;
+    int type;
+    bool isActive;
 
-    Symbol() : name(""), scope(0), line(0), type("") {}
+    Symbol(const string& name = "", int scope = 0, int line = 0, int type = 0)
+        : name(name), scope(scope), line(line), type(type), isActive(true) {}
+};
 
-    Symbol(string name, int scope, int line, string type)
+struct Variable{
+    string name;
+    int scope;
+    int line;
+    int type;
+
+    Variable() : name(""), scope(0), line(0), type(0) {}
+
+    Variable(string name, int scope, int line, int type)
         : name(name), scope(scope), line(line), type(type) {}
 };
 
-const string func_Names[] = {
-    "print",
-    "input",
-    "objectmemberkeys",
-    "objecttotalmembers",
-    "objectcopy",
-    "totalarguments",
-    "argument",
-    "typeof",
-    "strtonum"
-    "sqrt",
-    "cos",
-    "sin"
+struct Function{
+    string name;
+    int scope;
+    int line;
+    int type;
+
+    Function() : name(""), scope(0), line(0), type(0) {}
+
+    Function(string name, int scope, int line, int type)
+        : name(name), scope(scope), line(line), type(type) {}
 };
 
 enum class SymbolType {
@@ -44,14 +53,23 @@ enum class SymbolType {
 class SymbolTable {
 private:
     unordered_map<string, Symbol> table;
+    unordered_map<string, Symbol> scopeTable;
+    unordered_map<string, vector<string>> nameTable;
+
+
+    int scope;
 
 public:
-    void insertSymbol(string name, int scope, int line, string type){
-        table[name] = Symbol(name, scope, line, type);
-    }
-    bool lookupSymbol(string name){
-        return table.find(name) != table.end();
-    }
+
+    SymbolTable();
+    ~SymbolTable();
+    int getScope() const;
+    void insertSymbol(string name, int scope, int line, int type);
+    Symbol* lookupInScope(const string& name, int targetScope);
+    Symbol* lookupFunction(const string& name, int targetScope);
+    Symbol* lookupExtra(const string& name, bool isGlobal);  
+    bool lookup(string name);
+    vector<Symbol*> getAllSymbolsWithName(const string& name);
     void shadow();
     const unordered_map<string, Symbol>& getTable() const {
         return table;

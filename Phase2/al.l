@@ -1,6 +1,7 @@
 %{
-    #include "lexLib.h"
-    #define YY_DECL int alpha_yylex(void* yylval)
+    #include "lexLib.hpp"
+    #include "parser.hpp"
+    #define YY_DECL int alpha_yylex(alpha_token_t* yylval)
     int count = 0;
     void add_token(alpha_token_t *yylval, int line, int count, token_cont_t tt);
     void comment_push(int yylineno);
@@ -36,223 +37,267 @@ COMMENT_REGEX "/*"
                     count++;
                     token_cont_t tt = {yytext,"IF","KEYWORD"};
                     add_token(yylval,yylineno, count, tt);
+                    return IF;
                 }
 
 "else"          {
                     count++;
                     token_cont_t tt = {yytext,"ELSE","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return ELSE;
                 }
 "while"         {
                     count++;
                     token_cont_t tt = {yytext,"WHILE","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return WHILE;
                 }
 "for"           {
                     count++;
                     token_cont_t tt = {yytext,"for","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return FOR;
                 }
 "function"      {
                     count++;
                     token_cont_t tt = {yytext,"FUNCTION","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return FUNCTION;
                 }
 "return"        {
                     count++;
                     token_cont_t tt = {yytext,"RETURN","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return RETURN;
                 }
 "break"         {
                     count++;
                     token_cont_t tt = {yytext,"BREAK","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return BREAK;
                 }
 "continue"      {
                     count++;
                     token_cont_t tt = {yytext,"CONTINUE","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return CONTINUE;
                 }
 "and"           {
                     count++;
                     token_cont_t tt = {yytext,"AND","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return AND;
                 }
 "not"           {
                     count++;
                     token_cont_t tt = {yytext,"NOT","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return NOT;
                 }
 "or"            {
                     count++;
                     token_cont_t tt = {yytext,"OR","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return OR;
                 }
 "local"         {
                     count++;
                     token_cont_t tt = {yytext,"LOCAL","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return LOCAL;
                 }
 "true"          {
                     count++;
                     token_cont_t tt = {yytext,"TRUE","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return TRUE;
                 }
 "false"         {
                     count++;
                     token_cont_t tt = {yytext,"FALSE","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return FALSE;
                 }
 "nil"           {
                     count++;
                     token_cont_t tt = {yytext,"NIL","KEYWORD"};
                     add_token(yylval, yylineno, count, tt);
+                    return NIL;
                 }
 "="             {
                     count++;
                     token_cont_t tt = {yytext,"ASSIGN","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return EQUALS;
                 }
 "+"             {
                     count++;
                     token_cont_t tt = {yytext,"PLUS","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return PLUS;
                 }
 "-"             {
                     count++;
                     token_cont_t tt = {yytext,"MINUS","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return MINUS;
                 }
 "*"             {
                     count++;
                     token_cont_t tt = {yytext,"MULTIPLY","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return MULTIPLY;
                 }
 "/"             {
                     count++;
                     token_cont_t tt = {yytext,"DIVISION","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return DIVIDE;
                 }
 "%"             {
                     count++;
                     token_cont_t tt = {yytext,"MODULO","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return MOD;
                 }
 "=="            {
                     count++;
                     token_cont_t tt = {yytext,"EQUAL","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return DOUBLE_EQUALS;
                 }
 "!="            {
                     count++;
                     token_cont_t tt = {yytext,"NONEQUAL","OPERATOR"};
-                    add_token(yylval, yylineno, count, tt);
+                    add_token(yylval, yylineno, count, tt); 
+                    return NOT_EQUALS;
                 }
 "++"            {
                     count++;
                     token_cont_t tt = {yytext,"PLUS_PLUS","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return PLUS_PLUS;
                 }
 "--"            {
                     count++;
                     token_cont_t tt = {yytext,"MINUS_MINUS","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return MINUS_MINUS;
                 }
 ">"             {
                     count++;
                     token_cont_t tt = {yytext,"GREATER_THAN","OPERATOR"};
-                    add_token(yylval, yylineno, count, tt);
+                    add_token(yylval, yylineno, count, tt); 
+                    return GREATER;
                 }
 "<"             {
                     count++;
                     token_cont_t tt = {yytext,"LESS_THAN","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return LESS;
                 }
 ">="            {
                     count++;
                     token_cont_t tt = {yytext,"GREATER_EQUAL_THAN","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return GREATER_EQUALS;
                 }
 "<="            {
                     count++;
                     token_cont_t tt = {yytext,"LESS_EQUAL_THAN","OPERATOR"};
                     add_token(yylval, yylineno, count, tt);
+                    return LESS_EQUALS;
                 }
 "{"             {
                     count++;
                     token_cont_t tt = {yytext,"LEFT_BRACE","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return LEFT_BRACKET;
                 }
 "}"             {
                     count++;
                     token_cont_t tt = {yytext,"RIGHT_BRACE","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return RIGHT_BRACKET;
                 }
 "["             {
                     count++;
                     token_cont_t tt = {yytext,"LEFT_BRACKET","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return LEFT_CBRACKET;
                 }
 "]"             {
                     count++;
                     token_cont_t tt = {yytext,"RIGHT_BRACKET","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return RIGHT_CBRACKET;
                 }
 "("             {
                     count++;
                     token_cont_t tt = {yytext,"LEFT_PARENTHESIS","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return LEFT_PARENTHESIS;
                 }
 ")"             {
                     count++;
                     token_cont_t tt = {yytext,"RIGHT_PARENTHESIS","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return RIGHT_PARENTHESIS;
                 }
 ";"             {
                     count++;
                     token_cont_t tt = {yytext,"SEMICOLON","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return SEMICOLON;
                 }
 ","             {
                     count++;
                     token_cont_t tt = {yytext,"COMMA","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return COMMA;
                 }
 ":"             {
                     count++;
                     token_cont_t tt = {yytext,"COLON","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return COLON;
                 }
 "::"            {
                     count++;
                     token_cont_t tt = {yytext,"DOUBLE_COLON","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return DOUBLE_COLON;
                 }
 "."             {
                     count++;
                     token_cont_t tt = {yytext,"PERIOD","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return PERIOD;
                 }
 ".."            {
                     count++;
                     token_cont_t tt = {yytext,"DOUBLE_PERIOD","PUNCTUATION"};
                     add_token(yylval, yylineno, count, tt);
+                    return DOUBLE_PERIOD;
                 }
 
 {ID}            {
                     count++;
                     token_cont_t tt = {yytext,"ID","IDENTIFIER"};
                     add_token(yylval, yylineno, count, tt);
+                    return ID;
                 }
 {INT}           {
                     count++;
                     token_cont_t tt = {yytext,"INT","INTCONST"};
                     add_token(yylval, yylineno, count, tt);
+                    return INT;
                 }
 {REAL}          {
                     count++;
                     token_cont_t tt = {yytext,"REAL","REALCONST"};
                     add_token(yylval, yylineno, count, tt);
+                    return REAL;
                 }
 {STRING}        {
                     count++;
@@ -263,6 +308,7 @@ COMMENT_REGEX "/*"
                     yytext = str;
                     token_cont_t tt = {yytext,yytext,"STRING"};
                     add_token(yylval, yylineno, count, tt);
+                    return STRING;  
                 }
 \"[^\"]*        {
                   printf("Error, Unclosed String.\n");
@@ -315,13 +361,10 @@ COMMENT_REGEX "/*"
 <<EOF>>             {
                         return 2;
                     }
-<*>.                {
-                        printf("unknown token at %d\n",yylineno);
-                        return 2;
-                    }
+                    
 %%
 
-int main(int argc, char* argv[]) {
+int al_main(int argc, char* argv[]) {
     if(argc != 2) {
         printf("Error opening file\n");
         return 1;

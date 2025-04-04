@@ -1,22 +1,30 @@
 %{
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
+    #include <cstdio>
+    #include <cstdlib>
+    #include "lexLib.hpp"  // Include lexLib.hpp first
+    #include "header.hpp"  // Then include header.hpp
     #include "symtable.h"
-
+    #include <string>
+    #include "al.h"
+    
+    // Define function prototype
+    int alpha_yylex(alpha_token_t* yylval);
+    
+    // Map to bison's yylex
+    #define yylex() alpha_yylex(NULL)
     extern FILE* yaccout;
     extern FILE* yyin;
-    extern int yyparse();
     extern int yylineno;
     void yyerror(const char* msg);
-    extern int yylex();
     int scope = 0;
     int max_scope = 0;
-
 %}
 
+
+
+
 %union {
-    std::string* stringConst;
+    char* stringConst;
     int intConst;
     double realConst;
     struct expr* exprV;
@@ -227,13 +235,13 @@ indexed:    indexedelem                                 { fprintf(yaccout, "inde
 
 indexedelem:LEFT_CBRACKET expr COLON expr RIGHT_CBRACKET    { fprintf(yaccout, "indexedelem -> LEFT_CBRACKET expr COLON expr RIGHT_CBRACKET\n"); }
 
-openblock:  LEFT_CBRACKET stmt                          { scope++; if (max_scope < scope) {max_scope == scope; } 
+openblock:  LEFT_CBRACKET stmt                          { scope++; if (max_scope < scope) {max_scope = scope; } 
                                                             fprintf(yaccout, "openblock -> LEFT_CBRACKET stmt\n"); }
             | openblock stmt                            { fprintf(yaccout, "openblock -> openblock stmt\n"); }
             ;
 
-block:      LEFT_CBRACKET                               { scope++; if (max_scope < scope) {max_scope == scope; } } 
-                            RIGHT_CBRACKET { scope--; } { fprintf(yaccout, "block -> LEFT_CBRACKET RIGHT_CBRACKET\n"); }
+block:      LEFT_CBRACKET                               { scope++; if (max_scope < scope) {max_scope = scope; } } 
+             RIGHT_CBRACKET { scope--; } { fprintf(yaccout, "block -> LEFT_CBRACKET RIGHT_CBRACKET\n"); }
             | openblock RIGHT_BRACKET { scope--; }      { fprintf(yaccout, "block -> openblock RIGHT_BRACKET\n"); }
             ;
 
