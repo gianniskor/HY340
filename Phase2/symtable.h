@@ -64,7 +64,7 @@ public:
     SymbolTable();
     ~SymbolTable();
     int getScope() const;
-    void insertSymbol(string name, int scope, int line, int type);
+    Symbol* insertSymbol(string name, int scope, int line, int type);
     Symbol* lookupInScope(const string& name, int targetScope);
     Symbol* lookupFunction(const string& name, int targetScope);
     Symbol* lookupExtra(const string& name, bool isGlobal);  

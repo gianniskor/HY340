@@ -1,7 +1,7 @@
 all: calc
 
 bison:
-	bison --yacc --defines --output=parser.cpp parser.y
+	bison  --yacc --defines --output=parser.cpp parser.y
 
 flex:
 	flex --outfile=al.cpp al.l

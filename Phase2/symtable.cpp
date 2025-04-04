@@ -24,7 +24,7 @@ int SymbolTable::getScope() const {
     return scope;
 }
 
-void SymbolTable::insertSymbol(string name, int symbolScope, int line, int type) {
+Symbol* SymbolTable::insertSymbol(string name, int symbolScope, int line, int type) {
     string key = name + "_" + to_string(scope);
     Symbol newSymbol(name, scope, line, type);
 
@@ -35,6 +35,7 @@ void SymbolTable::insertSymbol(string name, int symbolScope, int line, int type)
 
     nameTable[name].push_back(key);
     table[name]= newSymbol;
+    return &(result.first->second);
 }
 
 

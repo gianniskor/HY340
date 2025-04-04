@@ -1,16 +1,15 @@
 %{
+    
     #include <cstdio>
     #include <cstdlib>
-    #include "lexLib.hpp"  // Include lexLib.hpp first
-    #include "header.hpp"  // Then include header.hpp
+    #include "lexLib.hpp"  
+    #include "header.hpp" 
     #include "symtable.h"
     #include <string>
     #include "al.h"
     
-    // Define function prototype
     int alpha_yylex(alpha_token_t* yylval);
-    
-    // Map to bison's yylex
+    extern SymbolTable symtable; 
     #define yylex() alpha_yylex(NULL)
     extern FILE* yaccout;
     extern FILE* yyin;
@@ -139,6 +138,7 @@ stmt:       expr SEMICOLON                              { fprintf(yaccout, "stmt
             | CONTINUE SEMICOLON                        { fprintf(yaccout, "stmt -> CONTINUE\n"); }
             | block                                     { fprintf(yaccout, "stmt -> block\n"); } 
             | funcdef                                   { fprintf(yaccout, "stmt -> funcdef\n"); }
+            | SEMICOLON                                 { fprintf(yaccout, "stmt -> SEMICOLON\n"); }
             ;
 
 expression: INT                                         { fprintf(yaccout, "expression -> INT\n"); }    
@@ -192,9 +192,7 @@ primary:    lvalue
             | const                                     { fprintf(yaccout, "primary -> const\n"); }
             ;
 
-lvalue:     ID                                          { fprintf(yaccout, "lvalue -> ID\n");
-                                                            lvalue_id();
-                                                        }                                                                   
+lvalue:     ID                                          { fprintf(yaccout, "lvalue -> ID\n");}                                                                   
             | LOCAL ID                                  { fprintf(yaccout, "lvalue -> LOCAL ID\n"); }
             | DOUBLE_COLON ID                           { fprintf(yaccout, "lvalue -> DOUBLE_COLON ID\n"); }
             | member                                    { fprintf(yaccout, "lvalue -> member\n"); }
