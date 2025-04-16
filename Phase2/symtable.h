@@ -49,12 +49,12 @@ enum class SymbolType {
     USERFUNC,
     LIBFUNC
 };
-
+//g++ lexLib.cpp al.cpp comment.cpp parser.cpp main.cpp
 class SymbolTable {
 private:
     unordered_map<string, Symbol> table;
     unordered_map<string, Symbol> scopeTable;
-    unordered_map<string, vector<string>> nameTable;
+    unordered_map<string, vector<string> > nameTable;
 
 
     int scope;

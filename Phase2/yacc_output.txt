@@ -1,0 +1,6 @@
+lvalue -> id
+expr -> term++
+expr -> term
+stmt -> expr;
+liststmt -> liststmt stmt
+liststmt -> stmt
