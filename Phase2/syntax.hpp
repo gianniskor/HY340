@@ -142,7 +142,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 18 "syntax.y"
+#line 66 "syntax.y"
 {
     char* stringConst;
     int intConst;

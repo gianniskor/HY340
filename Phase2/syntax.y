@@ -10,7 +10,55 @@
     extern int yylineno;
     extern char* yytext;
     int scope = 0;
-    int max_scope = 0;  
+    int max_scope = 0;
+    extern SymbolTable symbolTable;  
+    typedef struct {
+        Symbol* symbol;
+        char* name;
+        int line;
+    } SymbolInfo;
+    void Manage_lvalue_id(Symbol** result, char* id, int scope, int line) {
+    // Make sure all pointers are valid before dereferencing
+    if (!result) {
+        fprintf(stderr, "Error: result pointer is null\n");
+        return;
+    }
+    
+    fprintf(yacc_out, "lvalue -> id\n");
+    
+    // Check if yacc_out is initialized
+    if (!yacc_out) {
+        fprintf(stderr, "Error: yacc_out not initialized\n");
+        *result = nullptr;
+        return;
+    }
+    
+    // Check if id is valid
+    if (!id) {
+        fprintf(stderr, "Error: id is null at line %d\n", line);
+        *result = nullptr;
+        return;
+    }
+    
+    // Make sure symbolTable is properly initialized
+    // This assumes symbolTable is a global instance
+    
+    // Convert char* to std::string for the method call
+    std::string idStr(id);
+    Symbol* entry = symbolTable.manageLvalueId(idStr, scope, line);
+    
+    // Set the result
+    *result = entry;
+    
+    // Add debugging information
+    if (entry) {
+        fprintf(yacc_out, " Found symbol '%s' (type: %s) in scope %d\n",
+                id, entry->getTypeAsString().c_str(), entry->getScope());
+    } else {
+        fprintf(stderr, "Warning: Symbol '%s' not found or not accessible at line %d\n", id, line);
+    }
+}
+
 %}
 
 %start program
@@ -176,7 +224,7 @@ primary:    lvalue                                      { fprintf(yacc_out,"prim
             | const                                     { fprintf(yacc_out,"primary -> const\n")}
             ;
 
-lvalue:     ID                                          { fprintf(yacc_out,"lvalue -> id\n");}                                                                   
+lvalue:     ID                                          {  Manage_lvalue_id(&($$), $1, symbolTable.currentScope, yylineno);}                                                                   
             | LOCAL ID                                  { fprintf(yacc_out,"lvalue -> id\n");}
             | DOUBLE_COLON ID                           { fprintf(yacc_out,"lvalue -> id\n");}
             | member                                    { fprintf(yacc_out,"lvalue -> id\n");}
@@ -253,6 +301,5 @@ returnstmt: RETURN expression SEMICOLON                        { }
             ;
 
 %%
-
 
 

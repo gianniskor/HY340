@@ -6,54 +6,264 @@
 
 using namespace std;
 
+enum SymbolType {
+    GLOBAL_VAR, LOCAL_VAR, FUNCTION_PARAM, USER_FUNC, LIB_FUNC
+};
+
+
 class Symbol{
-    string name;
-    int scope;
-    int line;
-    int type;
-    bool isActive;
-    string value;
+    private:
+        string name;
+        int scope;
+        int line;
+        int type;
+        bool active;
+        string value;
     public:
-    Symbol(string name, int scope, int line, int type, string value) : name(name), scope(scope), line(line), type(type), isActive(true) {
-        this->name = name;
-        this->scope = scope;
-        this->line = line;
-        this->type = type;
-        this->isActive = true;
-        this -> value = value;
-    }
-    int getScope() const{
-        return scope;
-    }
-    int getLine() const{
-        return line;
-    }
-    int getType() const{
-        return type;
-    }
-    string getName() const{
-        return name;
-    }
-    bool isActive() const{
-        return isActive;
-    }
-    void setActive(bool active){
-        isActive = active;
-    }
-    string getValue() const{
-        return value;
-    }
-    void setValue(string value){
-        this->value = value;
-    }
+        Symbol():
+            name(""), scope(0), line(0), type(0), active(true), value("") {}
+        Symbol(string name, int scope, int line, int type, string value) 
+            :name(name), scope(scope), line(line), type(type), active(true), value(value) {}
+        int getScope() const{
+            return scope;
+        }
+        int getLine() const{
+            return line;
+        }
+        int getType() const{
+            return type;
+        }
+        string getName() const{
+            return name;
+        }
+        bool isActive() const{
+            return active;
+        }
+        void setActive(bool active){
+            active = active;
+        }
+        string getValue() const{
+            return value;
+        }
+        void setValue(string value){
+            this->value = value;
+        }
+        string getTypeAsString() const{
+            switch(type){
+                case GLOBAL_VAR: return "GLOBAL_VAR";
+                case LOCAL_VAR: return "LOCAL_VAR";
+                case FUNCTION_PARAM: return "FUNCTION_PARAM";
+                case USER_FUNC: return "USER_FUNC";
+                case LIB_FUNC: return "LIB_FUNC";
+                default: return "UNKNOWN";
+            }
+        }
+        void print() const {
+            printf("%-20s [%s] (line: %d) (scope: %d) %s\n", 
+                   name.c_str(), 
+                   getTypeAsString().c_str(), 
+                   line, 
+                   scope, 
+                   active ? "(active)" : "(inactive)");
+        }
 };
 
 class SymbolTable{
-    int size;
-    int scope;
-    unordered_map<string, Symbol> scopeTable;
+    private:
+        vector<vector <Symbol*>> scopeTable;
+        unordered_map<string, vector<Symbol*>> nameTable;
     public:
-    bool add(string name, int scope, int line, int type);
-    Symbol * lookupInScope(const string& name, int targetScope);
-    bool remove(string name, int scope);
+    int currentScope;
+    SymbolTable() : currentScope(0) {
+        scopeTable.push_back(vector<Symbol*>());
+        scopeTable.push_back(vector<Symbol*>());
+    }
+    ~SymbolTable() {
+        for (auto& scope : scopeTable) {
+            for (auto& symbol : scope) {
+                delete symbol;
+            }
+        }
+    }
+    Symbol* insert(string name, int scope, int line, int type, string value = "") {
+        // Check if we need to add new scope levels
+        while (scopeTable.size() <= scope) {
+            scopeTable.push_back(vector<Symbol*>());
+        }
+        
+        // Check if it's a library function
+        if (type == LIB_FUNC) {
+            // Can't redefine library functions
+            auto symbols = lookup(name);
+            for (auto& sym : symbols) {
+                if (sym->getType() == LIB_FUNC) {
+                    return sym; // Already exists
+                }
+            }
+        }
+        
+        // Check if symbol exists in the same scope
+        Symbol* existingSymbol = lookupInScope(name, scope);
+        if (existingSymbol != nullptr && existingSymbol->isActive()) {
+            // Cannot redefine a symbol in the same scope
+            return nullptr;
+        }
+        
+        // Check if it's a library function name (prevent shadowing)
+        if (type != LIB_FUNC) {
+            auto symbols = lookup(name);
+            for (auto& sym : symbols) {
+                if (sym->getType() == LIB_FUNC) {
+                    // Cannot shadow library functions
+                    return nullptr;
+                }
+            }
+        }
+        
+        // Create and add the new symbol
+        Symbol* newSymbol = new Symbol(name, scope, line, type, value);
+        scopeTable[scope].push_back(newSymbol);
+        
+        // Add to name table
+        if (nameTable.find(name) == nameTable.end()) {
+            nameTable[name] = vector<Symbol*>();
+        }
+        nameTable[name].push_back(newSymbol);
+        
+        return newSymbol;
+    }
+    
+    // Lookup a symbol by name (returns all matching symbols)
+    vector<Symbol*> lookup(const string& name) {
+        if (nameTable.find(name) != nameTable.end()) {
+            return nameTable[name];
+        }
+        return vector<Symbol*>();
+    }
+    
+    // Lookup active symbol in specific scope
+    Symbol* lookupInScope(const string& name, int targetScope) {
+        if (targetScope >= scopeTable.size()) {
+            return nullptr;
+        }
+        for (auto* symbol : scopeTable[targetScope]) {
+            if (symbol->getName() == name && symbol->isActive()) {
+                return symbol;
+            }
+        }
+        return nullptr;
+    }
+    
+    // Lookup any symbol (active or not) in specific scope
+    Symbol* lookupAnyInScope(const string& name, int targetScope) {
+        if (targetScope >= scopeTable.size()) {
+            return nullptr;
+        }
+        
+        for (auto* symbol : scopeTable[targetScope]) {
+            if (symbol->getName() == name) {
+                return symbol;
+            }
+        }
+        return nullptr;
+    }
+    
+    // Bottom-up lookup for active symbol in all enclosing scopes
+    Symbol* lookupActiveBottomUp(const string& name, int fromScope) {
+        for (int scope = fromScope; scope >= 0; scope--) {
+            Symbol* result = lookupInScope(name, scope);
+            if (result != nullptr) {
+                return result;
+            }
+        }
+        return nullptr;
+    }
+    
+    // Enter a new scope
+    void enterScope() {
+        currentScope++;
+        if (currentScope >= scopeTable.size()) {
+            scopeTable.push_back(vector<Symbol*>());
+        }
+    }
+    
+    // Exit the current scope (mark symbols as inactive)
+    void exitScope() {
+        if (currentScope > 0) {
+            for (auto* symbol : scopeTable[currentScope]) {
+                symbol->setActive(false);
+            }
+            currentScope--;
+        }
+    }
+    int getCurrentScope() const {
+        return currentScope;
+    }
+    
+    // Hide all symbols in a scope (mark as inactive)
+    void hideScope(int scope) {
+        if (scope < scopeTable.size()) {
+            for (auto* symbol : scopeTable[scope]) {
+                symbol->setActive(false);
+            }
+        }
+    }
+    void print() {
+        printf("\n--------------------- Symbol Table ---------------------\n");
+        printf("%-20s %-15s %-10s %-10s %s\n", "Name", "Type", "Line", "Scope", "Status");
+        printf("--------------------------------------------------------\n");
+        
+        // First print library functions (scope 0)
+        for (auto* symbol : scopeTable[0]) {
+            if (symbol->getType() == LIB_FUNC) {
+                symbol->print();
+            }
+        }
+        
+        // Then print user symbols by ascending scope
+        for (size_t scope = 0; scope < scopeTable.size(); scope++) {
+            for (auto* symbol : scopeTable[scope]) {
+                if (symbol->getType() != LIB_FUNC) {
+                    symbol->print();
+                }
+            }
+        }
+        printf("--------------------------------------------------------\n");
+    }
+    Symbol* manageLvalueId(const string& id, int scope, int line) {
+        // Search bottom-up for active matching symbols in all scopes
+        Symbol* entry = lookupActiveBottomUp(id, scope);
+        
+        if (entry == nullptr) {
+            // No active symbol found, check for any non-active matching symbols
+            for (int tmpscope = scope; tmpscope > 0; tmpscope--) {
+                entry = lookupAnyInScope(id, tmpscope);
+                if (entry != nullptr) {
+                    // Found inactive symbol - this is an error
+                    char errmsg[1024];
+                    if (entry->getType() == USER_FUNC| entry->getType() == LIB_FUNC) {
+                        sprintf(errmsg, "Cannot access local function declared in line %d with scope %d", 
+                                entry->getLine(), entry->getScope());
+                    } else {
+                        sprintf(errmsg, "Cannot access local variable declared in line %d with scope %d", 
+                                entry->getLine(), entry->getScope());
+                    }
+                    printf("Error: %s for symbol '%s' in scope %d\n", errmsg, id.c_str(), scope);
+                    return nullptr;
+                }
+            }
+            
+            // Check global scope
+            entry = lookupInScope(id, 0);
+            
+            // If still not found, create a new symbol
+            if (entry == nullptr) {
+                int type = (scope == 0) ? GLOBAL_VAR : LOCAL_VAR;
+                entry = insert(id, scope, line, type);
+            }
+        }
+        
+        return entry;
+    }
+    
 };
