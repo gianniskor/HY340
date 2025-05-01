@@ -23,6 +23,7 @@
     double realConst;
     struct expr* exprV;
     class Symbol* symbol_P ;
+    char* typeee;
 }
 %initial-action
 {
@@ -109,7 +110,6 @@
 %type <symbol_P> elist
 %type <symbol_P> indexed
 %type <symbol_P> indexedelem
-%type <symbol_P> openblock
 %type <symbol_P> block
 %type <symbol_P> funcdef
 %type <symbol_P> const
@@ -162,50 +162,51 @@ expression: assignexpr                                  { fprintf(yacc_out,"expr
 term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out,"expr -> (term)\n");}
             | MINUS expression %prec NEGATIVE_VAL             { fprintf(yacc_out,"expr -> -term\n");}
             | NOT expression                                  { fprintf(yacc_out,"expr -> !term\n");}
-            | PLUS_PLUS lvalue                          {   if ($2 != NULL && $2->type != USERFUNC && $2->type != LIBFUNC) {
-                                                                 fprintf(yaccout, "term -> PLUS_PLUS lvalue\n");}
-                                                             else if ($2->type == USERFUNC || $2->type == LIBFUNC) {
-                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+            | PLUS_PLUS lvalue                          {   if ($2 != NULL && $2->type != USER_FUNC && $2->type != LIB_FUNC) {
+                                                                 fprintf(yacc_out, "term -> PLUS_PLUS lvalue\n");}
+                                                             else if ($2->type == USER_FUNC || $2->type == LIB_FUNC) {
+                                                                 cout << (stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
                                                              } }
-             | lvalue PLUS_PLUS                          {   if ($1 != NULL && $1->type != USERFUNC && $1->type != LIBFUNC) {
-                                                                 fprintf(yaccout, "term -> lvalue PLUS_PLUS\n");}
-                                                             else if ($1->type == USERFUNC || $1->type == LIBFUNC) {
-                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+             | lvalue PLUS_PLUS                          {   if ($1 != NULL && $1->type != USER_FUNC && $1->type != LIB_FUNC) {
+                                                                 fprintf(yacc_out, "term -> lvalue PLUS_PLUS\n");}
+                                                             else if ($1->type == USER_FUNC || $1->type == LIB_FUNC) {
+                                                                 cout << (stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
                                                              } }
-             | MINUS_MINUS lvalue                        {   if ($2 != NULL && $2->type != USERFUNC && $2->type != LIBFUNC) {
-                                                                 fprintf(yaccout, "term -> MINUS_MINUS lvalue\n");}
-                                                             else if ($2->type == USERFUNC || $2->type == LIBFUNC) {
-                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+             | MINUS_MINUS lvalue                        {   if ($2 != NULL && $2->type != USER_FUNC && $2->type != LIB_FUNC) {
+                                                                 fprintf(yacc_out, "term -> MINUS_MINUS lvalue\n");}
+                                                             else if ($2->type == USER_FUNC || $2->type == LIB_FUNC) {
+                                                                 cout << (stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
                                                              } }
-             | lvalue MINUS_MINUS                        {   if ($1 != NULL && $1->type != USERFUNC && $1->type != LIBFUNC) {
-                                                                 fprintf(yaccout, "term -> lvalue MINUS_MINUS\n");}
-                                                             else if ($1->type == USERFUNC || $1->type == LIBFUNC) {
-                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+             | lvalue MINUS_MINUS                        {   if ($1 != NULL && $1->type != USER_FUNC && $1->type != LIB_FUNC) {
+                                                                 fprintf(yacc_out, "term -> lvalue MINUS_MINUS\n");}
+                                                             else if ($1->type == USER_FUNC || $1->type == LIB_FUNC) {
+                                                                 cout << (stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
                                                              } }
             | primary                                         { fprintf(yacc_out,"expr -> primary\n");}
             ;
 
 assignexpr: lvalue EQUALS expression                          { }
 
-primary:    lvalue                                      { fprintf(yacc_out,"primary -> lvalue\n")}
-            | call                                      { fprintf(yacc_out,"primary -> call\n")}
-            | objectdef                                 { fprintf(yacc_out,"primary -> objectdef\n")}
-            | LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS{ fprintf(yacc_out,"primary -> (funcdef)\n")}
-            | const                                     { fprintf(yacc_out,"primary -> const\n")}
+primary:    lvalue                                      { fprintf(yacc_out,"primary -> lvalue\n");}
+            | call                                      { fprintf(yacc_out,"primary -> call\n");}
+            | objectdef                                 { fprintf(yacc_out,"primary -> objectdef\n");}
+            | LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS{ fprintf(yacc_out,"primary -> (funcdef)\n");}
+            | const                                     { fprintf(yacc_out,"primary -> const\n");}
             ;
 
 
 lvalue:     ID                                          { }                                                                   
-            | LOCAL ID                                  { symbolTable.local_lvalue($2,scope,yylineno,1);
-                                                          fprintf(yacc_out,"lvalue -> id\n");}
-            | DOUBLE_COLON ID                           { fprintf(yacc_out,"lvalue -> id\n");}
+            | LOCAL ID                                  { symbolTable.local_lvalue($2,symbolTable.currentScope,yylineno,$$->type);
+                                                          fprintf(yacc_out,"lvalue -> local id\n");}
+            | DOUBLE_COLON ID                           { symbolTable.local_lvalue($2,0,yylineno,$$->type);
+                                                          fprintf(yacc_out,"lvalue -> global id\n");}
             | member                                    { fprintf(yacc_out,"lvalue -> id\n");}
             ;
 
-member:     lvalue PERIOD ID                            { }
-            | lvalue LEFT_BRACKET expression RIGHT_BRACKET    { }
-            | call PERIOD ID                            { }
-            | call LEFT_BRACKET expression RIGHT_BRACKET      { }
+member:     lvalue PERIOD ID                            { fprintf(yacc_out,"member -> lvalue.id\n");}
+            | lvalue LEFT_BRACKET expression RIGHT_BRACKET    {fprintf(yacc_out,"member -> lvalue[expr]\n"); }
+            | call PERIOD ID                            { fprintf(yacc_out,"member -> call.id\n");}
+            | call LEFT_BRACKET expression RIGHT_BRACKET      { fprintf(yacc_out,"member -> call[expr]\n");}
             ;
 
 call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   { }
@@ -233,16 +234,23 @@ objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            { }
 indexed:    indexedelem                                 { }
             | indexedelem COMMA indexedelem             { }
 
-indexedelem:LEFT_CBRACKET expression COLON expression RIGHT_CBRACKET    { }
+indexedelem: LEFT_CBRACKET expression COLON expression RIGHT_CBRACKET    { }
 
-openblock:  LEFT_CBRACKET stmt                          { }
-            | openblock stmt                            { }
-            ;
-
-block:      LEFT_CBRACKET                               { } 
-            RIGHT_CBRACKET { } { }
-            | openblock RIGHT_BRACKET { } { }
-            ;
+block: LEFT_CBRACKET {
+         symbolTable.enterScope();
+         fprintf(yacc_out, "Entered block scope %d\n", symbolTable.currentScope);
+         
+       }
+       stmts
+       RIGHT_CBRACKET {
+         symbolTable.exitScope();
+         fprintf(yacc_out, "Exited block scope %d\n", symbolTable.currentScope);
+       }
+       |
+       LEFT_CBRACKET RIGHT_CBRACKET {
+         fprintf(yacc_out, "Empty block\n");
+       }
+       ;
 
 funcdef:    FUNCTION ID LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block { }
             | FUNCTION LEFT_PARENTHESIS RIGHT_PARENTHESIS block         { }

@@ -1215,7 +1215,7 @@ YY_RULE_SETUP
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
                     yylval.stringConst = strdup(yytext);
-                    return LEFT_BRACKET;
+                    return LEFT_CBRACKET;
                 }
 	YY_BREAK
 case 31:
@@ -1227,7 +1227,7 @@ YY_RULE_SETUP
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
                     yylval.stringConst = strdup(yytext);
-                    return RIGHT_BRACKET;
+                    return RIGHT_CBRACKET;
                 }
 	YY_BREAK
 case 32:
@@ -1239,7 +1239,7 @@ YY_RULE_SETUP
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
                     yylval.stringConst = strdup(yytext);
-                    return LEFT_CBRACKET;
+                    return LEFT_BRACKET;
                 }
 	YY_BREAK
 case 33:
@@ -1251,7 +1251,7 @@ YY_RULE_SETUP
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
                     yylval.stringConst = strdup(yytext);
-                    return RIGHT_CBRACKET;
+                    return RIGHT_BRACKET;
                 }
 	YY_BREAK
 case 34:

@@ -274,7 +274,7 @@ COMMENT_REGEX "/*"
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
                     yylval.stringConst = strdup(yytext);
-                    return LEFT_BRACKET;
+                    return LEFT_CBRACKET;
                 }
 "}"             {
                     count++;
@@ -282,7 +282,7 @@ COMMENT_REGEX "/*"
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
                     yylval.stringConst = strdup(yytext);
-                    return RIGHT_BRACKET;
+                    return RIGHT_CBRACKET;
                 }
 "["             {
                     count++;
@@ -290,7 +290,7 @@ COMMENT_REGEX "/*"
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
                     yylval.stringConst = strdup(yytext);
-                    return LEFT_CBRACKET;
+                    return LEFT_BRACKET;
                 }
 "]"             {
                     count++;
@@ -298,7 +298,7 @@ COMMENT_REGEX "/*"
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
                     yylval.stringConst = strdup(yytext);
-                    return RIGHT_CBRACKET;
+                    return RIGHT_BRACKET;
                 }
 "("             {
                     count++;

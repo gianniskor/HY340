@@ -249,12 +249,40 @@ class SymbolTable{
                     return;
                 }
             }
-            Symbol* newS = new Symbol(name,scope,line,type,value);
+            Symbol* newS;
+            if(scope == 0){
+                newS = new Symbol(name,scope,line,GLOBAL_VAR,value);
+            }else{
+                newS = new Symbol(name,scope,line,LOCAL_VAR,value);
+            }
             scopeTable[scope].push_back(newS);
             if (nameTable.find(name) == nameTable.end()) {
                 nameTable[name] = vector<Symbol*>();
             }
             nameTable[name].push_back(newS);
+        } else {
+            if (e->getType() == LIB_FUNC) {
+                printf("Error: Cannot redefine library function %s\n", name.c_str());
+                return;
+            }
+            e->setActive(true);
+            e->setValue(value);
+        }
+    }
+    
+    void lvalue_default(string name,int scope,int line, int type, string value =""){
+        Symbol *e = NULL;
+        for(int count = currentScope; count > 0; count--){
+            e = lookupInScope(name,count);
+            if(e){
+                break;
+            }
+        }
+        if(e == NULL){
+            e = lookupInScope(name,0);
+            if(e == NULL){
+                //
+            }
         }
     }
 };

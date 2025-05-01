@@ -149,9 +149,10 @@ typedef union YYSTYPE
     double realConst;
     struct expr* exprV;
     class Symbol* symbol_P ;
+    char* typeee;
 }
 /* Line 1529 of yacc.c.  */
-#line 155 "syntax.hpp"
+#line 156 "syntax.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
