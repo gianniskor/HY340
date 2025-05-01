@@ -142,13 +142,13 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 66 "syntax.y"
+#line 20 "syntax.y"
 {
     char* stringConst;
     int intConst;
     double realConst;
     struct expr* exprV;
-    struct Symbol* symbol_P ;
+    class Symbol* symbol_P ;
 }
 /* Line 1529 of yacc.c.  */
 #line 155 "syntax.hpp"

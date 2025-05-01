@@ -866,7 +866,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"IF","KEYWORD"};
                     //add_token(yylval,yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return IF;
                 }
 	YY_BREAK
@@ -878,7 +878,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"ELSE","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return ELSE;
                 }
 	YY_BREAK
@@ -890,7 +890,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"WHILE","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return WHILE;
                 }
 	YY_BREAK
@@ -902,7 +902,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"for","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return FOR;
                 }
 	YY_BREAK
@@ -914,7 +914,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"FUNCTION","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return FUNCTION;
                 }
 	YY_BREAK
@@ -926,7 +926,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"RETURN","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return RETURN;
                 }
 	YY_BREAK
@@ -938,7 +938,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"BREAK","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return BREAK;
                 }
 	YY_BREAK
@@ -950,7 +950,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"CONTINUE","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return CONTINUE;
                 }
 	YY_BREAK
@@ -962,7 +962,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"AND","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return AND;
                 }
 	YY_BREAK
@@ -974,7 +974,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"NOT","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return NOT;
                 }
 	YY_BREAK
@@ -986,7 +986,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"OR","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return OR;
                 }
 	YY_BREAK
@@ -998,7 +998,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"LOCAL","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LOCAL;
                 }
 	YY_BREAK
@@ -1010,7 +1010,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"TRUE","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return TRUE;
                 }
 	YY_BREAK
@@ -1022,7 +1022,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"FALSE","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return FALSE;
                 }
 	YY_BREAK
@@ -1034,7 +1034,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"NIL","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return NIL;
                 }
 	YY_BREAK
@@ -1046,7 +1046,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"ASSIGN","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return EQUALS;
                 }
 	YY_BREAK
@@ -1058,7 +1058,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"PLUS","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return PLUS;
                 }
 	YY_BREAK
@@ -1070,7 +1070,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"MINUS","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return MINUS;
                 }
 	YY_BREAK
@@ -1082,7 +1082,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"MULTIPLY","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return MULTIPLY;
                 }
 	YY_BREAK
@@ -1094,7 +1094,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"DIVISION","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return DIVIDE;
                 }
 	YY_BREAK
@@ -1106,7 +1106,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"MODULO","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return MOD;
                 }
 	YY_BREAK
@@ -1118,7 +1118,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"EQUAL","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return DOUBLE_EQUALS;
                 }
 	YY_BREAK
@@ -1130,7 +1130,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"NONEQUAL","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt); 
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return NOT_EQUALS;
                 }
 	YY_BREAK
@@ -1142,7 +1142,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"PLUS_PLUS","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return PLUS_PLUS;
                 }
 	YY_BREAK
@@ -1154,7 +1154,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"MINUS_MINUS","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return MINUS_MINUS;
                 }
 	YY_BREAK
@@ -1166,7 +1166,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"GREATER_THAN","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt); 
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return GREATER;
                 }
 	YY_BREAK
@@ -1178,7 +1178,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"LESS_THAN","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LESS;
                 }
 	YY_BREAK
@@ -1190,7 +1190,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"GREATER_EQUAL_THAN","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return GREATER_EQUALS;
                 }
 	YY_BREAK
@@ -1202,7 +1202,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"LESS_EQUAL_THAN","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LESS_EQUALS;
                 }
 	YY_BREAK
@@ -1214,7 +1214,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"LEFT_BRACE","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LEFT_BRACKET;
                 }
 	YY_BREAK
@@ -1226,7 +1226,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"RIGHT_BRACE","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return RIGHT_BRACKET;
                 }
 	YY_BREAK
@@ -1238,7 +1238,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"LEFT_BRACKET","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LEFT_CBRACKET;
                 }
 	YY_BREAK
@@ -1250,7 +1250,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"RIGHT_BRACKET","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return RIGHT_CBRACKET;
                 }
 	YY_BREAK
@@ -1262,7 +1262,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"LEFT_PARENTHESIS","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LEFT_PARENTHESIS;
                 }
 	YY_BREAK
@@ -1274,7 +1274,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"RIGHT_PARENTHESIS","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return RIGHT_PARENTHESIS;
                 }
 	YY_BREAK
@@ -1286,7 +1286,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"SEMICOLON","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return SEMICOLON;
                 }
 	YY_BREAK
@@ -1298,7 +1298,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"COMMA","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return COMMA;
                 }
 	YY_BREAK
@@ -1310,7 +1310,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"COLON","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return COLON;
                 }
 	YY_BREAK
@@ -1322,7 +1322,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"DOUBLE_COLON","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return DOUBLE_COLON;
                 }
 	YY_BREAK
@@ -1334,7 +1334,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"PERIOD","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return PERIOD;
                 }
 	YY_BREAK
@@ -1346,7 +1346,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"DOUBLE_PERIOD","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return DOUBLE_PERIOD;
                 }
 	YY_BREAK
@@ -1358,7 +1358,7 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"ID","IDENTIFIER"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return ID;
                 }
 	YY_BREAK
@@ -1370,24 +1370,26 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,"INT","INTCONST"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                                   return INT;
+                    yylval.stringConst = strdup(yytext);
+                    return INT;
                 }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 383 "al.l"
+#line 384 "al.l"
 {
                     count++;
                     token_cont_t tt = {yytext,"REAL","REALCONST"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                                   return REAL;
+                    yylval.stringConst = strdup(yytext);
+                    return REAL;
                 }
 	YY_BREAK
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 390 "al.l"
+#line 392 "al.l"
 {
                     count++;
                     // remove quotes
@@ -1398,14 +1400,14 @@ YY_RULE_SETUP
                     token_cont_t tt = {yytext,yytext,"STRING"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return STRING;  
                 }
 	YY_BREAK
 case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
-#line 403 "al.l"
+#line 405 "al.l"
 {
                     printf("Error, Unclosed String.\n");
                     return -1;
@@ -1414,13 +1416,13 @@ YY_RULE_SETUP
 case 47:
 /* rule 47 can match eol */
 YY_RULE_SETUP
-#line 407 "al.l"
+#line 409 "al.l"
 {
                 }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 409 "al.l"
+#line 411 "al.l"
 {
                     BEGIN(LINE_COMMENT);
                 }
@@ -1428,7 +1430,7 @@ YY_RULE_SETUP
 case 49:
 /* rule 49 can match eol */
 YY_RULE_SETUP
-#line 412 "al.l"
+#line 414 "al.l"
 {
                     count++;
                     token_cont_t tt = {yytext,"COMMENT","LINE_COMMENT"};
@@ -1439,13 +1441,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 419 "al.l"
+#line 421 "al.l"
 {
                 }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 421 "al.l"
+#line 423 "al.l"
 {
                     //comment_push(yylineno);
                     BEGIN(COMMENT);
@@ -1453,14 +1455,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 425 "al.l"
+#line 427 "al.l"
 {
                     comment_push(yylineno);
                 }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 428 "al.l"
+#line 430 "al.l"
 {
                     if (comment_head != NULL && comment_head->next == NULL) {
                         count++;
@@ -1483,7 +1485,7 @@ YY_RULE_SETUP
                 }
 	YY_BREAK
 case YY_STATE_EOF(COMMENT):
-#line 448 "al.l"
+#line 450 "al.l"
 {
                         printf("error, block comment not closed.\n");
                         return 2;
@@ -1492,23 +1494,23 @@ case YY_STATE_EOF(COMMENT):
 case 54:
 /* rule 54 can match eol */
 YY_RULE_SETUP
-#line 452 "al.l"
+#line 454 "al.l"
 {
                     }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(LINE_COMMENT):
-#line 454 "al.l"
+#line 456 "al.l"
 {
                         return 2;
                     }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 458 "al.l"
+#line 460 "al.l"
 ECHO;
 	YY_BREAK
-#line 1511 "al.cpp"
+#line 1513 "al.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2523,7 +2525,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 458 "al.l"
+#line 460 "al.l"
 
 void print_alpha_token(int yylineno, int count, token_cont_t tt) {
     printf("%d:\t#%d\t\"%s\"\t%s\t%s\t",

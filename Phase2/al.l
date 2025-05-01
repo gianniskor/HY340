@@ -40,7 +40,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"IF","KEYWORD"};
                     //add_token(yylval,yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return IF;
                 }
 
@@ -49,7 +49,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"ELSE","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return ELSE;
                 }
 "while"         {
@@ -57,7 +57,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"WHILE","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return WHILE;
                 }
 "for"           {
@@ -65,7 +65,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"for","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return FOR;
                 }
 "function"      {
@@ -73,7 +73,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"FUNCTION","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return FUNCTION;
                 }
 "return"        {
@@ -81,7 +81,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"RETURN","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return RETURN;
                 }
 "break"         {
@@ -89,7 +89,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"BREAK","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return BREAK;
                 }
 "continue"      {
@@ -97,7 +97,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"CONTINUE","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return CONTINUE;
                 }
 "and"           {
@@ -105,7 +105,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"AND","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return AND;
                 }
 "not"           {
@@ -113,7 +113,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"NOT","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return NOT;
                 }
 "or"            {
@@ -121,7 +121,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"OR","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return OR;
                 }
 "local"         {
@@ -129,7 +129,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"LOCAL","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LOCAL;
                 }
 "true"          {
@@ -137,7 +137,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"TRUE","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return TRUE;
                 }
 "false"         {
@@ -145,7 +145,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"FALSE","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return FALSE;
                 }
 "nil"           {
@@ -153,7 +153,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"NIL","KEYWORD"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return NIL;
                 }
 "="             {
@@ -161,7 +161,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"ASSIGN","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return EQUALS;
                 }
 "+"             {
@@ -169,7 +169,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"PLUS","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return PLUS;
                 }
 "-"             {
@@ -177,7 +177,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"MINUS","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return MINUS;
                 }
 "*"             {
@@ -185,7 +185,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"MULTIPLY","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return MULTIPLY;
                 }
 "/"             {
@@ -193,7 +193,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"DIVISION","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return DIVIDE;
                 }
 "%"             {
@@ -201,7 +201,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"MODULO","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return MOD;
                 }
 "=="            {
@@ -209,7 +209,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"EQUAL","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return DOUBLE_EQUALS;
                 }
 "!="            {
@@ -217,7 +217,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"NONEQUAL","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt); 
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return NOT_EQUALS;
                 }
 "++"            {
@@ -225,7 +225,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"PLUS_PLUS","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return PLUS_PLUS;
                 }
 "--"            {
@@ -233,7 +233,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"MINUS_MINUS","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return MINUS_MINUS;
                 }
 ">"             {
@@ -241,7 +241,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"GREATER_THAN","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt); 
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return GREATER;
                 }
 "<"             {
@@ -249,7 +249,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"LESS_THAN","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LESS;
                 }
 ">="            {
@@ -257,7 +257,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"GREATER_EQUAL_THAN","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return GREATER_EQUALS;
                 }
 "<="            {
@@ -265,7 +265,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"LESS_EQUAL_THAN","OPERATOR"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LESS_EQUALS;
                 }
 "{"             {
@@ -273,7 +273,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"LEFT_BRACE","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LEFT_BRACKET;
                 }
 "}"             {
@@ -281,7 +281,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"RIGHT_BRACE","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return RIGHT_BRACKET;
                 }
 "["             {
@@ -289,7 +289,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"LEFT_BRACKET","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LEFT_CBRACKET;
                 }
 "]"             {
@@ -297,7 +297,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"RIGHT_BRACKET","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return RIGHT_CBRACKET;
                 }
 "("             {
@@ -305,7 +305,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"LEFT_PARENTHESIS","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return LEFT_PARENTHESIS;
                 }
 ")"             {
@@ -313,7 +313,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"RIGHT_PARENTHESIS","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return RIGHT_PARENTHESIS;
                 }
 ";"             {
@@ -321,7 +321,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"SEMICOLON","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return SEMICOLON;
                 }
 ","             {
@@ -329,7 +329,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"COMMA","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return COMMA;
                 }
 ":"             {
@@ -337,7 +337,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"COLON","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return COLON;
                 }
 "::"            {
@@ -345,7 +345,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"DOUBLE_COLON","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return DOUBLE_COLON;
                 }
 "."             {
@@ -353,7 +353,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"PERIOD","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return PERIOD;
                 }
 ".."            {
@@ -361,7 +361,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"DOUBLE_PERIOD","PUNCTUATION"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return DOUBLE_PERIOD;
                 }
 
@@ -370,7 +370,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"ID","IDENTIFIER"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return ID;
                 }
 {INT}           {
@@ -378,14 +378,16 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"INT","INTCONST"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                                   return INT;
+                    yylval.stringConst = strdup(yytext);
+                    return INT;
                 }
 {REAL}          {
                     count++;
                     token_cont_t tt = {yytext,"REAL","REALCONST"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                                   return REAL;
+                    yylval.stringConst = strdup(yytext);
+                    return REAL;
                 }
 {STRING}        {
                     count++;
@@ -397,7 +399,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,yytext,"STRING"};
                     //add_token(yylval, yylineno, count, tt);
                     print_alpha_token(yylineno, count, tt);
-                
+                    yylval.stringConst = strdup(yytext);
                     return STRING;  
                 }
 \"[^\"]*        {

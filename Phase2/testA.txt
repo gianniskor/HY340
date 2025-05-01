@@ -1,1 +1,5 @@
-x++;
+local foo;
+local foo;
+local fooo;
+local foolfasfasd;
+

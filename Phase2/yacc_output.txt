@@ -1,6 +1,25 @@
 lvalue -> id
-expr -> term++
+primary -> lvalue
+expr -> primary
 expr -> term
 stmt -> expr;
 liststmt -> liststmt stmt
+lvalue -> id
+primary -> lvalue
+expr -> primary
+expr -> term
+stmt -> expr;
+liststmt -> stmt
+lvalue -> id
+primary -> lvalue
+expr -> primary
+expr -> term
+stmt -> expr;
+liststmt -> stmt
+lvalue -> id
+primary -> lvalue
+expr -> primary
+expr -> term
+stmt -> expr;
+liststmt -> stmt
 liststmt -> stmt

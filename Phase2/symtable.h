@@ -12,14 +12,14 @@ enum SymbolType {
 
 
 class Symbol{
-    private:
+    
+    public:
         string name;
         int scope;
         int line;
         int type;
         bool active;
         string value;
-    public:
         Symbol():
             name(""), scope(0), line(0), type(0), active(true), value("") {}
         Symbol(string name, int scope, int line, int type, string value) 
@@ -70,9 +70,12 @@ class Symbol{
 
 class SymbolTable{
     private:
+
         vector<vector <Symbol*>> scopeTable;
         unordered_map<string, vector<Symbol*>> nameTable;
+
     public:
+    
     int currentScope;
     SymbolTable() : currentScope(0) {
         scopeTable.push_back(vector<Symbol*>());
@@ -85,6 +88,7 @@ class SymbolTable{
             }
         }
     }
+
     Symbol* insert(string name, int scope, int line, int type, string value = "") {
         // Check if we need to add new scope levels
         while (scopeTable.size() <= scope) {
@@ -196,6 +200,7 @@ class SymbolTable{
             currentScope--;
         }
     }
+
     int getCurrentScope() const {
         return currentScope;
     }
@@ -208,6 +213,7 @@ class SymbolTable{
             }
         }
     }
+
     void print() {
         printf("\n--------------------- Symbol Table ---------------------\n");
         printf("%-20s %-15s %-10s %-10s %s\n", "Name", "Type", "Line", "Scope", "Status");
@@ -230,40 +236,25 @@ class SymbolTable{
         }
         printf("--------------------------------------------------------\n");
     }
-    Symbol* manageLvalueId(const string& id, int scope, int line) {
-        // Search bottom-up for active matching symbols in all scopes
-        Symbol* entry = lookupActiveBottomUp(id, scope);
+
+    void local_lvalue(string name,int scope,int line, int type, string value =""){
         
-        if (entry == nullptr) {
-            // No active symbol found, check for any non-active matching symbols
-            for (int tmpscope = scope; tmpscope > 0; tmpscope--) {
-                entry = lookupAnyInScope(id, tmpscope);
-                if (entry != nullptr) {
-                    // Found inactive symbol - this is an error
-                    char errmsg[1024];
-                    if (entry->getType() == USER_FUNC| entry->getType() == LIB_FUNC) {
-                        sprintf(errmsg, "Cannot access local function declared in line %d with scope %d", 
-                                entry->getLine(), entry->getScope());
-                    } else {
-                        sprintf(errmsg, "Cannot access local variable declared in line %d with scope %d", 
-                                entry->getLine(), entry->getScope());
-                    }
-                    printf("Error: %s for symbol '%s' in scope %d\n", errmsg, id.c_str(), scope);
-                    return nullptr;
+        Symbol *e = lookupInScope(name,scope);
+        
+        if(e == NULL){
+            auto symbols = lookup(name);
+            for (auto& sym : symbols) {
+            if (sym->getType() == LIB_FUNC) {
+                    //shadow libfunc
+                    return;
                 }
             }
-            
-            // Check global scope
-            entry = lookupInScope(id, 0);
-            
-            // If still not found, create a new symbol
-            if (entry == nullptr) {
-                int type = (scope == 0) ? GLOBAL_VAR : LOCAL_VAR;
-                entry = insert(id, scope, line, type);
+            Symbol* newS = new Symbol(name,scope,line,type,value);
+            scopeTable[scope].push_back(newS);
+            if (nameTable.find(name) == nameTable.end()) {
+                nameTable[name] = vector<Symbol*>();
             }
+            nameTable[name].push_back(newS);
         }
-        
-        return entry;
     }
-    
 };

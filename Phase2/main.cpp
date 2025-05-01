@@ -47,10 +47,7 @@ int main(int argc, char *argv[]) {
     for (const char* function : libFuncs) {
         symbolTable.insert(function, 0, 0, LIB_FUNC);
     }
-    printf("hello?");
-    symbolTable.print();
-    printf("hello?");
     yyparse();
-    printf("lala");
+    symbolTable.print();
     return 0;
 }

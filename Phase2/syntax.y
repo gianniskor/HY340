@@ -12,53 +12,7 @@
     int scope = 0;
     int max_scope = 0;
     extern SymbolTable symbolTable;  
-    typedef struct {
-        Symbol* symbol;
-        char* name;
-        int line;
-    } SymbolInfo;
-    void Manage_lvalue_id(Symbol** result, char* id, int scope, int line) {
-    // Make sure all pointers are valid before dereferencing
-    if (!result) {
-        fprintf(stderr, "Error: result pointer is null\n");
-        return;
-    }
     
-    fprintf(yacc_out, "lvalue -> id\n");
-    
-    // Check if yacc_out is initialized
-    if (!yacc_out) {
-        fprintf(stderr, "Error: yacc_out not initialized\n");
-        *result = nullptr;
-        return;
-    }
-    
-    // Check if id is valid
-    if (!id) {
-        fprintf(stderr, "Error: id is null at line %d\n", line);
-        *result = nullptr;
-        return;
-    }
-    
-    // Make sure symbolTable is properly initialized
-    // This assumes symbolTable is a global instance
-    
-    // Convert char* to std::string for the method call
-    std::string idStr(id);
-    Symbol* entry = symbolTable.manageLvalueId(idStr, scope, line);
-    
-    // Set the result
-    *result = entry;
-    
-    // Add debugging information
-    if (entry) {
-        fprintf(yacc_out, " Found symbol '%s' (type: %s) in scope %d\n",
-                id, entry->getTypeAsString().c_str(), entry->getScope());
-    } else {
-        fprintf(stderr, "Warning: Symbol '%s' not found or not accessible at line %d\n", id, line);
-    }
-}
-
 %}
 
 %start program
@@ -68,7 +22,7 @@
     int intConst;
     double realConst;
     struct expr* exprV;
-    struct Symbol* symbol_P ;
+    class Symbol* symbol_P ;
 }
 %initial-action
 {
@@ -208,10 +162,26 @@ expression: assignexpr                                  { fprintf(yacc_out,"expr
 term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out,"expr -> (term)\n");}
             | MINUS expression %prec NEGATIVE_VAL             { fprintf(yacc_out,"expr -> -term\n");}
             | NOT expression                                  { fprintf(yacc_out,"expr -> !term\n");}
-            | PLUS_PLUS lvalue                                { fprintf(yacc_out,"expr -> ++term\n");}
-            | lvalue PLUS_PLUS                                { fprintf(yacc_out,"expr -> term++\n");}
-            | MINUS_MINUS lvalue                              { fprintf(yacc_out,"expr -> --term\n");}
-            | lvalue MINUS_MINUS                              { fprintf(yacc_out,"expr -> term--\n");}
+            | PLUS_PLUS lvalue                          {   if ($2 != NULL && $2->type != USERFUNC && $2->type != LIBFUNC) {
+                                                                 fprintf(yaccout, "term -> PLUS_PLUS lvalue\n");}
+                                                             else if ($2->type == USERFUNC || $2->type == LIBFUNC) {
+                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+                                                             } }
+             | lvalue PLUS_PLUS                          {   if ($1 != NULL && $1->type != USERFUNC && $1->type != LIBFUNC) {
+                                                                 fprintf(yaccout, "term -> lvalue PLUS_PLUS\n");}
+                                                             else if ($1->type == USERFUNC || $1->type == LIBFUNC) {
+                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+                                                             } }
+             | MINUS_MINUS lvalue                        {   if ($2 != NULL && $2->type != USERFUNC && $2->type != LIBFUNC) {
+                                                                 fprintf(yaccout, "term -> MINUS_MINUS lvalue\n");}
+                                                             else if ($2->type == USERFUNC || $2->type == LIBFUNC) {
+                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+                                                             } }
+             | lvalue MINUS_MINUS                        {   if ($1 != NULL && $1->type != USERFUNC && $1->type != LIBFUNC) {
+                                                                 fprintf(yaccout, "term -> lvalue MINUS_MINUS\n");}
+                                                             else if ($1->type == USERFUNC || $1->type == LIBFUNC) {
+                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+                                                             } }
             | primary                                         { fprintf(yacc_out,"expr -> primary\n");}
             ;
 
@@ -224,8 +194,10 @@ primary:    lvalue                                      { fprintf(yacc_out,"prim
             | const                                     { fprintf(yacc_out,"primary -> const\n")}
             ;
 
-lvalue:     ID                                          {  Manage_lvalue_id(&($$), $1, symbolTable.currentScope, yylineno);}                                                                   
-            | LOCAL ID                                  { fprintf(yacc_out,"lvalue -> id\n");}
+
+lvalue:     ID                                          { }                                                                   
+            | LOCAL ID                                  { symbolTable.local_lvalue($2,scope,yylineno,1);
+                                                          fprintf(yacc_out,"lvalue -> id\n");}
             | DOUBLE_COLON ID                           { fprintf(yacc_out,"lvalue -> id\n");}
             | member                                    { fprintf(yacc_out,"lvalue -> id\n");}
             ;
