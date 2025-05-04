@@ -1,0 +1,12 @@
+local s; x;
+{
+    local ss;
+    xx;
+    ::g;
+    {
+        local sss;
+        xx;
+    }
+}
+x;
+sss;

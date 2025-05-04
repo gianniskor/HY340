@@ -172,7 +172,7 @@ class SymbolTable{
         return nullptr;
     }
     
-    // Bottom-up lookup for active symbol in all enclosing scopes
+
     Symbol* lookupActiveBottomUp(const string& name, int fromScope) {
         for (int scope = fromScope; scope >= 0; scope--) {
             Symbol* result = lookupInScope(name, scope);
@@ -270,18 +270,32 @@ class SymbolTable{
         }
     }
     
-    void lvalue_default(string name,int scope,int line, int type, string value =""){
-        Symbol *e = NULL;
-        for(int count = currentScope; count > 0; count--){
-            e = lookupInScope(name,count);
-            if(e){
-                break;
+    void lvalue_default(string name, int scope, int line, int type, string value = "") {
+        Symbol *e = lookupActiveBottomUp(name, scope);
+        if(e == nullptr) {
+            auto symbols = lookup(name);
+            for (auto& sym : symbols) {
+                if (sym->getType() == LIB_FUNC) {
+                    printf("Error: Cannot shadow library function %s at line %d\n", name.c_str(), line);
+                    return;
+                }
             }
-        }
-        if(e == NULL){
-            e = lookupInScope(name,0);
-            if(e == NULL){
-                //
+            Symbol* newSymbol;
+            if(scope == 0){
+                newSymbol = insert(name, scope, line, GLOBAL_VAR, value);
+            } else{
+                newSymbol = insert(name, scope, line, LOCAL_VAR, value);
+            }
+            if(newSymbol == nullptr) {
+                printf("Error: Failed to create global variable %s at line %d\n", name.c_str(), line);
+            }
+        } else {
+            if (e->getType() == USER_FUNC || e->getType() == LIB_FUNC) {
+                printf("Error: Cannot use function %s as an lvalue at line %d\n", name.c_str(), line);
+                return;
+            }
+            if(!value.empty()) {
+                e->setValue(value);
             }
         }
     }

@@ -1,22 +1,42 @@
-Entered block scope 1
-Entered block scope 2
-Entered block scope 3
 lvalue -> local id
 primary -> lvalue
 expr -> primary
 expr -> term
 stmt -> expr;
 liststmt -> liststmt stmt
+lvalue -> id
+primary -> lvalue
+expr -> primary
+expr -> term
+stmt -> expr;
+liststmt -> stmt
+Entered block scope 1
+lvalue -> local id
+primary -> lvalue
+expr -> primary
+expr -> term
+stmt -> expr;
+liststmt -> liststmt stmt
+lvalue -> id
+primary -> lvalue
+expr -> primary
+expr -> term
+stmt -> expr;
+liststmt -> stmt
 lvalue -> global id
 primary -> lvalue
 expr -> primary
 expr -> term
 stmt -> expr;
 liststmt -> stmt
-Exited block scope 2
-stmt -> blockstmt;
+Entered block scope 2
+lvalue -> local id
+primary -> lvalue
+expr -> primary
+expr -> term
+stmt -> expr;
 liststmt -> liststmt stmt
-lvalue -> global id
+lvalue -> id
 primary -> lvalue
 expr -> primary
 expr -> term
@@ -24,17 +44,17 @@ stmt -> expr;
 liststmt -> stmt
 Exited block scope 1
 stmt -> blockstmt;
-liststmt -> liststmt stmt
-lvalue -> local id
+liststmt -> stmt
+Exited block scope 0
+stmt -> blockstmt;
+liststmt -> stmt
+lvalue -> id
 primary -> lvalue
 expr -> primary
 expr -> term
 stmt -> expr;
 liststmt -> stmt
-Exited block scope 0
-stmt -> blockstmt;
-liststmt -> liststmt stmt
-lvalue -> local id
+lvalue -> id
 primary -> lvalue
 expr -> primary
 expr -> term

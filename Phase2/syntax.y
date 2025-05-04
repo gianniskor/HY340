@@ -195,7 +195,8 @@ primary:    lvalue                                      { fprintf(yacc_out,"prim
             ;
 
 
-lvalue:     ID                                          { }                                                                   
+lvalue:     ID                                          { symbolTable.lvalue_default($1,symbolTable.currentScope,yylineno,$$->type);
+                                                          fprintf(yacc_out,"lvalue -> id\n");                                        }                                                                   
             | LOCAL ID                                  { symbolTable.local_lvalue($2,symbolTable.currentScope,yylineno,$$->type);
                                                           fprintf(yacc_out,"lvalue -> local id\n");}
             | DOUBLE_COLON ID                           { symbolTable.local_lvalue($2,0,yylineno,$$->type);
@@ -252,7 +253,7 @@ block: LEFT_CBRACKET {
        }
        ;
 
-funcdef:    FUNCTION ID LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block { }
+funcdef:    FUNCTION ID LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block { fprintf(yacc_out, "function id (idlist) block\n");}
             | FUNCTION LEFT_PARENTHESIS RIGHT_PARENTHESIS block         { }
             ;
 
@@ -268,8 +269,8 @@ idlist:     ID                                          { }
             | idlist COMMA ID                           { }
             ;   
 
-ifstmt: IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt %prec LOWER_THAN_ELSE {}
-       | IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt ELSE stmt {}
+ifstmt: IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt %prec LOWER_THAN_ELSE { }
+       | IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt ELSE stmt { }
        ;
 
 whilestmt:  WHILE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt      { }
@@ -277,7 +278,7 @@ whilestmt:  WHILE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt      { }
 forstmt:    FOR LEFT_PARENTHESIS elist SEMICOLON expression SEMICOLON elist RIGHT_PARENTHESIS stmt    { }
 
 returnstmt: RETURN expression SEMICOLON                        { }  
-            | RETURN SEMICOLON                           { }
+            | RETURN SEMICOLON                                 { }
             ;
 
 %%

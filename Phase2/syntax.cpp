@@ -556,11 +556,11 @@ static const yytype_uint16 yyrline[] =
      136,   137,   138,   139,   140,   141,   144,   145,   146,   147,
      148,   149,   150,   151,   152,   153,   154,   155,   156,   157,
      158,   162,   163,   164,   165,   170,   175,   180,   185,   188,
-     190,   191,   192,   193,   194,   198,   199,   201,   203,   206,
-     207,   208,   209,   212,   213,   214,   217,   218,   221,   223,
-     225,   226,   229,   230,   231,   234,   235,   237,   239,   239,
-     250,   255,   256,   259,   260,   261,   262,   263,   264,   267,
-     268,   271,   272,   275,   277,   279,   280
+     190,   191,   192,   193,   194,   198,   200,   202,   204,   207,
+     208,   209,   210,   213,   214,   215,   218,   219,   222,   224,
+     226,   227,   230,   231,   232,   235,   236,   238,   240,   240,
+     251,   256,   257,   260,   261,   262,   263,   264,   265,   268,
+     269,   272,   273,   276,   278,   280,   281
 };
 #endif
 
@@ -1904,123 +1904,124 @@ yyreduce:
 
   case 45:
 #line 198 "syntax.y"
-    { ;}
+    { symbolTable.lvalue_default((yyvsp[(1) - (1)].stringConst),symbolTable.currentScope,yylineno,(yyval.symbol_P)->type);
+                                                          fprintf(yacc_out,"lvalue -> id\n");                                        ;}
     break;
 
   case 46:
-#line 199 "syntax.y"
+#line 200 "syntax.y"
     { symbolTable.local_lvalue((yyvsp[(2) - (2)].stringConst),symbolTable.currentScope,yylineno,(yyval.symbol_P)->type);
                                                           fprintf(yacc_out,"lvalue -> local id\n");;}
     break;
 
   case 47:
-#line 201 "syntax.y"
+#line 202 "syntax.y"
     { symbolTable.local_lvalue((yyvsp[(2) - (2)].stringConst),0,yylineno,(yyval.symbol_P)->type);
                                                           fprintf(yacc_out,"lvalue -> global id\n");;}
     break;
 
   case 48:
-#line 203 "syntax.y"
+#line 204 "syntax.y"
     { fprintf(yacc_out,"lvalue -> id\n");;}
     break;
 
   case 49:
-#line 206 "syntax.y"
+#line 207 "syntax.y"
     { fprintf(yacc_out,"member -> lvalue.id\n");;}
     break;
 
   case 50:
-#line 207 "syntax.y"
+#line 208 "syntax.y"
     {fprintf(yacc_out,"member -> lvalue[expr]\n"); ;}
     break;
 
   case 51:
-#line 208 "syntax.y"
+#line 209 "syntax.y"
     { fprintf(yacc_out,"member -> call.id\n");;}
     break;
 
   case 52:
-#line 209 "syntax.y"
+#line 210 "syntax.y"
     { fprintf(yacc_out,"member -> call[expr]\n");;}
     break;
 
   case 53:
-#line 212 "syntax.y"
-    { ;}
-    break;
-
-  case 54:
 #line 213 "syntax.y"
     { ;}
     break;
 
-  case 55:
+  case 54:
 #line 214 "syntax.y"
     { ;}
     break;
 
-  case 56:
-#line 217 "syntax.y"
+  case 55:
+#line 215 "syntax.y"
     { ;}
     break;
 
-  case 57:
+  case 56:
 #line 218 "syntax.y"
     { ;}
     break;
 
+  case 57:
+#line 219 "syntax.y"
+    { ;}
+    break;
+
   case 58:
-#line 221 "syntax.y"
+#line 222 "syntax.y"
     { ;}
     break;
 
   case 59:
-#line 223 "syntax.y"
+#line 224 "syntax.y"
     { ;}
     break;
 
   case 60:
-#line 225 "syntax.y"
-    { ;}
-    break;
-
-  case 61:
 #line 226 "syntax.y"
     { ;}
     break;
 
-  case 62:
-#line 229 "syntax.y"
+  case 61:
+#line 227 "syntax.y"
     { ;}
     break;
 
-  case 63:
+  case 62:
 #line 230 "syntax.y"
     { ;}
     break;
 
-  case 64:
+  case 63:
 #line 231 "syntax.y"
     { ;}
     break;
 
-  case 65:
-#line 234 "syntax.y"
+  case 64:
+#line 232 "syntax.y"
     { ;}
     break;
 
-  case 66:
+  case 65:
 #line 235 "syntax.y"
     { ;}
     break;
 
+  case 66:
+#line 236 "syntax.y"
+    { ;}
+    break;
+
   case 67:
-#line 237 "syntax.y"
+#line 238 "syntax.y"
     { ;}
     break;
 
   case 68:
-#line 239 "syntax.y"
+#line 240 "syntax.y"
     {
          symbolTable.enterScope();
          fprintf(yacc_out, "Entered block scope %d\n", symbolTable.currentScope);
@@ -2029,7 +2030,7 @@ yyreduce:
     break;
 
   case 69:
-#line 245 "syntax.y"
+#line 246 "syntax.y"
     {
          symbolTable.exitScope();
          fprintf(yacc_out, "Exited block scope %d\n", symbolTable.currentScope);
@@ -2037,95 +2038,95 @@ yyreduce:
     break;
 
   case 70:
-#line 250 "syntax.y"
+#line 251 "syntax.y"
     {
          fprintf(yacc_out, "Empty block\n");
        ;}
     break;
 
   case 71:
-#line 255 "syntax.y"
-    { ;}
-    break;
-
-  case 72:
 #line 256 "syntax.y"
     { ;}
     break;
 
-  case 73:
-#line 259 "syntax.y"
+  case 72:
+#line 257 "syntax.y"
     { ;}
     break;
 
-  case 74:
+  case 73:
 #line 260 "syntax.y"
     { ;}
     break;
 
-  case 75:
+  case 74:
 #line 261 "syntax.y"
     { ;}
     break;
 
-  case 76:
+  case 75:
 #line 262 "syntax.y"
     { ;}
     break;
 
-  case 77:
+  case 76:
 #line 263 "syntax.y"
     { ;}
     break;
 
-  case 78:
+  case 77:
 #line 264 "syntax.y"
     { ;}
     break;
 
-  case 79:
-#line 267 "syntax.y"
+  case 78:
+#line 265 "syntax.y"
     { ;}
     break;
 
-  case 80:
+  case 79:
 #line 268 "syntax.y"
     { ;}
     break;
 
-  case 81:
-#line 271 "syntax.y"
-    {;}
+  case 80:
+#line 269 "syntax.y"
+    { ;}
     break;
 
-  case 82:
+  case 81:
 #line 272 "syntax.y"
     {;}
     break;
 
+  case 82:
+#line 273 "syntax.y"
+    {;}
+    break;
+
   case 83:
-#line 275 "syntax.y"
+#line 276 "syntax.y"
     { ;}
     break;
 
   case 84:
-#line 277 "syntax.y"
+#line 278 "syntax.y"
     { ;}
     break;
 
   case 85:
-#line 279 "syntax.y"
+#line 280 "syntax.y"
     { ;}
     break;
 
   case 86:
-#line 280 "syntax.y"
+#line 281 "syntax.y"
     { ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 2129 "syntax.cpp"
+#line 2130 "syntax.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2339,7 +2340,7 @@ yyreturn:
 }
 
 
-#line 283 "syntax.y"
+#line 284 "syntax.y"
 
 
 
