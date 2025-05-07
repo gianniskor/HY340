@@ -1,5 +1,5 @@
 //#include "al.h"
-#include "lexLib.h"
+#include "lexLib.hpp"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
