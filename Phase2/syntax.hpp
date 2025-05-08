@@ -142,17 +142,22 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 20 "syntax.y"
+#line 22 "syntax.y"
 {
     char* stringConst;
     int intConst;
     double realConst;
     struct expr* exprV;
-    class Symbol* symbol_P ;
-    char* typeee;
+    class Symbol* symbol_P;
+    /*Gia thn trith fash prosethikan 
+    ta parakatw sto union*/
+    unsigned int flowLabel_V;
+    //enum type_t * statementT;
+    expr* expression;
+    /*menei na dw to for_type*/
 }
 /* Line 1529 of yacc.c.  */
-#line 156 "syntax.hpp"
+#line 161 "syntax.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

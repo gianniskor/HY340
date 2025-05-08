@@ -45,7 +45,7 @@ typedef struct quad {
     expr* result;
     expr* arg1;
     expr* arg2;
-    unsigned lablel;
+    unsigned label;
     unsigned line;
 } quad;
 

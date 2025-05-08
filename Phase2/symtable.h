@@ -1,3 +1,5 @@
+#ifndef __SYM__
+#define __SYM__
 
 #include <iostream>
 #include <unordered_map>
@@ -6,9 +8,9 @@
 
 using namespace std;
 
-enum SymbolType {
+typedef enum SymbolType {
     GLOBAL_VAR, LOCAL_VAR, FUNCTION_PARAM, USER_FUNC, LIB_FUNC
-};
+}SymbolType;
 
 
 class Symbol{
@@ -17,12 +19,12 @@ class Symbol{
         string name;
         int scope;
         int line;
-        int type;
+        SymbolType type;
         bool active;
         string value;
         Symbol():
-            name(""), scope(0), line(0), type(0), active(true), value("") {}
-        Symbol(string name, int scope, int line, int type, string value) 
+            name(""), scope(0), line(0), type(), active(true), value("") {}
+        Symbol(string name, int scope, int line, SymbolType type, string value) 
             :name(name), scope(scope), line(line), type(type), active(true), value(value) {}
         int getScope() const{
             return scope;
@@ -89,7 +91,7 @@ class SymbolTable{
         }
     }
 
-    Symbol* insert(string name, int scope, int line, int type, string value = "") {
+    Symbol* insert(string name, int scope, int line, SymbolType type, string value = "") {
         // Check if we need to add new scope levels
         while (scopeTable.size() <= scope) {
             scopeTable.push_back(vector<Symbol*>());
@@ -237,7 +239,7 @@ class SymbolTable{
         printf("--------------------------------------------------------\n");
     }
 
-    void local_lvalue(string name,int scope,int line, int type, string value =""){
+    void local_lvalue(string name,int scope,int line, SymbolType type, string value =""){
         
         Symbol *e = lookupInScope(name,scope);
         
@@ -270,7 +272,7 @@ class SymbolTable{
         }
     }
     
-    void lvalue_default(string name, int scope, int line, int type, string value = "") {
+    void lvalue_default(string name, int scope, int line, SymbolType type, string value = "") {
         Symbol *e = lookupActiveBottomUp(name, scope);
         if(e == nullptr) {
             auto symbols = lookup(name);
@@ -300,3 +302,4 @@ class SymbolTable{
         }
     }
 };
+#endif

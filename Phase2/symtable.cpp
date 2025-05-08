@@ -1,3 +1,6 @@
+#ifndef __SYMTABLECPP__
+#define __SYMTABLECPP__
+
 #include "symtable.h"
 #include <iostream>
 #include <cassert>
@@ -9,4 +12,4 @@
 
 using namespace std;
 
-
+#endif

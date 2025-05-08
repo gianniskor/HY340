@@ -5,6 +5,8 @@
     #include "symtable.h"
     #include <string>
     #include "yaccHeader.hpp"
+    #include "expressions.h"
+    #include "quad.h"
     int yylex();
     FILE* yacc_out;
     extern int yylineno;
@@ -22,8 +24,13 @@
     int intConst;
     double realConst;
     struct expr* exprV;
-    class Symbol* symbol_P ;
-    char* typeee;
+    class Symbol* symbol_P;
+    /*Gia thn trith fash prosethikan 
+    ta parakatw sto union*/
+    unsigned int flowLabel_V;
+    //enum type_t * statementT;
+    expr* expression;
+    /*menei na dw to for_type*/
 }
 %initial-action
 {
@@ -141,6 +148,7 @@ stmt:       expression SEMICOLON                        { fprintf(yacc_out,"stmt
             | SEMICOLON                                 { fprintf(yacc_out,"stmt -> semicolon;\n");}
             ;
 
+
 expression: assignexpr                                  { fprintf(yacc_out,"expr -> assignexpr\n");}
           | term                                        { fprintf(yacc_out,"expr -> term\n");}
           | expression PLUS expression                  { fprintf(yacc_out,"expr -> +\n");}
@@ -148,16 +156,17 @@ expression: assignexpr                                  { fprintf(yacc_out,"expr
           | expression MULTIPLY expression              { fprintf(yacc_out,"expr -> *\n");}
           | expression DIVIDE expression                { fprintf(yacc_out,"expr -> /\n");}
           | expression MOD expression                   { fprintf(yacc_out,"expr -> %\n");}
+
           | expression DOUBLE_EQUALS expression         { fprintf(yacc_out,"expr -> ==\n");}
           | expression NOT_EQUALS expression            { fprintf(yacc_out,"expr -> !=\n");}
           | expression LESS expression                  { fprintf(yacc_out,"expr -> <\n");}
           | expression GREATER expression               { fprintf(yacc_out,"expr -> >\n");}
           | expression LESS_EQUALS expression           { fprintf(yacc_out,"expr -> <=\n");}
           | expression GREATER_EQUALS expression        { fprintf(yacc_out,"expr -> >=\n");}
+
           | expression AND expression                   { fprintf(yacc_out,"expr -> AND\n");}
           | expression OR expression                    { fprintf(yacc_out,"expr -> OR\n");} 
           ;
-
 
 term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out,"expr -> (term)\n");}
             | MINUS expression %prec NEGATIVE_VAL             { fprintf(yacc_out,"expr -> -term\n");}

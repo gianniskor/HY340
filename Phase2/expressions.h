@@ -3,7 +3,7 @@
 
 #include "symtable.h"
 
-typedef enum type_t{ 
+typedef enum type_t { 
     var_e,
     tableitem_e,
 
@@ -13,6 +13,7 @@ typedef enum type_t{
     arithexpr_e,
     boolexpr_e,
     assignexpr_e,
+    newtable_e,
 
     constint_e,
     constdouble_e,
