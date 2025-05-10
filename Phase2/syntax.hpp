@@ -1,14 +1,14 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
-/* Skeleton interface for Bison's Yacc-like parsers in C
+/* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,9 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -33,117 +31,92 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Tokens.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
+#ifndef YY_YY_SYNTAX_HPP_INCLUDED
+# define YY_YY_SYNTAX_HPP_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int yydebug;
+#endif
+/* "%code requires" blocks.  */
+#line 1 "syntax.y"
+
+    #include "expressions.h"
+
+#line 53 "syntax.hpp"
+
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     ID = 258,
-     STRING = 259,
-     INT = 260,
-     REAL = 261,
-     LEFT_PARENTHESIS = 262,
-     RIGHT_PARENTHESIS = 263,
-     LEFT_BRACKET = 264,
-     RIGHT_BRACKET = 265,
-     LEFT_CBRACKET = 266,
-     RIGHT_CBRACKET = 267,
-     SEMICOLON = 268,
-     COMMA = 269,
-     COLON = 270,
-     DOUBLE_COLON = 271,
-     PERIOD = 272,
-     DOUBLE_PERIOD = 273,
-     PLUS = 274,
-     MINUS = 275,
-     MULTIPLY = 276,
-     DIVIDE = 277,
-     PLUS_PLUS = 278,
-     MINUS_MINUS = 279,
-     MOD = 280,
-     EQUALS = 281,
-     DOUBLE_EQUALS = 282,
-     NOT_EQUALS = 283,
-     LESS = 284,
-     GREATER = 285,
-     LESS_EQUALS = 286,
-     GREATER_EQUALS = 287,
-     AND = 288,
-     NOT = 289,
-     OR = 290,
-     IF = 291,
-     ELSE = 292,
-     WHILE = 293,
-     TRUE = 294,
-     FALSE = 295,
-     NIL = 296,
-     RETURN = 297,
-     FUNCTION = 298,
-     BREAK = 299,
-     CONTINUE = 300,
-     LOCAL = 301,
-     FOR = 302,
-     NEGATIVE_VAL = 303,
-     LOWER_THAN_ELSE = 304
-   };
+  enum yytokentype
+  {
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    ID = 258,                      /* ID  */
+    STRING = 259,                  /* STRING  */
+    INT = 260,                     /* INT  */
+    REAL = 261,                    /* REAL  */
+    LEFT_PARENTHESIS = 262,        /* "("  */
+    RIGHT_PARENTHESIS = 263,       /* ")"  */
+    LEFT_BRACKET = 264,            /* "["  */
+    RIGHT_BRACKET = 265,           /* "]"  */
+    LEFT_CBRACKET = 266,           /* "{"  */
+    RIGHT_CBRACKET = 267,          /* "}"  */
+    SEMICOLON = 268,               /* ";"  */
+    COMMA = 269,                   /* ","  */
+    COLON = 270,                   /* ":"  */
+    DOUBLE_COLON = 271,            /* "::"  */
+    PERIOD = 272,                  /* "."  */
+    DOUBLE_PERIOD = 273,           /* ".."  */
+    PLUS = 274,                    /* "+"  */
+    MINUS = 275,                   /* "-"  */
+    MULTIPLY = 276,                /* "*"  */
+    DIVIDE = 277,                  /* "/"  */
+    PLUS_PLUS = 278,               /* "++"  */
+    MINUS_MINUS = 279,             /* "--"  */
+    MOD = 280,                     /* "%"  */
+    EQUALS = 281,                  /* "="  */
+    DOUBLE_EQUALS = 282,           /* "=="  */
+    NOT_EQUALS = 283,              /* "!="  */
+    LESS = 284,                    /* "<"  */
+    GREATER = 285,                 /* ">"  */
+    LESS_EQUALS = 286,             /* "<="  */
+    GREATER_EQUALS = 287,          /* ">="  */
+    AND = 288,                     /* "and"  */
+    NOT = 289,                     /* "not"  */
+    OR = 290,                      /* "or"  */
+    IF = 291,                      /* "if"  */
+    ELSE = 292,                    /* "else"  */
+    WHILE = 293,                   /* "while"  */
+    TRUE = 294,                    /* "true"  */
+    FALSE = 295,                   /* "false"  */
+    NIL = 296,                     /* "nil"  */
+    RETURN = 297,                  /* "return"  */
+    FUNCTION = 298,                /* "function"  */
+    BREAK = 299,                   /* "break"  */
+    CONTINUE = 300,                /* "continue"  */
+    LOCAL = 301,                   /* "local"  */
+    FOR = 302,                     /* "for"  */
+    NEGATIVE_VAL = 303,            /* NEGATIVE_VAL  */
+    LOWER_THAN_ELSE = 304          /* LOWER_THAN_ELSE  */
+  };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
-#define ID 258
-#define STRING 259
-#define INT 260
-#define REAL 261
-#define LEFT_PARENTHESIS 262
-#define RIGHT_PARENTHESIS 263
-#define LEFT_BRACKET 264
-#define RIGHT_BRACKET 265
-#define LEFT_CBRACKET 266
-#define RIGHT_CBRACKET 267
-#define SEMICOLON 268
-#define COMMA 269
-#define COLON 270
-#define DOUBLE_COLON 271
-#define PERIOD 272
-#define DOUBLE_PERIOD 273
-#define PLUS 274
-#define MINUS 275
-#define MULTIPLY 276
-#define DIVIDE 277
-#define PLUS_PLUS 278
-#define MINUS_MINUS 279
-#define MOD 280
-#define EQUALS 281
-#define DOUBLE_EQUALS 282
-#define NOT_EQUALS 283
-#define LESS 284
-#define GREATER 285
-#define LESS_EQUALS 286
-#define GREATER_EQUALS 287
-#define AND 288
-#define NOT 289
-#define OR 290
-#define IF 291
-#define ELSE 292
-#define WHILE 293
-#define TRUE 294
-#define FALSE 295
-#define NIL 296
-#define RETURN 297
-#define FUNCTION 298
-#define BREAK 299
-#define CONTINUE 300
-#define LOCAL 301
-#define FOR 302
-#define NEGATIVE_VAL 303
-#define LOWER_THAN_ELSE 304
 
-
-
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
-#line 22 "syntax.y"
+union YYSTYPE
 {
+#line 26 "syntax.y"
+
     char* stringConst;
     int intConst;
     double realConst;
@@ -152,17 +125,23 @@ typedef union YYSTYPE
     /*Gia thn trith fash prosethikan 
     ta parakatw sto union*/
     unsigned int flowLabel_V;
-    //enum type_t * statementT;
+    type_t * statementT;
     expr* expression;
     /*menei na dw to for_type*/
-}
-/* Line 1529 of yacc.c.  */
-#line 161 "syntax.hpp"
-	YYSTYPE;
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
-# define YYSTYPE_IS_DECLARED 1
+
+#line 133 "syntax.hpp"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
+# define YYSTYPE_IS_DECLARED 1
 #endif
+
 
 extern YYSTYPE yylval;
 
+
+int yyparse (void);
+
+
+#endif /* !YY_YY_SYNTAX_HPP_INCLUDED  */

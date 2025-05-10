@@ -1,3 +1,8 @@
+%code requires {
+    #include "expressions.h"
+}
+
+
 %{
     #include <cstdio>
     #include <cstdlib>
@@ -5,7 +10,6 @@
     #include "symtable.h"
     #include <string>
     #include "yaccHeader.hpp"
-    #include "expressions.h"
     #include "quad.h"
     int yylex();
     FILE* yacc_out;
@@ -28,12 +32,12 @@
     /*Gia thn trith fash prosethikan 
     ta parakatw sto union*/
     unsigned int flowLabel_V;
-    //enum type_t * statementT;
+    type_t * statementT;
     expr* expression;
     /*menei na dw to for_type*/
 }
 %initial-action
-{
+{   
     yacc_out = fopen("yacc_output.txt", "w");
 };
 

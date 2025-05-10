@@ -2,9 +2,8 @@
 #define __EXPR__
 
 #include "symtable.h"
-
 typedef enum type_t { 
-    var_e,
+    var_e ,
     tableitem_e,
 
     programfunc_e,
