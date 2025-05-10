@@ -7,7 +7,7 @@ typedef enum iopcode{
     assign,
     sub,
     add,
-    div,
+    div_op,
     mul,
     mod,
     uminus,
@@ -32,13 +32,7 @@ typedef enum iopcode{
     tablesetelem
 } iopcode;
 
-char quadString[][32] = {
-    "assing", "sub", "add", "div", "mul", "mod", "uminus",
-    "and", "or", "not", "if_eq", "if_noteq", "if_lesseq",
-    "if_greatereq", "if_less", "if_greater", "jump", "param",
-    "call", "return", "getretval", "funcstart", "funcend",
-    "tablecreate", "tablegetelem", "tablesetelem"
-};
+extern char quadString[26][32];
 
 typedef struct quad {
     iopcode op;

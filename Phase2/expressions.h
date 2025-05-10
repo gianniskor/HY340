@@ -1,6 +1,6 @@
 #ifndef __EXPR__
 #define __EXPR__
-
+#include <variant>
 #include "symtable.h"
 typedef enum type_t { 
     var_e ,
@@ -27,14 +27,20 @@ typedef struct expr{
     Symbol* sym;
     expr* index;
     union {
-        int             intConst;
-        double          doubleConst;
-        char*           strConst;
-        unsigned char   boolConst;
-    } content;
+        int intValue;
+        double doubleValue;
+        bool boolValue;
+        string* stringValue;
+    } value;
     expr* next;
-    int truelist;
-    int flaselist;
 } expr;
 
+expr* newIntExpr(int val);
+expr* newDoubleExpr(double val);
+expr* newNilExpr();
+expr* newStringExpr(const string & val); 
+void deleteExpr(expr* e);
+expr* newSymbolExpr(type_t t,Symbol* symToExpr);
+expr* symToExpr(Symbol* symToExpr);
+expr* newBoolExpr(bool val);
 #endif

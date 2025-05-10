@@ -29,6 +29,7 @@
     double realConst;
     struct expr* exprV;
     class Symbol* symbol_P;
+    int boolConst;
     /*Gia thn trith fash prosethikan 
     ta parakatw sto union*/
     unsigned int flowLabel_V;
@@ -43,7 +44,8 @@
 
 %token <stringConst> ID STRING
 %token <intConst> INT 
-%token <realConst> REAL 
+%token <realConst> REAL
+%token <boolConst> TRUE FALSE
 
 %token LEFT_PARENTHESIS "("
 %token RIGHT_PARENTHESIS ")"
@@ -82,8 +84,8 @@
 %token IF "if"
 %token ELSE "else"
 %token WHILE "while"
-%token TRUE "true"
-%token FALSE "false"
+// %token TRUE "true"
+// %token FALSE "false"
 %token NIL "nil"
 %token RETURN "return"
 %token FUNCTION "function"
@@ -110,7 +112,7 @@
 
 %type <symbol_P> expression 
 %type <symbol_P> term
-%type <symbol_P> assignexpr
+%type <exprV> assignexpr //working on it
 %type <symbol_P> primary
 %type <symbol_P> lvalue
 %type <symbol_P> member
@@ -123,7 +125,7 @@
 %type <symbol_P> indexedelem
 %type <symbol_P> block
 %type <symbol_P> funcdef
-%type <symbol_P> const
+%type <exprV> const //done 
 %type <symbol_P> idlist
 %type <symbol_P> ifstmt
 %type <symbol_P> whilestmt
@@ -178,27 +180,39 @@ term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out
             | PLUS_PLUS lvalue                          {   if ($2 != NULL && $2->type != USER_FUNC && $2->type != LIB_FUNC) {
                                                                  fprintf(yacc_out, "term -> PLUS_PLUS lvalue\n");}
                                                              else if ($2->type == USER_FUNC || $2->type == LIB_FUNC) {
-                                                                 cout << (stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
                                                              } }
              | lvalue PLUS_PLUS                          {   if ($1 != NULL && $1->type != USER_FUNC && $1->type != LIB_FUNC) {
                                                                  fprintf(yacc_out, "term -> lvalue PLUS_PLUS\n");}
                                                              else if ($1->type == USER_FUNC || $1->type == LIB_FUNC) {
-                                                                 cout << (stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
                                                              } }
              | MINUS_MINUS lvalue                        {   if ($2 != NULL && $2->type != USER_FUNC && $2->type != LIB_FUNC) {
                                                                  fprintf(yacc_out, "term -> MINUS_MINUS lvalue\n");}
                                                              else if ($2->type == USER_FUNC || $2->type == LIB_FUNC) {
-                                                                 cout << (stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+                                                                  fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
                                                              } }
              | lvalue MINUS_MINUS                        {   if ($1 != NULL && $1->type != USER_FUNC && $1->type != LIB_FUNC) {
                                                                  fprintf(yacc_out, "term -> lvalue MINUS_MINUS\n");}
                                                              else if ($1->type == USER_FUNC || $1->type == LIB_FUNC) {
-                                                                 cout << (stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
+                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
                                                              } }
             | primary                                         { fprintf(yacc_out,"expr -> primary\n");}
             ;
 
-assignexpr: lvalue EQUALS expression                          { }
+assignexpr: lvalue EQUALS expression                          { 
+                                                                if(!$$){
+                                                                    cerr << "error at assign -> lval is null, in line: "<< yylineno << endl;
+                                                                    exit(-1);
+                                                                }
+                                                                if($$->type ==  USER_FUNC || $$->type == LIB_FUNC){
+                                                                    cerr << "error at assign -> lval is func, in line: "<< yylineno << endl;
+                                                                    exit(-1);
+                                                                }
+                                                                //table items;
+                                                                expr* e = $1;
+                                                                //bool values;
+                                                              }
 
 primary:    lvalue                                      { fprintf(yacc_out,"primary -> lvalue\n");}
             | call                                      { fprintf(yacc_out,"primary -> call\n");}
@@ -270,12 +284,23 @@ funcdef:    FUNCTION ID LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block { fprint
             | FUNCTION LEFT_PARENTHESIS RIGHT_PARENTHESIS block         { }
             ;
 
-const:      INT                                         { }
-            | REAL                                      { }
-            | STRING                                    { }
-            | NIL                                       { }
-            | TRUE                                      { }
-            | FALSE                                     { }
+const:      INT                                         { fprintf(yacc_out,"const -> number\n");
+                                                          $$ = newIntExpr($1);
+                                                        }
+            | REAL                                      { fprintf(yacc_out,"const -> number\n");
+                                                          $$ = newDoubleExpr($1);
+                                                        }
+            | STRING                                    { fprintf(yacc_out,"const -> string\n");
+                                                          $$ = newStringExpr($1);
+                                                        }
+            | NIL                                       { fprintf(yacc_out,"const -> nil\n");}
+            | TRUE                                      { fprintf(yacc_out,"const -> true\n");
+                                                          $$ = newBoolExpr(true);
+                                                        }
+            | FALSE                                     { fprintf(yacc_out,"const -> false\n");
+
+                                                          $$ = newBoolExpr(false);
+                                                        }
             ;
 
 idlist:     ID                                          { }

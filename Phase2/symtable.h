@@ -32,7 +32,7 @@ class Symbol{
         int getLine() const{
             return line;
         }
-        int getType() const{
+        SymbolType getType() const{
             return type;
         }
         string getName() const{

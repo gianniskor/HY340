@@ -137,7 +137,8 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"TRUE","KEYWORD"};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
-                    yylval.stringConst = strdup(yytext);
+                    //apo yylval.stringConst = strdup(yytext); se -> yylval.intValue = 0;
+                    yylval.boolConst = 1;
                     return TRUE;
                 }
 "false"         {
@@ -145,7 +146,8 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"FALSE","KEYWORD"};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
-                    yylval.stringConst = strdup(yytext);
+                    //yylval.stringConst = strdup(yytext);
+                    yylval.boolConst = 0;
                     return FALSE;
                 }
 "nil"           {
@@ -378,7 +380,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"INT","INTCONST"};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
-                    yylval.stringConst = strdup(yytext);
+                    yylval.intConst = atoi(yytext);
                     return INT;
                 }
 {REAL}          {
@@ -386,7 +388,7 @@ COMMENT_REGEX "/*"
                     token_cont_t tt = {yytext,"REAL","REALCONST"};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
-                    yylval.stringConst = strdup(yytext);
+                    yylval.realConst = atof(yytext);
                     return REAL;
                 }
 {STRING}        {
