@@ -1,16 +1,16 @@
-#include "expressions.h"
-#include "quad.h"
+
 #include <iostream>
 #include <cstring>
 #include <vector>
 #include <iomanip>
-
+#include "headerLib.h"
 using namespace std;
 
 extern int yylineno;
 extern SymbolTable symbolTable;
 vector<quad*> quads;
 int currQuad = 0;
+
 
 static unsigned temp_count = 0;
 
@@ -58,12 +58,69 @@ void print_quads(){
     cout << setw(10) << "Quad#" << setw(20) << "opcode" << setw(10) << "result" 
          << setw(10) << "arg1" << setw(10) << "arg2" << setw(10) << "label" << endl;
     cout << "---------------------------------------------------------------------------" << endl;
+    
     for (unsigned i = 0; i < quads.size(); i++) {
-        cout << setw(10) << i << setw(20) << quads[i]->op << setw(10) 
-             << (quads[i]->result ? quads[i]->result->sym->name : "NULL") 
-             << setw(10) << (quads[i]->arg1 ? quads[i]->arg1->sym->name : "NULL") 
-             << setw(10) << (quads[i]->arg2 ? quads[i]->arg2->sym->name : "NULL") 
-             << setw(10) << quads[i]->label << endl;
+        quad* q = quads[i];
+        string result_str = "NULL";
+        string arg1_str = "NULL";
+        string arg2_str = "NULL";
+        
+        // Handle result expression
+        if (q->result) {
+            if (q->result->type == constint_e) 
+                result_str = to_string(q->result->value.intValue);
+            else if (q->result->type == constdouble_e) 
+                result_str = to_string(q->result->value.doubleValue);
+            else if (q->result->type == constbool_e) 
+                result_str = q->result->value.boolValue ? "true" : "false";
+            else if (q->result->type == conststring_e && q->result->value.stringValue) 
+                result_str = *q->result->value.stringValue;
+            else if (q->result->sym) 
+                result_str = q->result->sym->getName();
+        }
+        
+        // Handle arg1 expression
+        if (q->arg1) {
+            if (q->arg1->type == constint_e) 
+                arg1_str = to_string(q->arg1->value.intValue);
+            else if (q->arg1->type == constdouble_e) 
+                arg1_str = to_string(q->arg1->value.doubleValue);
+            else if (q->arg1->type == constbool_e) 
+                arg1_str = q->arg1->value.boolValue ? "true" : "false";
+            else if (q->arg1->type == conststring_e && q->arg1->value.stringValue) 
+                arg1_str = *q->arg1->value.stringValue;
+            else if (q->arg1->sym) 
+                arg1_str = q->arg1->sym->getName();
+        }
+        
+        // Handle arg2 expression
+        if (q->arg2) {
+            if (q->arg2->type == constint_e) 
+                arg2_str = to_string(q->arg2->value.intValue);
+            else if (q->arg2->type == constdouble_e) 
+                arg2_str = to_string(q->arg2->value.doubleValue);
+            else if (q->arg2->type == constbool_e) 
+                arg2_str = q->arg2->value.boolValue ? "true" : "false";
+            else if (q->arg2->type == conststring_e && q->arg2->value.stringValue) 
+                arg2_str = *q->arg2->value.stringValue;
+            else if (q->arg2->sym) 
+                arg2_str = q->arg2->sym->getName();
+        }
+        
+        cout << setw(10) << i << setw(20) << quadString[q->op] 
+             << setw(10) << result_str
+             << setw(10) << arg1_str
+             << setw(10) << arg2_str
+             << setw(10) << q->label << endl;
     }
     cout << "---------------------------------------------------------------------------" << endl; 
+}
+
+expr* newTempExpr() {
+    string tempName = "_t" + to_string(tmpCount++);
+    Symbol* sym = symbolTable.lookupInScope(tempName, 0);
+    if (!sym) {
+        sym = symbolTable.insert(tempName, 0, 0, LOCAL_VAR);
+    }
+    return symToExpr(sym);
 }

@@ -1,5 +1,5 @@
 %code requires {
-    #include "headerLib.h"
+    #include "expressions.h"
 }
 
 
@@ -10,8 +10,7 @@
     #include "symtable.h"
     #include <string>
     #include "yaccHeader.hpp"
-    // #include "quad.h"
-    // #include "expression"
+    #include "quad.h"
     int yylex();
     FILE* yacc_out;
     extern int yylineno;
@@ -19,7 +18,7 @@
     int scope = 0;
     int max_scope = 0;
     extern SymbolTable symbolTable;  
-    int tmpCount = 0;
+    
 %}
 
 %start program
@@ -111,8 +110,7 @@
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
-%type <exprV> expression 
-%type <statementT> stmt //working on it with assignexpr
+%type <symbol_P> expression 
 %type <symbol_P> term
 %type <exprV> assignexpr //working on it
 %type <symbol_P> primary
@@ -144,8 +142,7 @@ stmts:      stmt                                        { fprintf(yacc_out,"list
             | stmts stmt                                { fprintf(yacc_out,"liststmt -> stmt\n");}
             ;
 
-stmt:       expression SEMICOLON                        { tmpCount = 0;
-                                                          fprintf(yacc_out,"stmt -> expr;\n");}
+stmt:       expression SEMICOLON                        { fprintf(yacc_out,"stmt -> expr;\n");}
             | ifstmt                                    { fprintf(yacc_out,"stmt -> ifstmt;\n");}
             | whilestmt                                 { fprintf(yacc_out,"stmt -> whilestmt;\n");}
             | forstmt                                   { fprintf(yacc_out,"stmt -> forstmt;\n");}
@@ -160,21 +157,11 @@ stmt:       expression SEMICOLON                        { tmpCount = 0;
 
 expression: assignexpr                                  { fprintf(yacc_out,"expr -> assignexpr\n");}
           | term                                        { fprintf(yacc_out,"expr -> term\n");}
-          | expression PLUS expression                  { fprintf(yacc_out,"expr -> +\n");
-                                                           $$ = evaluateNumber($1, $3, add);
-                                                        }
-          | expression MINUS expression                 { fprintf(yacc_out,"expr -> -\n");
-                                                           $$ = evaluateNumber($1, $3, sub);
-                                                        }   
-          | expression MULTIPLY expression              { fprintf(yacc_out,"expr -> *\n");
-                                                           $$ = evaluateNumber($1, $3, mul);
-                                                        }       
-          | expression DIVIDE expression                { fprintf(yacc_out,"expr -> /\n");
-                                                           $$ = evaluateNumber($1, $3, div_op);
-                                                        }         
-          | expression MOD expression                   { fprintf(yacc_out,"expr -> %\n");
-                                                           $$ = evaluateNumber($1, $3, mod);
-                                                        }
+          | expression PLUS expression                  { fprintf(yacc_out,"expr -> +\n");}
+          | expression MINUS expression                 { fprintf(yacc_out,"expr -> -\n");}
+          | expression MULTIPLY expression              { fprintf(yacc_out,"expr -> *\n");}
+          | expression DIVIDE expression                { fprintf(yacc_out,"expr -> /\n");}
+          | expression MOD expression                   { fprintf(yacc_out,"expr -> %\n");}
 
           | expression DOUBLE_EQUALS expression         { fprintf(yacc_out,"expr -> ==\n");}
           | expression NOT_EQUALS expression            { fprintf(yacc_out,"expr -> !=\n");}
@@ -223,7 +210,7 @@ assignexpr: lvalue EQUALS expression                          {
                                                                     exit(-1);
                                                                 }
                                                                 //table items;
-                                                                //expr* e = $1;
+                                                                expr* e = $1;
                                                                 //bool values;
                                                               }
 
@@ -235,13 +222,11 @@ primary:    lvalue                                      { fprintf(yacc_out,"prim
             ;
 
 
-lvalue:     ID                                          { Symbol *s = symbolTable.lvalue_default($1,symbolTable.currentScope,yylineno,$$->type);
-                                                          fprintf(yacc_out,"lvalue -> id\n");
-                                                        }                                                                   
-            | LOCAL ID                                  { Symbol *s = symbolTable.local_lvalue($2,symbolTable.currentScope,yylineno,$$->type);
-                                                          fprintf(yacc_out,"lvalue -> local id\n");
-                                                        }
-            | DOUBLE_COLON ID                           { Symbol *s = symbolTable.local_lvalue($2,0,yylineno,$$->type);
+lvalue:     ID                                          { symbolTable.lvalue_default($1,symbolTable.currentScope,yylineno,$$->type);
+                                                          fprintf(yacc_out,"lvalue -> id\n");                                        }                                                                   
+            | LOCAL ID                                  { symbolTable.local_lvalue($2,symbolTable.currentScope,yylineno,$$->type);
+                                                          fprintf(yacc_out,"lvalue -> local id\n");}
+            | DOUBLE_COLON ID                           { symbolTable.local_lvalue($2,0,yylineno,$$->type);
                                                           fprintf(yacc_out,"lvalue -> global id\n");}
             | member                                    { fprintf(yacc_out,"lvalue -> id\n");}
             ;
@@ -295,29 +280,7 @@ block: LEFT_CBRACKET {
        }
        ;
 
-funcdef:    FUNCTION ID LEFT_PARENTHESIS {
-             Symbol *s = symbolTable.lookupInScope($2, symbolTable.currentScope);
-              if(s!= nullptr){
-                fprintf(stderr, "ERROR at line %d, with scope %d: function %s already declared\n", yylineno, symbolTable.currentScope, $2);
-              } else {
-               vector <Symbol*> temp_sym = symbolTable.lookup($2);
-               bool isLib = false;
-                for (auto& sym : temp_sym) {
-                    if (sym->type == LIB_FUNC) {
-                        isLib = true;
-                        break;
-                    }
-                }
-                if (isLib) {
-                    fprintf(stderr, "ERROR at line %d, with scope %d: function %s already declared as a library function\n", yylineno, symbolTable.currentScope, $2);
-                } else {
-                   Symbol *s = symbolTable.insert($2, symbolTable.currentScope, yylineno, USER_FUNC);
-                   fprintf(yacc_out, "funcdef -> function %s\n", $2);
-                }
-              }
-              
-            }
-            idlist RIGHT_PARENTHESIS block { fprintf(yacc_out, "function id (idlist) block\n");}
+funcdef:    FUNCTION ID LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block { fprintf(yacc_out, "function id (idlist) block\n");}
             | FUNCTION LEFT_PARENTHESIS RIGHT_PARENTHESIS block         { }
             ;
 

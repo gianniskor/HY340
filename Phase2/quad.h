@@ -3,6 +3,8 @@
 
 #include "expressions.h"
 
+extern int tmpCount;
+
 typedef enum iopcode{
     assign,
     sub,
@@ -43,7 +45,8 @@ typedef struct quad {
     unsigned line;
 } quad;
 
-void print_quads(void *);
-void enumToString(void *);
-
+void print_quads();
+void enumToString();
+void emit(iopcode op, expr* arg1, expr* arg2, expr* result);
+expr* newTempExpr();
 #endif

@@ -239,7 +239,7 @@ class SymbolTable{
         printf("--------------------------------------------------------\n");
     }
 
-    void local_lvalue(string name,int scope,int line, SymbolType type, string value =""){
+    Symbol* local_lvalue(string name,int scope,int line, SymbolType type, string value =""){
         
         Symbol *e = lookupInScope(name,scope);
         
@@ -248,7 +248,7 @@ class SymbolTable{
             for (auto& sym : symbols) {
             if (sym->getType() == LIB_FUNC) {
                     //shadow libfunc
-                    return;
+                    return NULL;
                 }
             }
             Symbol* newS;
@@ -262,24 +262,26 @@ class SymbolTable{
                 nameTable[name] = vector<Symbol*>();
             }
             nameTable[name].push_back(newS);
+            return newS;
         } else {
             if (e->getType() == LIB_FUNC) {
                 printf("Error: Cannot redefine library function %s\n", name.c_str());
-                return;
+                return NULL;
             }
             e->setActive(true);
             e->setValue(value);
+            return e;
         }
     }
     
-    void lvalue_default(string name, int scope, int line, SymbolType type, string value = "") {
+    Symbol* lvalue_default(string name, int scope, int line, SymbolType type, string value = "") {
         Symbol *e = lookupActiveBottomUp(name, scope);
         if(e == nullptr) {
             auto symbols = lookup(name);
             for (auto& sym : symbols) {
                 if (sym->getType() == LIB_FUNC) {
                     printf("Error: Cannot shadow library function %s at line %d\n", name.c_str(), line);
-                    return;
+                    return NULL;
                 }
             }
             Symbol* newSymbol;
@@ -291,15 +293,17 @@ class SymbolTable{
             if(newSymbol == nullptr) {
                 printf("Error: Failed to create global variable %s at line %d\n", name.c_str(), line);
             }
+            return newSymbol;
         } else {
             if (e->getType() == USER_FUNC || e->getType() == LIB_FUNC) {
                 printf("Error: Cannot use function %s as an lvalue at line %d\n", name.c_str(), line);
-                return;
+                return NULL;
             }
             if(!value.empty()) {
                 e->setValue(value);
             }
         }
+        return e;
     }
 };
 #endif

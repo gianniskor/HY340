@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include "lexLib.hpp"
-#include "symtable.h"
+#include "headerLib.h"
 // extern "C++" int yylex() {
 //     static alpha_token_t token;
 //     return alpha_yylex(&token);
@@ -49,5 +49,6 @@ int main(int argc, char *argv[]) {
     }
     yyparse();
     symbolTable.print();
+    print_quads();
     return 0;
 }

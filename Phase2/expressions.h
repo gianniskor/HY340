@@ -1,7 +1,12 @@
 #ifndef __EXPR__
 #define __EXPR__
-#include <variant>
-#include "symtable.h"
+#include <string>
+#include <cstdio>
+class Symbol;
+struct expr;
+struct quad;
+#include "quad.h"
+
 typedef enum type_t { 
     var_e ,
     tableitem_e,
@@ -43,4 +48,8 @@ void deleteExpr(expr* e);
 expr* newSymbolExpr(type_t t,Symbol* symToExpr);
 expr* symToExpr(Symbol* symToExpr);
 expr* newBoolExpr(bool val);
+bool validNumberExpr(expr *e);
+bool tmpCheck(expr* e);
+expr* evaluateNumber(expr* e, expr* e2, iopcode opcode);
+expr* newTempExpr();
 #endif
