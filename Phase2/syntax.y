@@ -313,8 +313,17 @@ funcdef:    FUNCTION ID LEFT_PARENTHESIS {
               }
               
             }
-            idlist RIGHT_PARENTHESIS block { fprintf(yacc_out, "function id (idlist) block\n");}
-            | FUNCTION LEFT_PARENTHESIS RIGHT_PARENTHESIS block         { }
+            idlist RIGHT_PARENTHESIS block { 
+
+              ;}
+            | FUNCTION LEFT_PARENTHESIS {
+              static int anonCount = 0;
+              string name = "_f" + to_string(anonCount);
+              fprintf(yacc_out, "funcdef -> function %s\n", name.c_str());
+              Symbol *s = symbolTable.insert(name.c_str(), symbolTable.currentScope, yylineno, USER_FUNC);
+              anonCount++;
+              }
+            RIGHT_PARENTHESIS block         { }
             ;
 
 const:      INT                                         { fprintf(yacc_out,"const -> number\n");
