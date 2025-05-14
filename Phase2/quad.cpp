@@ -54,18 +54,14 @@ unsigned nextquad(){
     return currQuad;
 }
 
-void print_quads(){
-    cout << setw(10) << "Quad#" << setw(20) << "opcode" << setw(10) << "result" 
-         << setw(10) << "arg1" << setw(10) << "arg2" << setw(10) << "label" << endl;
-    cout << "---------------------------------------------------------------------------" << endl;
+void print_quads() {
+    cout << "NO.  OPCODE          RESULT      ARG1        ARG2        LABEL\n\n";
     
     for (unsigned i = 0; i < quads.size(); i++) {
         quad* q = quads[i];
-        string result_str = "NULL";
-        string arg1_str = "NULL";
-        string arg2_str = "NULL";
-        
-        // Handle result expression
+        string result_str = "";
+        string arg1_str = "";
+        string arg2_str = "";
         if (q->result) {
             if (q->result->type == constint_e) 
                 result_str = to_string(q->result->value.intValue);
@@ -78,8 +74,6 @@ void print_quads(){
             else if (q->result->sym) 
                 result_str = q->result->sym->getName();
         }
-        
-        // Handle arg1 expression
         if (q->arg1) {
             if (q->arg1->type == constint_e) 
                 arg1_str = to_string(q->arg1->value.intValue);
@@ -92,8 +86,6 @@ void print_quads(){
             else if (q->arg1->sym) 
                 arg1_str = q->arg1->sym->getName();
         }
-        
-        // Handle arg2 expression
         if (q->arg2) {
             if (q->arg2->type == constint_e) 
                 arg2_str = to_string(q->arg2->value.intValue);
@@ -106,14 +98,16 @@ void print_quads(){
             else if (q->arg2->sym) 
                 arg2_str = q->arg2->sym->getName();
         }
-        
-        cout << setw(10) << i << setw(20) << quadString[q->op] 
-             << setw(10) << result_str
-             << setw(10) << arg1_str
-             << setw(10) << arg2_str
-             << setw(10) << q->label << endl;
+        cout << "#" << (i+1) << left << setw(4) << " " 
+             << setw(15) << quadString[q->op]
+             << setw(12) << result_str
+             << setw(12) << arg1_str
+             << setw(12) << arg2_str;
+        if (q->label != 0) {
+            cout << setw(5) << q->label;
+        }
+        cout << "    [line " << q->line << "]" << endl;
     }
-    cout << "---------------------------------------------------------------------------" << endl; 
 }
 
 expr* newTempExpr() {

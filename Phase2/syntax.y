@@ -113,19 +113,20 @@
 
 %type <exprV> expression 
 %type <statementT> stmt //working on it with assignexpr
-%type <symbol_P> term
+%type <exprV> term
 %type <exprV> assignexpr //working on it
 %type <symbol_P> primary
-%type <symbol_P> lvalue
+%type <exprV> lvalue
 %type <symbol_P> member
 %type <symbol_P> call
 %type <symbol_P> callsuffix
 %type <symbol_P> normcall
 %type <symbol_P> methodcall
-%type <symbol_P> elist
+%type <exprV> elist
 %type <symbol_P> indexed
 %type <symbol_P> indexedelem
-%type <symbol_P> block
+%type <statementT> block
+%type <statementT> stmts
 %type <symbol_P> funcdef
 %type <exprV> const //done 
 %type <symbol_P> idlist
@@ -152,7 +153,10 @@ stmt:       expression SEMICOLON                        { tmpCount = 0;
             | returnstmt                                { fprintf(yacc_out,"stmt -> returnstmt;\n");}
             | BREAK SEMICOLON                           { fprintf(yacc_out,"stmt -> breakstmt;\n");}
             | CONTINUE SEMICOLON                        { fprintf(yacc_out,"stmt -> continuestmt;\n");}
-            | block                                     { fprintf(yacc_out,"stmt -> blockstmt;\n");} 
+            | block                                     { fprintf(yacc_out,"stmt -> blockstmt;\n");
+                                                          tmpCount = 0;
+                                                          $$ = $1;
+                                                        } 
             | funcdef                                   { fprintf(yacc_out,"stmt -> functstmt;\n");}
             | SEMICOLON                                 { fprintf(yacc_out,"stmt -> semicolon;\n");}
             ;
@@ -187,44 +191,26 @@ expression: assignexpr                                  { fprintf(yacc_out,"expr
           | expression OR expression                    { fprintf(yacc_out,"expr -> OR\n");} 
           ;
 
-term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out,"expr -> (term)\n");}
-            | MINUS expression %prec NEGATIVE_VAL             { fprintf(yacc_out,"expr -> -term\n");}
+term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out,"expr -> (term)\n");
+                                                                $$ = $2;
+                                                              }
+            | MINUS expression %prec NEGATIVE_VAL             { fprintf(yacc_out,"expr -> -term\n");
+                                                                $$ = evaluateUminus($2);
+                                                              }
             | NOT expression                                  { fprintf(yacc_out,"expr -> !term\n");}
-            | PLUS_PLUS lvalue                          {   if ($2 != NULL && $2->type != USER_FUNC && $2->type != LIB_FUNC) {
-                                                                 fprintf(yacc_out, "term -> PLUS_PLUS lvalue\n");}
-                                                             else if ($2->type == USER_FUNC || $2->type == LIB_FUNC) {
-                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
-                                                             } }
-             | lvalue PLUS_PLUS                          {   if ($1 != NULL && $1->type != USER_FUNC && $1->type != LIB_FUNC) {
-                                                                 fprintf(yacc_out, "term -> lvalue PLUS_PLUS\n");}
-                                                             else if ($1->type == USER_FUNC || $1->type == LIB_FUNC) {
-                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
-                                                             } }
-             | MINUS_MINUS lvalue                        {   if ($2 != NULL && $2->type != USER_FUNC && $2->type != LIB_FUNC) {
-                                                                 fprintf(yacc_out, "term -> MINUS_MINUS lvalue\n");}
-                                                             else if ($2->type == USER_FUNC || $2->type == LIB_FUNC) {
-                                                                  fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
-                                                             } }
-             | lvalue MINUS_MINUS                        {   if ($1 != NULL && $1->type != USER_FUNC && $1->type != LIB_FUNC) {
-                                                                 fprintf(yacc_out, "term -> lvalue MINUS_MINUS\n");}
-                                                             else if ($1->type == USER_FUNC || $1->type == LIB_FUNC) {
-                                                                 fprintf(stderr, "ERROR at line %d, with scope %d: Can't use a function as lvalue\n", yylineno, scope);
-                                                             } }
+            | PLUS_PLUS lvalue                                {}
+             | lvalue PLUS_PLUS                               {}
+             | MINUS_MINUS lvalue                             {}
+             | lvalue MINUS_MINUS                             {}
             | primary                                         { fprintf(yacc_out,"expr -> primary\n");}
             ;
 
 assignexpr: lvalue EQUALS expression                          { 
-                                                                if(!$$){
-                                                                    cerr << "error at assign -> lval is null, in line: "<< yylineno << endl;
-                                                                    exit(-1);
-                                                                }
-                                                                if($$->type ==  USER_FUNC || $$->type == LIB_FUNC){
-                                                                    cerr << "error at assign -> lval is func, in line: "<< yylineno << endl;
-                                                                    exit(-1);
-                                                                }
+                                                                $$ = evaluateAssignExp($1, $3);
                                                                 //table items;
                                                                 //expr* e = $1;
                                                                 //bool values;
+
                                                               }
 
 primary:    lvalue                                      { fprintf(yacc_out,"primary -> lvalue\n");}
@@ -235,14 +221,18 @@ primary:    lvalue                                      { fprintf(yacc_out,"prim
             ;
 
 
-lvalue:     ID                                          { Symbol *s = symbolTable.lvalue_default($1,symbolTable.currentScope,yylineno,$$->type);
+lvalue:     ID                                          { Symbol *s = symbolTable.lvalue_default($1,symbolTable.currentScope,yylineno);
                                                           fprintf(yacc_out,"lvalue -> id\n");
+                                                          $$ = symToExpr(s);
                                                         }                                                                   
-            | LOCAL ID                                  { Symbol *s = symbolTable.local_lvalue($2,symbolTable.currentScope,yylineno,$$->type);
+            | LOCAL ID                                  { Symbol *s = symbolTable.local_lvalue($2,symbolTable.currentScope,yylineno);
                                                           fprintf(yacc_out,"lvalue -> local id\n");
+                                                          $$ = symToExpr(s);
                                                         }
-            | DOUBLE_COLON ID                           { Symbol *s = symbolTable.local_lvalue($2,0,yylineno,$$->type);
-                                                          fprintf(yacc_out,"lvalue -> global id\n");}
+            | DOUBLE_COLON ID                           { Symbol *s = symbolTable.local_lvalue($2,0,yylineno);
+                                                          fprintf(yacc_out,"lvalue -> global id\n");
+                                                          $$ = symToExpr(s);
+                                                        }
             | member                                    { fprintf(yacc_out,"lvalue -> id\n");}
             ;
 
@@ -265,8 +255,13 @@ normcall:   LEFT_PARENTHESIS elist RIGHT_PARENTHESIS    { }
 
 methodcall: DOUBLE_PERIOD ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   { }
 
-elist:      expression                                        { }
-            | elist COMMA expression                          { }
+elist:      %empty                                            {$$ = nullptr; 
+                                                                fprintf(yacc_out,"elist -> null;\n");
+                                                              }
+            |
+            elist COMMA expression                            {
+            }
+            | expression                                      { }
             ;
 
 objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            { }
@@ -288,6 +283,7 @@ block: LEFT_CBRACKET {
        RIGHT_CBRACKET {
          symbolTable.exitScope();
          fprintf(yacc_out, "Exited block scope %d\n", symbolTable.currentScope);
+         $$ = $3;
        }
        |
        LEFT_CBRACKET RIGHT_CBRACKET {

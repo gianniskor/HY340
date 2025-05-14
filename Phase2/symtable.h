@@ -239,7 +239,7 @@ class SymbolTable{
         printf("--------------------------------------------------------\n");
     }
 
-    Symbol* local_lvalue(string name,int scope,int line, SymbolType type, string value =""){
+    Symbol* local_lvalue(string name,int scope,int line, string value =""){
         
         Symbol *e = lookupInScope(name,scope);
         
@@ -274,7 +274,7 @@ class SymbolTable{
         }
     }
     
-    Symbol* lvalue_default(string name, int scope, int line, SymbolType type, string value = "") {
+    Symbol* lvalue_default(string name, int scope, int line, string value = "") {
         Symbol *e = lookupActiveBottomUp(name, scope);
         if(e == nullptr) {
             auto symbols = lookup(name);

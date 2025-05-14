@@ -90,22 +90,16 @@ expr* symToExpr(Symbol* symToExpr){
     }
     return e;
 }
-bool validNumberExpr(expr *e){
-    switch (e->type)
-    {
-    case var_e:
-    case tableitem_e:
-    case arithexpr_e:
-    case assignexpr_e:
-    case constint_e:
-    case constdouble_e:
+bool validNumberExpr(expr *e) {
+    if (!e) return false;
+    if (e->type == constint_e || e->type == constdouble_e) 
         return true;
-        /*break;*/
-    default:
-        printf("Invalid arithmetic op, at %d -> line\n");
-        return false;
-        /*break;*/
-    }
+    if (e->type == var_e && e->sym) 
+        return true;
+    if (e->type == arithexpr_e)
+        return true; //idk
+        
+    return false;
 }
 
 bool tmpCheck(expr* e) {
@@ -145,4 +139,45 @@ expr* evaluateNumber(expr* e, expr* e2, iopcode opcode) {
     }
     
     return tmpExpr;
+}
+
+// void backpatch(list* list, unsigned label) {
+//     for (unsigned quadIndex : list->quadLabels) {
+//         quads[quadIndex]->label = label;
+//     }
+// }
+// void backpatch(unsigned quadIndex, unsigned label) {
+//     quads[quadIndex]->label = label;
+// }
+
+expr* evaluateUminus(expr* e){
+    expr* tmpExpr = nullptr;
+    if(!validNumberExpr(e)){
+        cerr << "Invalid op Uminus, not a number type, in function evaluateUminus" << endl;
+        return nullptr;
+    }
+    if(tmpCheck(e)){
+        emit(uminus,e,nullptr,e);
+        return e;
+    } else {
+        tmpExpr = newTempExpr();
+        emit(uminus,e,nullptr,tmpExpr);
+        return tmpExpr;
+    }
+}
+
+expr* evaluateAssignExp(expr* e, expr *e2){
+    expr* tmpExpr = nullptr;
+    tmpExpr = newTempExpr();
+    if(!validNumberExpr(e)){
+        cerr << "Invalid op Uminus, not a number type, in function evaluateUminus" << endl;
+        return nullptr;
+    }
+    equalsExprHelper(e,e2,tmpExpr);
+    return tmpExpr;
+}
+
+void equalsExprHelper(expr* lvalue, expr* rvalue, expr* tmpExpr){
+    emit(assign, rvalue, nullptr, lvalue);
+    emit(assign,lvalue, nullptr,tmpExpr);
 }

@@ -6,6 +6,7 @@ class Symbol;
 struct expr;
 struct quad;
 #include "quad.h"
+extern vector<quad*> quads;
 
 typedef enum type_t { 
     var_e ,
@@ -27,7 +28,19 @@ typedef enum type_t {
     nil_e,
 } type_t;
 
+struct list {
+    vector<unsigned> quadLabels;
+    void merge(list* other) {
+        quadLabels.insert(quadLabels.end(), 
+                          other->quadLabels.begin(), 
+                          other->quadLabels.end());
+    }
+};
+
 typedef struct expr{
+    list* trueList;
+    list* falseList;
+    list* nextList;
     type_t type;
     Symbol* sym;
     expr* index;
@@ -52,4 +65,8 @@ bool validNumberExpr(expr *e);
 bool tmpCheck(expr* e);
 expr* evaluateNumber(expr* e, expr* e2, iopcode opcode);
 expr* newTempExpr();
+void backpatch(list* list, unsigned label);
+expr* evaluateUminus(expr* e);
+void equalsExprHelper(expr* lvalue, expr* rvalue, expr* tmpExpr);
+expr* evaluateAssignExp(expr*e, expr *e2);
 #endif
