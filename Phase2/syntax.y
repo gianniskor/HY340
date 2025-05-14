@@ -112,9 +112,9 @@
 %nonassoc ELSE
 
 %type <exprV> expression 
-%type <statementT> stmt //working on it with assignexpr
-%type <exprV> term
-%type <exprV> assignexpr //working on it
+%type <statementT> stmt 
+%type <exprV> term //working on it
+%type <exprV> assignexpr //done
 %type <symbol_P> primary
 %type <exprV> lvalue
 %type <symbol_P> member
@@ -125,7 +125,7 @@
 %type <exprV> elist
 %type <symbol_P> indexed
 %type <symbol_P> indexedelem
-%type <statementT> block
+%type <statementT> block 
 %type <statementT> stmts
 %type <symbol_P> funcdef
 %type <exprV> const //done 
@@ -134,6 +134,11 @@
 %type <symbol_P> whilestmt
 %type <symbol_P> forstmt
 %type <symbol_P> returnstmt
+
+/*
+  BUSULAS: 
+  arithmitika done;
+*/
 
 %%
 
@@ -197,11 +202,27 @@ term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out
             | MINUS expression %prec NEGATIVE_VAL             { fprintf(yacc_out,"expr -> -term\n");
                                                                 $$ = evaluateUminus($2);
                                                               }
-            | NOT expression                                  { fprintf(yacc_out,"expr -> !term\n");}
-            | PLUS_PLUS lvalue                                {}
-             | lvalue PLUS_PLUS                               {}
-             | MINUS_MINUS lvalue                             {}
-             | lvalue MINUS_MINUS                             {}
+            | NOT expression                                  {
+                                                               fprintf(yacc_out,"expr -> !term\n");
+                                                              }
+            | PLUS_PLUS lvalue                                {
+                                                                expr* oneoneoneone = newIntExpr(1);
+                                                                $$ = evaluateNumber($2, oneoneoneone, add); //antrea ,dua lipa kosovo 1 , 2 i 3 augoustoy 
+                                                                // ELA NA KLEISOYME TWRA EISITIRIA
+
+                                                              }
+             | lvalue PLUS_PLUS                               {
+                                                                expr* oneoneoneone = newIntExpr(1);
+                                                                $$ = evaluateNumber($1, oneoneoneone, add);
+                                                              }
+             | MINUS_MINUS lvalue                             {
+                                                                expr* oneoneoneone = newIntExpr(1);
+                                                                $$ = evaluateNumber($2, oneoneoneone, sub);
+                                                              }
+             | lvalue MINUS_MINUS                             {
+                                                                expr* oneoneoneone = newIntExpr(1);
+                                                                $$ = evaluateNumber($1, oneoneoneone, sub);
+                                                              }
             | primary                                         { fprintf(yacc_out,"expr -> primary\n");}
             ;
 
@@ -340,14 +361,54 @@ const:      INT                                         { fprintf(yacc_out,"cons
                                                           $$ = newBoolExpr(true);
                                                         }
             | FALSE                                     { fprintf(yacc_out,"const -> false\n");
-
                                                           $$ = newBoolExpr(false);
                                                         }
             ;
 
-idlist:     ID                                          { }
-            | idlist COMMA ID                           { }
-            ;   
+idlist: /* empty */                                { fprintf(yacc_out, "idlist -> empty\n"); }
+       | ID                                        { 
+        Symbol *s = symbolTable.lookupInScope($1, symbolTable.currentScope);
+        if(s!= nullptr){
+          fprintf(stderr, "ERROR at line %d : formal redeclaration '%s'\n" , yylineno, $1);
+          }else{
+          auto temp_sym = symbolTable.lookup($1);
+          bool isLib = false;
+          for (auto& sym : temp_sym) {
+              if (sym->type == LIB_FUNC) {
+                  isLib = true;
+                  break;
+              }
+          }
+          if (isLib) {
+              fprintf(stderr, "ERROR at line %d : formal argument shadows library function '%s'\n", yylineno, $1);
+              } else {
+                Symbol *param = symbolTable.insert($1, symbolTable.currentScope, yylineno, FUNCTION_PARAM);
+                fprintf(yacc_out, "idlist -> %s\n", $1);
+              }
+          }
+       }
+       | idlist COMMA ID                           { 
+        Symbol *s = symbolTable.lookupInScope($3, symbolTable.currentScope);
+        if(s!= nullptr){
+          fprintf(stderr, "ERROR at line %d : formal redeclaration '%s'\n" , yylineno, $3);
+          }else{
+          auto temp_sym = symbolTable.lookup($3);
+          bool isLib = false;
+          for (auto& sym : temp_sym) {
+              if (sym->type == LIB_FUNC) {
+                  isLib = true;
+                  break;
+              }
+          }
+          if (isLib) {
+              fprintf(stderr, "ERROR at line %d : formal argument shadows library function '%s'\n", yylineno, $3);
+              } else {
+                Symbol *param = symbolTable.insert($3, symbolTable.currentScope, yylineno, FUNCTION_PARAM);
+                fprintf(yacc_out, "idlist -> %s\n", $3);
+              }
+          }
+       }
+       ;    
 
 ifstmt: IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt %prec LOWER_THAN_ELSE { }
        | IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt ELSE stmt { }
