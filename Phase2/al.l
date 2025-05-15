@@ -37,7 +37,7 @@ COMMENT_REGEX "/*"
 
 "if"            {
                     counter++;
-                    token_cont_t tt = {yytext,"IF","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("IF"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval,yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -46,7 +46,7 @@ COMMENT_REGEX "/*"
 
 "else"          {
                     counter++;
-                    token_cont_t tt = {yytext,"ELSE","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("ELSE"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -54,7 +54,7 @@ COMMENT_REGEX "/*"
                 }
 "while"         {
                     counter++;
-                    token_cont_t tt = {yytext,"WHILE","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("WHILE"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -62,7 +62,7 @@ COMMENT_REGEX "/*"
                 }
 "for"           {
                     counter++;
-                    token_cont_t tt = {yytext,"for","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("for"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -70,7 +70,7 @@ COMMENT_REGEX "/*"
                 }
 "function"      {
                     counter++;
-                    token_cont_t tt = {yytext,"FUNCTION","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("FUNCTION"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -78,7 +78,7 @@ COMMENT_REGEX "/*"
                 }
 "return"        {
                     counter++;
-                    token_cont_t tt = {yytext,"RETURN","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("RETURN"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -86,7 +86,7 @@ COMMENT_REGEX "/*"
                 }
 "break"         {
                     counter++;
-                    token_cont_t tt = {yytext,"BREAK","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("BREAK"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -94,7 +94,7 @@ COMMENT_REGEX "/*"
                 }
 "continue"      {
                     counter++;
-                    token_cont_t tt = {yytext,"CONTINUE","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("CONTINUE"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -102,7 +102,7 @@ COMMENT_REGEX "/*"
                 }
 "and"           {
                     counter++;
-                    token_cont_t tt = {yytext,"AND","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("AND"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -110,7 +110,7 @@ COMMENT_REGEX "/*"
                 }
 "not"           {
                     counter++;
-                    token_cont_t tt = {yytext,"NOT","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("NOT"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -118,7 +118,7 @@ COMMENT_REGEX "/*"
                 }
 "or"            {
                     counter++;
-                    token_cont_t tt = {yytext,"OR","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("OR"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -126,7 +126,7 @@ COMMENT_REGEX "/*"
                 }
 "local"         {
                     counter++;
-                    token_cont_t tt = {yytext,"LOCAL","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("LOCAL"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -134,7 +134,7 @@ COMMENT_REGEX "/*"
                 }
 "true"          {
                     counter++;
-                    token_cont_t tt = {yytext,"TRUE","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("TRUE"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     //apo yylval.stringConst = strdup(yytext); se -> yylval.intValue = 0;
@@ -143,7 +143,7 @@ COMMENT_REGEX "/*"
                 }
 "false"         {
                     counter++;
-                    token_cont_t tt = {yytext,"FALSE","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("FALSE"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     //yylval.stringConst = strdup(yytext);
@@ -152,7 +152,7 @@ COMMENT_REGEX "/*"
                 }
 "nil"           {
                     counter++;
-                    token_cont_t tt = {yytext,"NIL","KEYWORD"};
+                    token_cont_t tt = {yytext,const_cast<char*>("NIL"),const_cast<char*>("KEYWORD")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -160,7 +160,7 @@ COMMENT_REGEX "/*"
                 }
 "="             {
                     counter++;
-                    token_cont_t tt = {yytext,"ASSIGN","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("ASSIGN"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -168,7 +168,7 @@ COMMENT_REGEX "/*"
                 }
 "+"             {
                     counter++;
-                    token_cont_t tt = {yytext,"PLUS","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("PLUS"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -176,7 +176,7 @@ COMMENT_REGEX "/*"
                 }
 "-"             {
                     counter++;
-                    token_cont_t tt = {yytext,"MINUS","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("MINUS"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -184,7 +184,7 @@ COMMENT_REGEX "/*"
                 }
 "*"             {
                     counter++;
-                    token_cont_t tt = {yytext,"MULTIPLY","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("MULTIPLY"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -192,7 +192,7 @@ COMMENT_REGEX "/*"
                 }
 "/"             {
                     counter++;
-                    token_cont_t tt = {yytext,"DIVISION","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("DIVISION"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -200,7 +200,7 @@ COMMENT_REGEX "/*"
                 }
 "%"             {
                     counter++;
-                    token_cont_t tt = {yytext,"MODULO","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("MODULO"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -208,7 +208,7 @@ COMMENT_REGEX "/*"
                 }
 "=="            {
                     counter++;
-                    token_cont_t tt = {yytext,"EQUAL","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("EQUAL"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -216,7 +216,7 @@ COMMENT_REGEX "/*"
                 }
 "!="            {
                     counter++;
-                    token_cont_t tt = {yytext,"NONEQUAL","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("NONEQUAL"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt); 
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -224,7 +224,7 @@ COMMENT_REGEX "/*"
                 }
 "++"            {
                     counter++;
-                    token_cont_t tt = {yytext,"PLUS_PLUS","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("PLUS_PLUS"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -232,7 +232,7 @@ COMMENT_REGEX "/*"
                 }
 "--"            {
                     counter++;
-                    token_cont_t tt = {yytext,"MINUS_MINUS","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("MINUS_MINUS"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -240,7 +240,7 @@ COMMENT_REGEX "/*"
                 }
 ">"             {
                     counter++;
-                    token_cont_t tt = {yytext,"GREATER_THAN","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("GREATER_THAN"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt); 
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -248,7 +248,7 @@ COMMENT_REGEX "/*"
                 }
 "<"             {
                     counter++;
-                    token_cont_t tt = {yytext,"LESS_THAN","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("LESS_THAN"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -256,7 +256,7 @@ COMMENT_REGEX "/*"
                 }
 ">="            {
                     counter++;
-                    token_cont_t tt = {yytext,"GREATER_EQUAL_THAN","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("GREATER_EQUAL_THAN"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -264,7 +264,7 @@ COMMENT_REGEX "/*"
                 }
 "<="            {
                     counter++;
-                    token_cont_t tt = {yytext,"LESS_EQUAL_THAN","OPERATOR"};
+                    token_cont_t tt = {yytext,const_cast<char*>("LESS_EQUAL_THAN"),const_cast<char*>("OPERATOR")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -272,7 +272,7 @@ COMMENT_REGEX "/*"
                 }
 "{"             {
                     counter++;
-                    token_cont_t tt = {yytext,"LEFT_BRACE","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("LEFT_BRACE"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -280,7 +280,7 @@ COMMENT_REGEX "/*"
                 }
 "}"             {
                     counter++;
-                    token_cont_t tt = {yytext,"RIGHT_BRACE","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("RIGHT_BRACE"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -288,7 +288,7 @@ COMMENT_REGEX "/*"
                 }
 "["             {
                     counter++;
-                    token_cont_t tt = {yytext,"LEFT_BRACKET","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("LEFT_BRACKET"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -296,7 +296,7 @@ COMMENT_REGEX "/*"
                 }
 "]"             {
                     counter++;
-                    token_cont_t tt = {yytext,"RIGHT_BRACKET","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("RIGHT_BRACKET"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -304,7 +304,7 @@ COMMENT_REGEX "/*"
                 }
 "("             {
                     counter++;
-                    token_cont_t tt = {yytext,"LEFT_PARENTHESIS","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("LEFT_PARENTHESIS"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -312,7 +312,7 @@ COMMENT_REGEX "/*"
                 }
 ")"             {
                     counter++;
-                    token_cont_t tt = {yytext,"RIGHT_PARENTHESIS","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("RIGHT_PARENTHESIS"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -320,7 +320,7 @@ COMMENT_REGEX "/*"
                 }
 ";"             {
                     counter++;
-                    token_cont_t tt = {yytext,"SEMICOLON","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("SEMICOLON"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -328,7 +328,7 @@ COMMENT_REGEX "/*"
                 }
 ","             {
                     counter++;
-                    token_cont_t tt = {yytext,"COMMA","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("COMMA"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -336,7 +336,7 @@ COMMENT_REGEX "/*"
                 }
 ":"             {
                     counter++;
-                    token_cont_t tt = {yytext,"COLON","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("COLON"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -344,7 +344,7 @@ COMMENT_REGEX "/*"
                 }
 "::"            {
                     counter++;
-                    token_cont_t tt = {yytext,"DOUBLE_COLON","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("DOUBLE_COLON"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -352,7 +352,7 @@ COMMENT_REGEX "/*"
                 }
 "."             {
                     counter++;
-                    token_cont_t tt = {yytext,"PERIOD","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("PERIOD"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -360,7 +360,7 @@ COMMENT_REGEX "/*"
                 }
 ".."            {
                     counter++;
-                    token_cont_t tt = {yytext,"DOUBLE_PERIOD","PUNCTUATION"};
+                    token_cont_t tt = {yytext,const_cast<char*>("DOUBLE_PERIOD"),const_cast<char*>("PUNCTUATION")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -369,7 +369,7 @@ COMMENT_REGEX "/*"
 
 {ID}            {
                     counter++;
-                    token_cont_t tt = {yytext,"ID","IDENTIFIER"};
+                    token_cont_t tt = {yytext,const_cast<char*>("ID"),const_cast<char*>("IDENTIFIER")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -377,7 +377,7 @@ COMMENT_REGEX "/*"
                 }
 {INT}           {
                     counter++;
-                    token_cont_t tt = {yytext,"INT","INTCONST"};
+                    token_cont_t tt = {yytext,const_cast<char*>("INT"),const_cast<char*>("INTCONST")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.intConst = atoi(yytext);
@@ -385,7 +385,7 @@ COMMENT_REGEX "/*"
                 }
 {REAL}          {
                     counter++;
-                    token_cont_t tt = {yytext,"REAL","REALCONST"};
+                    token_cont_t tt = {yytext,const_cast<char*>("REAL"),const_cast<char*>("REALCONST")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.realConst = atof(yytext);
@@ -398,7 +398,7 @@ COMMENT_REGEX "/*"
                     str[strlen(str) - 1] = '\0';
                     str = replace_chars(str);
                     yytext = str;
-                    token_cont_t tt = {yytext,yytext,"STRING"};
+                    token_cont_t tt = {yytext,yytext,const_cast<char*>("STRING")};
                     //add_token(yylval, yylineno, counter, tt);
                     print_alpha_token(yylineno, counter, tt);
                     yylval.stringConst = strdup(yytext);
@@ -415,7 +415,7 @@ COMMENT_REGEX "/*"
                 }
 <LINE_COMMENT>\n {
                     counter++;
-                    token_cont_t tt = {yytext,"COMMENT","LINE_COMMENT"};
+                    token_cont_t tt = {yytext,const_cast<char*>("COMMENT"),const_cast<char*>("LINE_COMMENT")};
                     //add_token(yylval,yylineno-1,counter,tt);
                     print_alpha_token(yylineno-1, counter, tt);
                     BEGIN(INITIAL);
@@ -433,7 +433,7 @@ COMMENT_REGEX "/*"
                     if (comment_head != NULL && comment_head->next == NULL) {
                         counter++;
                         char *str = comment_line(comment_tail->line, yylineno);
-                        token_cont_t tt = {str, "COMMENT", "BLOCK_COMMENT"};
+                        token_cont_t tt = {str, const_cast<char*>("COMMENT"), const_cast<char*>("BLOCK_COMMENT")};
                         //add_token(yylval, comment_tail->line, counter, tt);
                         print_alpha_token(comment_tail->line, counter, tt);
                         free(str);
@@ -442,7 +442,7 @@ COMMENT_REGEX "/*"
                     } else {
                         counter++;
                         char *str = comment_line(comment_tail->line, yylineno);
-                        token_cont_t tt = {str, "COMMENT", "NESTED_COMMENT"};
+                        token_cont_t tt = {str, const_cast<char*>("COMMENT"), const_cast<char*>("NESTED_COMMENT")};
                         //add_token(yylval, comment_tail->line, counter, tt);
                         print_alpha_token(comment_tail->line, counter, tt);
                         free(str);
@@ -467,14 +467,14 @@ void print_alpha_token(int yylineno, int counter, token_cont_t tt) {
             tt.val,
             tt.class_type,
             tt.type);
-    if (strcmp(tt.class_type, "LINE_COMMENT") == 0 || strcmp(tt.class_type, "COMMENT") == 0 ||
-        strcmp(tt.class_type, "BLOCK_COMMENT") == 0 || strcmp(tt.class_type, "NESTED_COMMENT") == 0) {
+    if (strcmp(tt.class_type, const_cast<char*>("LINE_COMMENT")) == 0 || strcmp(tt.class_type, const_cast<char*>("COMMENT")) == 0 ||
+        strcmp(tt.class_type, const_cast<char*>("BLOCK_COMMENT")) == 0 || strcmp(tt.class_type, const_cast<char*>("NESTED_COMMENT")) == 0) {
         printf("\n");
-    }else if (strcmp(tt.class_type, "ID") == 0 || strcmp(tt.class_type, "STRING") == 0) {
+    }else if (strcmp(tt.class_type, const_cast<char*>("ID")) == 0 || strcmp(tt.class_type, const_cast<char*>("STRING")) == 0) {
         printf("<- char*\n");
-    }else if (strcmp(tt.class_type, "INT") == 0) {
+    }else if (strcmp(tt.class_type, const_cast<char*>("INT")) == 0) {
         printf("<- int\n");
-    }else if (strcmp(tt.class_type, "REAL") == 0) {
+    }else if (strcmp(tt.class_type, const_cast<char*>("REAL")) == 0) {
         printf("<- float\n");
     }else {
         printf("<- enumerated\n");

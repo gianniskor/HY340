@@ -123,8 +123,8 @@
 %type <symbol_P> normcall
 %type <symbol_P> methodcall
 %type <exprV> elist
-%type <symbol_P> indexed
-%type <symbol_P> indexedelem
+%type <exprV> indexed
+%type <exprV> indexedelem
 %type <statementT> block 
 %type <statementT> stmts
 %type <symbol_P> funcdef
@@ -134,16 +134,19 @@
 %type <symbol_P> whilestmt
 %type <symbol_P> forstmt
 %type <symbol_P> returnstmt
+%type <exprV> objectdef //working on it
 
 /*
   BUSULAS: 
   arithmitika done;
+  KANW: 
+  tables :(
 */
 
 %%
 
 program:    stmts                                       { fprintf(yacc_out,"liststmt -> stmt\n"); fclose(yacc_out);}
-            |/* empty */                              { fprintf(yacc_out,"empty program\n"); fclose(yacc_out);}
+            |%empty                                     { fprintf(yacc_out,"empty program\n"); fclose(yacc_out);}
             ;
 
 stmts:      stmt                                        { fprintf(yacc_out,"liststmt -> liststmt stmt\n");}
@@ -181,7 +184,7 @@ expression: assignexpr                                  { fprintf(yacc_out,"expr
           | expression DIVIDE expression                { fprintf(yacc_out,"expr -> /\n");
                                                            $$ = evaluateNumber($1, $3, div_op);
                                                         }         
-          | expression MOD expression                   { fprintf(yacc_out,"expr -> %\n");
+          | expression MOD expression                   { fprintf(yacc_out,"expr -> %%\n");
                                                            $$ = evaluateNumber($1, $3, mod);
                                                         }
 
@@ -207,21 +210,20 @@ term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out
                                                               }
             | PLUS_PLUS lvalue                                {
                                                                 expr* oneoneoneone = newIntExpr(1);
-                                                                $$ = evaluateNumber($2, oneoneoneone, add); //antrea ,dua lipa kosovo 1 , 2 i 3 augoustoy 
+                                                                $$ = evaluatePP(oneoneoneone, $2, false, add); //antrea ,dua lipa kosovo 1 , 2 i 3 augoustoy 
                                                                 // ELA NA KLEISOYME TWRA EISITIRIA
-
                                                               }
              | lvalue PLUS_PLUS                               {
                                                                 expr* oneoneoneone = newIntExpr(1);
-                                                                $$ = evaluateNumber($1, oneoneoneone, add);
+                                                                $$ = evaluatePP($1, oneoneoneone, true, add);
                                                               }
              | MINUS_MINUS lvalue                             {
                                                                 expr* oneoneoneone = newIntExpr(1);
-                                                                $$ = evaluateNumber($2, oneoneoneone, sub);
+                                                                $$ = evaluatePP(oneoneoneone, $2, false, sub);
                                                               }
              | lvalue MINUS_MINUS                             {
                                                                 expr* oneoneoneone = newIntExpr(1);
-                                                                $$ = evaluateNumber($1, oneoneoneone, sub);
+                                                                $$ = evaluatePP($1, oneoneoneone, true, sub);
                                                               }
             | primary                                         { fprintf(yacc_out,"expr -> primary\n");}
             ;
@@ -276,24 +278,83 @@ normcall:   LEFT_PARENTHESIS elist RIGHT_PARENTHESIS    { }
 
 methodcall: DOUBLE_PERIOD ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   { }
 
-elist:      %empty                                            {$$ = nullptr; 
+elist:      %empty                                            { $$ = nullptr; 
                                                                 fprintf(yacc_out,"elist -> null;\n");
                                                               }
             |
             elist COMMA expression                            {
-            }
-            | expression                                      { }
+                                                                while($1->next){
+                                                                  $1 = $1-> next;
+                                                                }
+                                                                if($3->type == boolexpr_e){
+                                                                  int lala;
+                                                                }
+                                                                $1->next = $3;
+                                                                $3->prev = $1;
+                                                              }
+            | expression                                      { $$ = $1;}
             ;
 
-objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            { }
-            | LEFT_BRACKET indexed RIGHT_BRACKET        { }
-            | LEFT_BRACKET RIGHT_BRACKET                { }
+objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            { 
+                                                          expr* tmpExpr = newTempExpr();
+                                                          tmpExpr->type = newtable_e;
+                                                          emit(tablecreate, nullptr, nullptr, tmpExpr);
+                                                          if($2){
+                                                              expr* current = $2;
+                                                              int i = 0;
+                                                              while (current) {
+                                                                  expr* indexExpr = newIntExpr(i++);
+                                                                  emit(tablesetelem, indexExpr, current,tmpExpr);
+                                                                  current = current->next;
+                                                              }
+                                                          }
+                                                          $$ = tmpExpr;
+                                                          fprintf(yacc_out, "objectdef -> [ elist ]\n");
+                                                        }
+            | LEFT_BRACKET indexed RIGHT_BRACKET        { 
+                                                          expr* tmpExpr = newTempExpr();
+                                                          tmpExpr->type = newtable_e;
+                                                          emit(tablecreate, nullptr, nullptr, tmpExpr);
+                                                          expr* current = $2;
+                                                          while(current) {
+                                                              emit(tablesetelem, current->index, current,tmpExpr);
+                                                              current = current->next;
+                                                          }
+                                                          $$ = tmpExpr;
+                                                        }
+            | LEFT_BRACKET RIGHT_BRACKET                {
+                                                          expr* tmpExpr = newTempExpr();
+                                                          if (!tmpExpr) {
+                                                              cerr << "Failed to create temp expression for empty table" << endl;
+                                                              exit(-1);
+                                                          }
+                                                          tmpExpr->type = newtable_e;
+                                                          tmpExpr->next = nullptr;
+                                                          tmpExpr->prev = nullptr;
+                                                          tmpExpr->index = nullptr;
+                                                          emit(tablecreate, nullptr, nullptr, tmpExpr);
+                                                          $$ = tmpExpr;
+                                                        }
             ;
 
-indexed:    indexedelem                                 { }
-            | indexedelem COMMA indexedelem             { }
+indexed:    indexedelem                                 { $$ = $1;}
+            | indexedelem COMMA indexedelem             { 
+                                                        expr* current = $1;
+                                                        while(current->next) {
+                                                            current = current->next;
+                                                        }
+                                                        current->next = $3;
+                                                        $3->prev = current;
+                                                        $$ = $1;
+                                                        }
+            ;
 
-indexedelem: LEFT_CBRACKET expression COLON expression RIGHT_CBRACKET    { }
+indexedelem: LEFT_CBRACKET expression COLON expression RIGHT_CBRACKET   { 
+                                                                          $$ = $4;
+                                                                          $$->index = $2;
+                                                                          $$->next = nullptr;
+                                                                          $$->prev = nullptr; 
+                                                                        }
 
 block: LEFT_CBRACKET {
          symbolTable.enterScope();
@@ -365,7 +426,7 @@ const:      INT                                         { fprintf(yacc_out,"cons
                                                         }
             ;
 
-idlist: /* empty */                                { fprintf(yacc_out, "idlist -> empty\n"); }
+idlist: %empty                                { fprintf(yacc_out, "idlist -> empty\n"); }
        | ID                                        { 
         Symbol *s = symbolTable.lookupInScope($1, symbolTable.currentScope);
         if(s!= nullptr){

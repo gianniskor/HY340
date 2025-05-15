@@ -5,7 +5,7 @@
 using namespace std;
 extern int tmpCount;
 extern SymbolTable symbolTable;
-extern 
+extern int yylineno;
 
 expr* newStringExpr(const string & val) {
     expr* e = new expr();
@@ -72,6 +72,10 @@ expr* newSymbolExpr(type_t t,Symbol* symToExpr){
     e->sym = symToExpr;
     e->index = nullptr;
     e->next = nullptr;
+    e->prev = nullptr;
+    e->trueList = nullptr;
+    e->falseList = nullptr;
+    e->nextList = nullptr;
     return e;
 } 
 
@@ -169,10 +173,16 @@ expr* evaluateUminus(expr* e){
 expr* evaluateAssignExp(expr* e, expr *e2){
     expr* tmpExpr = nullptr;
     tmpExpr = newTempExpr();
+    if (e2->type == newtable_e) {
+        emit(assign, e2, nullptr, e);
+        emit(assign, e, nullptr, tmpExpr);
+        return tmpExpr;
+    }
     if(!validNumberExpr(e)){
-        cerr << "Invalid op Uminus, not a number type, in function evaluateUminus" << endl;
+        cerr << "Invalid assignment target, not a valid lvalue at line " << yylineno << endl;
         return nullptr;
     }
+    
     equalsExprHelper(e,e2,tmpExpr);
     return tmpExpr;
 }
@@ -180,4 +190,25 @@ expr* evaluateAssignExp(expr* e, expr *e2){
 void equalsExprHelper(expr* lvalue, expr* rvalue, expr* tmpExpr){
     emit(assign, rvalue, nullptr, lvalue);
     emit(assign,lvalue, nullptr,tmpExpr);
+}
+/*  
+    if bool == true, a++
+    else ++a
+*/
+expr* evaluatePP(expr *e, expr* e2, bool flag, iopcode t){
+    if(!e || !validNumberExpr(e)){
+        cerr << "Invalid lvalue in increment/decrement operation at line "<< yylineno<< endl;
+        return nullptr;
+    }
+    expr* tmpExpr = newTempExpr();
+    tmpExpr->type = arithexpr_e;
+    if(flag == true){
+        emit(assign, e, nullptr, tmpExpr);
+        emit(t, e, e2, e);
+    } else {
+        emit(t, e, e2, e);
+        emit(assign, e, nullptr, tmpExpr);
+    }
+    
+    return tmpExpr;
 }

@@ -37,6 +37,8 @@ struct list {
     }
 };
 
+
+
 typedef struct expr{
     list* trueList;
     list* falseList;
@@ -51,6 +53,7 @@ typedef struct expr{
         string* stringValue;
     } value;
     expr* next;
+    expr* prev;
 } expr;
 
 expr* newIntExpr(int val);
@@ -69,4 +72,5 @@ void backpatch(list* list, unsigned label);
 expr* evaluateUminus(expr* e);
 void equalsExprHelper(expr* lvalue, expr* rvalue, expr* tmpExpr);
 expr* evaluateAssignExp(expr*e, expr *e2);
+expr* evaluatePP(expr *e, expr* e2, bool flag, iopcode t);
 #endif
