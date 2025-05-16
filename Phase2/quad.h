@@ -49,4 +49,5 @@ void print_quads();
 void enumToString();
 void emit(iopcode op, expr* arg1, expr* arg2, expr* result);
 expr* newTempExpr();
+unsigned nextquad();
 #endif

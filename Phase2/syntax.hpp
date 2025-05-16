@@ -115,12 +115,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 27 "syntax.y"
+#line 29 "syntax.y"
 
     char* stringConst;
     int intConst;
     double realConst;
     struct expr* exprV;
+    struct ifstmt* Ifstmt;
     class Symbol* symbol_P;
     int boolConst;
     /*Gia thn trith fash prosethikan 
@@ -130,7 +131,7 @@ union YYSTYPE
     expr* expression;
     /*menei na dw to for_type*/
 
-#line 134 "syntax.hpp"
+#line 135 "syntax.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

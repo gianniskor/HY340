@@ -118,3 +118,8 @@ expr* newTempExpr() {
     }
     return symToExpr(sym);
 }
+
+// unsigned nextquad() {
+//     return currQuad;
+// }
+

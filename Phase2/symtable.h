@@ -15,6 +15,10 @@ typedef enum SymbolType {
 
 class Symbol{
     
+    private:
+        unsigned int Iaddress;
+        unsigned int totalLoc;
+
     public:
         string name;
         int scope;
@@ -23,9 +27,9 @@ class Symbol{
         bool active;
         string value;
         Symbol():
-            name(""), scope(0), line(0), type(), active(true), value("") {}
+            name(""), scope(0), line(0), type(), active(true), value(""),Iaddress(0), totalLoc(0) {}
         Symbol(string name, int scope, int line, SymbolType type, string value) 
-            :name(name), scope(scope), line(line), type(type), active(true), value(value) {}
+            :name(name), scope(scope), line(line), type(type), active(true), value(value), Iaddress(0), totalLoc(0) {}
         int getScope() const{
             return scope;
         }
@@ -68,6 +72,19 @@ class Symbol{
                    scope, 
                    active ? "(active)" : "(inactive)");
         }
+
+            void setIaddress(unsigned int address) {
+        Iaddress = address;
+    }
+    unsigned int getIaddress() const {
+        return Iaddress;
+    }
+    void setTotalLoc(unsigned int loc) {
+        totalLoc = loc;
+    }
+    unsigned int getTotalLoc() const {
+        return totalLoc;
+    }
 };
 
 class SymbolTable{
@@ -75,6 +92,7 @@ class SymbolTable{
 
         vector<vector <Symbol*>> scopeTable;
         unordered_map<string, vector<Symbol*>> nameTable;
+
 
     public:
     
@@ -215,6 +233,23 @@ class SymbolTable{
             }
         }
     }
+
+    
+    unsigned int getTotalLoc() const {
+    unsigned int count = 0;
+    
+    if (currentScope < scopeTable.size()) {
+        for (auto* symbol : scopeTable[currentScope]) {
+            if (symbol->isActive() && 
+                (symbol->getType() == LOCAL_VAR || symbol->getType() == FUNCTION_PARAM)) {
+                count++;
+            }
+        }
+    }
+    
+    return count;
+}
+
 
     void print() {
         printf("\n--------------------- Symbol Table ---------------------\n");

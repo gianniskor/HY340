@@ -12,6 +12,9 @@ expr* newStringExpr(const string & val) {
     e->type = conststring_e;
     e->sym = nullptr;
     e->index = nullptr;
+    e->trueList = nullptr;
+    e->falseList = nullptr;
+    e->nextList = nullptr;
     e->next = nullptr;
     e->value.stringValue = new string(val);
     return e;
@@ -21,6 +24,9 @@ expr* newBoolExpr(bool val){
     expr* e = new expr();
     e->type = constbool_e;
     e->sym = nullptr;
+    e->trueList = nullptr;
+    e->falseList = nullptr;
+    e->nextList = nullptr;
     e->index = nullptr;
     e->next = nullptr;
     e->value.boolValue = val;
@@ -31,6 +37,9 @@ expr* newIntExpr(int val){
     expr* e = new expr();
     e->type = constint_e;
     e->sym = nullptr;
+    e->trueList = nullptr;
+    e->falseList = nullptr;
+    e->nextList = nullptr;
     e->index = nullptr;
     e->next = nullptr;
     e->value.intValue = val;
@@ -43,6 +52,9 @@ expr* newDoubleExpr(double val){
     e->sym = nullptr;
     e->index = nullptr;
     e->next = nullptr;
+    e->trueList = nullptr;
+    e->falseList = nullptr;
+    e->nextList = nullptr;
     e->value.doubleValue = val;
     return e;
 }
@@ -53,6 +65,9 @@ expr* newNilExpr(){
     e->sym = nullptr;
     e->index = nullptr;
     e->next = nullptr;
+    e->trueList = nullptr;
+    e->falseList = nullptr;
+    e->nextList = nullptr;
     return e;
 }
 
@@ -81,7 +96,7 @@ expr* newSymbolExpr(type_t t,Symbol* symToExpr){
 
 expr* symToExpr(Symbol* symToExpr){
     if(!symToExpr){
-        cerr << "Error in SymToExpr functioin, symbol -> null\n" << endl;
+        cerr << "Error in SymToExpr function, symbol -> null\n" << endl;
         exit(-1);
     }
     expr *e;
@@ -170,6 +185,14 @@ expr* evaluateUminus(expr* e){
     }
 }
 
+expr* evalMem(expr* e){
+    expr* ret;
+    ret = newTempExpr();
+    ret->type = var_e;
+    emit(tablegetelem, e, e->index, ret);
+    return ret;
+}
+
 expr* evaluateAssignExp(expr* e, expr *e2){
     expr* tmpExpr = nullptr;
     tmpExpr = newTempExpr();
@@ -177,6 +200,18 @@ expr* evaluateAssignExp(expr* e, expr *e2){
         emit(assign, e2, nullptr, e);
         emit(assign, e, nullptr, tmpExpr);
         return tmpExpr;
+    }
+    if (e->type == tableitem_e) {
+        if (e2->type == tableitem_e) {
+            expr* rightValue = newTempExpr();
+            emit(tablegetelem, e2, e2->index, rightValue);
+            emit(tablesetelem, e->index, rightValue,e);
+        } else {
+            emit(tablesetelem, e->index, e2,e);
+        }
+        expr* result = newTempExpr();
+        emit(tablegetelem, e, e->index, result);
+        return result;
     }
     if(!validNumberExpr(e)){
         cerr << "Invalid assignment target, not a valid lvalue at line " << yylineno << endl;
@@ -211,4 +246,37 @@ expr* evaluatePP(expr *e, expr* e2, bool flag, iopcode t){
     }
     
     return tmpExpr;
+}
+
+bool isFunc(expr *ptr){
+    if(ptr->type == programfunc_e || ptr->type == libraryfunc_e){
+        return true;
+    }
+    return false;
+}
+
+expr* newMember(expr *table, string key) {
+    expr *t = newTempExpr();
+    t->type = tableitem_e;
+    t->sym = table->sym;
+    t->index = newStringExpr(key);
+    
+    return t;
+}
+
+expr* tablePeriodId(expr *table, string pointer) {
+    if (!table) {
+        cerr << "Nullptr at tablePeriodId" << endl;
+        exit(-1);
+    }
+    if (isFunc(table)) {
+        cerr << "Error, Function as name in value, in tablePeriodId" << endl;
+        exit(-1);
+    }
+    if (table->type == tableitem_e) {
+        expr* tmp = evalMem(table);
+        return newMember(tmp, pointer);
+    } else {
+        return newMember(table, pointer);
+    }
 }

@@ -18,7 +18,9 @@
     extern char* yytext;
     int scope = 0;
     int max_scope = 0;
-    extern SymbolTable symbolTable;  
+    extern SymbolTable symbolTable; 
+    static int anonCount = 0;
+ 
     int tmpCount = 0;
 %}
 
@@ -29,6 +31,7 @@
     int intConst;
     double realConst;
     struct expr* exprV;
+    struct ifstmt* Ifstmt;
     class Symbol* symbol_P;
     int boolConst;
     /*Gia thn trith fash prosethikan 
@@ -117,30 +120,38 @@
 %type <exprV> assignexpr //done
 %type <symbol_P> primary
 %type <exprV> lvalue
-%type <symbol_P> member
-%type <symbol_P> call
-%type <symbol_P> callsuffix
-%type <symbol_P> normcall
-%type <symbol_P> methodcall
+%type <exprV> member //working on it
+%type <exprV> call
+%type <exprV> callsuffix
+%type <exprV> normcall
+%type <exprV> methodcall
 %type <exprV> elist
 %type <exprV> indexed
 %type <exprV> indexedelem
 %type <statementT> block 
 %type <statementT> stmts
-%type <symbol_P> funcdef
+%type <symbol_P> funcdef //working on it
 %type <exprV> const //done 
 %type <symbol_P> idlist
-%type <symbol_P> ifstmt
+%type <Ifstmt> ifstmt
 %type <symbol_P> whilestmt
 %type <symbol_P> forstmt
 %type <symbol_P> returnstmt
-%type <exprV> objectdef //working on it
+%type <exprV> objectdef //done
 
 /*
   BUSULAS: 
   arithmitika done;
+  object def done;
+
   KANW: 
-  tables :(
+  object assign, access
+
+  TODO:
+  oliki (!)
+  if else
+  while
+  for
 */
 
 %%
@@ -188,7 +199,7 @@ expression: assignexpr                                  { fprintf(yacc_out,"expr
                                                            $$ = evaluateNumber($1, $3, mod);
                                                         }
 
-          | expression DOUBLE_EQUALS expression         { fprintf(yacc_out,"expr -> ==\n");}
+          | expression DOUBLE_EQUALS expression         { fprintf(yacc_out,"expr -> ==\n");} 
           | expression NOT_EQUALS expression            { fprintf(yacc_out,"expr -> !=\n");}
           | expression LESS expression                  { fprintf(yacc_out,"expr -> <\n");}
           | expression GREATER expression               { fprintf(yacc_out,"expr -> >\n");}
@@ -259,24 +270,91 @@ lvalue:     ID                                          { Symbol *s = symbolTabl
             | member                                    { fprintf(yacc_out,"lvalue -> id\n");}
             ;
 
-member:     lvalue PERIOD ID                            { fprintf(yacc_out,"member -> lvalue.id\n");}
+member:     lvalue PERIOD ID                            { fprintf(yacc_out,"member -> lvalue.id\n");
+                                                          $$ = tablePeriodId($1, $3);
+                                                        }
             | lvalue LEFT_BRACKET expression RIGHT_BRACKET    {fprintf(yacc_out,"member -> lvalue[expr]\n"); }
             | call PERIOD ID                            { fprintf(yacc_out,"member -> call.id\n");}
             | call LEFT_BRACKET expression RIGHT_BRACKET      { fprintf(yacc_out,"member -> call[expr]\n");}
             ;
 
-call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   { }
-            | lvalue callsuffix                             { }
-            | LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS { }
+call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
+              expr* current = $3;
+              int  paramCount = 0;
+              expr* last = nullptr;
+              while (current) {
+                  paramCount++;
+                  if (current->next) {
+                      last = current;
+                      current = current->next;
+                  }
+              }
+
+              current =last;
+              while (current && paramCount > 0) {
+                  emit (param, current, nullptr, nullptr);
+                  current = current->prev;
+                  paramCount--;
+              }
+
+              expr* tmpExpr = newTempExpr();
+              emit(call, nullptr, nullptr, $1);
+
+              expr* result = newTempExpr();
+              emit(getretval, nullptr, nullptr, result);
+              $$ = result;
+
+ }
+            | lvalue callsuffix                             {
+              emit (call, nullptr, nullptr, $1);
+              expr* result = newTempExpr();
+              emit(getretval, nullptr, nullptr, result);
+              $$ = result;
+             }
+            | LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
+              expr* current = $5;
+              int  paramCount = 0;
+              expr* last = nullptr;
+              while (current) {
+                  paramCount++;
+                  if (current->next) {
+                      last = current;
+                      current = current->next;
+                  }
+                  current = last;
+                  while (current && paramCount > 0) {
+                      emit(param, current, nullptr, nullptr);
+                      current = current->prev;
+                      paramCount--;
+                  }
+
+                  Symbol *s = (Symbol*)$2;
+                  emit(call, nullptr, nullptr, symToExpr(s));
+                  expr* result = newTempExpr();
+                  emit(getretval, nullptr, nullptr, result);
+                  $$ = result;
+              }
+             }
             ;
 
-callsuffix: normcall                                    { }
-            | methodcall                                { }
+callsuffix: normcall                                    {$$ = $1;}  
+            | methodcall                                {$$ = $1;}
             ;
 
-normcall:   LEFT_PARENTHESIS elist RIGHT_PARENTHESIS    { }
+normcall:   LEFT_PARENTHESIS elist RIGHT_PARENTHESIS    {$$ =$2;}
 
-methodcall: DOUBLE_PERIOD ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   { }
+methodcall: DOUBLE_PERIOD ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
+                                                                           expr* current = $4;
+                                                                           int  paramCount = 0;
+                                                                           expr* last = nullptr;
+                                                                           while (current) {
+                                                                               paramCount++;
+                                                                               if (current->next) {
+                                                                                   last = current;
+                                                                                   current = current->next;
+                                                                               }
+                                                                           }
+                                                                           $$ = $4; }
 
 elist:      %empty                                            { $$ = nullptr; 
                                                                 fprintf(yacc_out,"elist -> null;\n");
@@ -292,7 +370,10 @@ elist:      %empty                                            { $$ = nullptr;
                                                                 $1->next = $3;
                                                                 $3->prev = $1;
                                                               }
-            | expression                                      { $$ = $1;}
+            | expression                                      { $$ = $1;
+                                                                $$->next = nullptr;
+                                                                $$->prev = nullptr;
+                                                                }
             ;
 
 objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            { 
@@ -390,22 +471,39 @@ funcdef:    FUNCTION ID LEFT_PARENTHESIS {
                     fprintf(stderr, "ERROR at line %d, with scope %d: function %s already declared as a library function\n", yylineno, symbolTable.currentScope, $2);
                 } else {
                    Symbol *s = symbolTable.insert($2, symbolTable.currentScope, yylineno, USER_FUNC);
+                   s->setIaddress(nextquad());
+                   emit(funcstart, nullptr, nullptr, symToExpr(s));
                    fprintf(yacc_out, "funcdef -> function %s\n", $2);
                 }
               }
               
             }
             idlist RIGHT_PARENTHESIS block { 
-
-              ;}
+              Symbol *s = symbolTable.lookup($2)[0];
+              if (s && s->type == USER_FUNC) {
+                  unsigned int localCount = symbolTable.getTotalLoc();
+                  s->setTotalLoc(localCount);
+                  emit(funcend, nullptr, nullptr, symToExpr(s));
+              }
+            }
             | FUNCTION LEFT_PARENTHESIS {
-              static int anonCount = 0;
               string name = "_f" + to_string(anonCount);
               fprintf(yacc_out, "funcdef -> function %s\n", name.c_str());
               Symbol *s = symbolTable.insert(name.c_str(), symbolTable.currentScope, yylineno, USER_FUNC);
+              s->setIaddress(nextquad());
+              emit(funcstart, nullptr, nullptr, symToExpr(s));
               anonCount++;
               }
-            RIGHT_PARENTHESIS block         { }
+            RIGHT_PARENTHESIS block         { 
+              int currentFuncIndex = anonCount - 1;
+              string name = "_f" + to_string(currentFuncIndex);
+              Symbol *s = symbolTable.lookup(name.c_str())[0];
+              if (s && s->type == USER_FUNC) {
+                  unsigned int localCount = symbolTable.getTotalLoc();
+                  s->setTotalLoc(localCount);
+                  emit(funcend, nullptr, nullptr, symToExpr(s));
+              }
+            }
             ;
 
 const:      INT                                         { fprintf(yacc_out,"const -> number\n");
@@ -471,8 +569,22 @@ idlist: %empty                                { fprintf(yacc_out, "idlist -> emp
        }
        ;    
 
-ifstmt: IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt %prec LOWER_THAN_ELSE { }
-       | IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt ELSE stmt { }
+ifstmt: IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt %prec LOWER_THAN_ELSE   {
+          fprintf(yacc_out,"ifstmt -> if (expr) stmt\n"); 
+          $$ = newIfStmt($3, $5, nullptr); 
+          backpatch($3->trueList, nextquad());
+          $$->nextlist = $3->falseList;
+                    
+        }
+       | IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt ELSE stmt { 
+          fprintf(yacc_out,"ifstmt -> if (expr) else stmt\n");
+          $$ = newIfStmt($3, $5, $7);   //de briskei to newifstmt eno to exo orisei pantou me to idio onoma ...
+          unsigned thenQuad = nextquad();
+          emit(jump, nullptr, nullptr, nullptr);
+          unsigned elseQuad = nextquad();
+          backpatch($3->trueList, thenQuad);
+          backpatch($3->falseList, elseQuad);
+        }
        ;
 
 whilestmt:  WHILE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt      { }

@@ -37,7 +37,12 @@ struct list {
     }
 };
 
-
+typedef struct ifstmt{
+    expr* condition;
+    expr* then;
+    expr* elsep;
+    list* next;
+} ifstmt;
 
 typedef struct expr{
     list* trueList;
@@ -56,21 +61,49 @@ typedef struct expr{
     expr* prev;
 } expr;
 
+bool isFunc(expr *ptr);
+
 expr* newIntExpr(int val);
+
 expr* newDoubleExpr(double val);
+
 expr* newNilExpr();
+
 expr* newStringExpr(const string & val); 
+
 void deleteExpr(expr* e);
+
+ifstmt* newIfStmt(expr* condition, expr* then, expr* elsep);
+
+void deleteIfStmt(ifstmt* ifs);
+
 expr* newSymbolExpr(type_t t,Symbol* symToExpr);
+
 expr* symToExpr(Symbol* symToExpr);
+
 expr* newBoolExpr(bool val);
+
 bool validNumberExpr(expr *e);
+
 bool tmpCheck(expr* e);
+
 expr* evaluateNumber(expr* e, expr* e2, iopcode opcode);
+
 expr* newTempExpr();
+
 void backpatch(list* list, unsigned label);
+
 expr* evaluateUminus(expr* e);
+
 void equalsExprHelper(expr* lvalue, expr* rvalue, expr* tmpExpr);
+
 expr* evaluateAssignExp(expr*e, expr *e2);
+
 expr* evaluatePP(expr *e, expr* e2, bool flag, iopcode t);
+
+expr* tablePeriodId(expr *table, string pointer);
+
+expr* newMember(expr *member, string key);
+
+expr* evalMem(expr* e);
 #endif
