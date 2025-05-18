@@ -73,7 +73,7 @@ expr* newStringExpr(const string & val);
 
 void deleteExpr(expr* e);
 
-ifstmt* newIfStmt(expr* condition, expr* then, expr* elsep);
+//ifstmt* newIfStmt(expr* condition, expr* then, expr* elsep);
 
 void deleteIfStmt(ifstmt* ifs);
 
@@ -118,4 +118,8 @@ expr* evaluateBoolean(expr* e, expr* e2, iopcode opcode);
 expr* evaluateAND_OR(expr* e, expr* e2, iopcode opcode);
 
 expr* evaluateNOT(expr* e);
+
+void ifPrefix(expr* e, int& res);
+
+void fixLabel(int quad_id, int label);
 #endif

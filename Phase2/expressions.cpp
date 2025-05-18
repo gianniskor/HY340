@@ -381,9 +381,9 @@ expr* evaluateBoolean(expr* e, expr* e2, iopcode opcode){
         tmpExpr = newTempExpr("evalNum");
     }
     quad_counter = nextquad();
-    expr* JumpPlus3 = newIntExpr(quad_counter+3);
-    expr* JumpPlus5 = newIntExpr(quad_counter+5);
-    expr* JumpPlus6 = newIntExpr(quad_counter+6);
+    // expr* JumpPlus3 = newIntExpr(quad_counter+3);
+    // expr* JumpPlus5 = newIntExpr(quad_counter+5);
+    // expr* JumpPlus6 = newIntExpr(quad_counter+6);
     expr* JumpTrue = newBoolExpr(true);
     expr* JumpFalse = newBoolExpr(false);
 
@@ -443,4 +443,24 @@ expr* evaluateNOT(expr* e){
     }
     emit(not_op,e,nullptr,tmpExpr);
     return tmpExpr;
+}
+
+void ifPrefix(expr* e,int &res){
+    int quad_counter = nextquad();
+    //expr* JumpPlus2 = newIntExpr(quad_counter+2);
+    expr* JumpTrue = newBoolExpr(true);
+    emit(if_eq,e,JumpTrue,nullptr,quad_counter+3);
+    res = nextquad();
+    //0 is gonnafixed
+    emit(jump,nullptr,nullptr,0);
+}
+
+void fixLabel(int quad_id, int label){
+    if(quad_id > label){
+        cerr <<"quad_id < label"<<endl;
+        exit(-1);
+    }
+    else{
+        quads[quad_id]->label = label;
+    }
 }
