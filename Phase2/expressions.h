@@ -113,6 +113,5 @@ void setToNULL(expr* e);
 
 bool isTableItem(expr* e);
  
-expr* emit_table(expr* e);
-
+expr* evaluateBoolean(expr* e, expr* e2, iopcode opcode);
 #endif

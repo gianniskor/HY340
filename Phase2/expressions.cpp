@@ -357,12 +357,42 @@ bool isTableItem(expr* e){
     return false;
 }
 
-expr* emit_table(expr* e){
-    if(isTableItem(e)){
-        return e;
+expr* evaluateBoolean(expr* e, expr* e2, iopcode opcode){
+    int quad_counter;
+    if (!e || !e2) {
+        cerr << "Error: Null expression in evaluatebool" << endl;
+        return nullptr;
     }
-    expr* retArg = newTempExpr("emit_Table");
-    retArg->type = (var_e);
-    emit(tablegetelem,e,e->index,retArg);
-    return retArg;
+    bool flag1 = validNumberExpr(e) || (e->type == constbool_e);
+    bool flag2 = validNumberExpr(e2) || (e2->type == constbool_e);
+    if (!flag1 || !flag2) {
+        printf("Error, flag in eNum is false \n");
+        exit(-1);
+    }
+    //res
+    expr* tmpExpr = nullptr;
+    if (tmpCheck(e)) {
+        tmpExpr = symToExpr(e->sym);
+    } else if (tmpCheck(e2)) {
+        tmpExpr = symToExpr(e2->sym);
+    } else {
+        tmpExpr = newTempExpr("evalNum");
+    }
+    quad_counter = nextquad();
+    expr* JumpPlus3 = newIntExpr(quad_counter+3);
+    expr* JumpPlus5 = newIntExpr(quad_counter+5);
+    expr* JumpPlus6 = newIntExpr(quad_counter+6);
+    expr* JumpTrue = newBoolExpr(true);
+    expr* JumpFalse = newBoolExpr(false);
+
+    // emit(opcode,e,e2,JumpPlus3);
+    // emit(assign,JumpFalse,nullptr,tmpExpr);
+    // emit(jump,nullptr,nullptr,JumpPlus5);
+    // emit(assign,JumpTrue,nullptr,tmpExpr);
+    emit(opcode, e2,JumpPlus3,e);
+    emit(jump,nullptr,nullptr,JumpPlus5);
+    emit(assign,JumpTrue,nullptr,tmpExpr);
+    emit(jump,nullptr,nullptr,JumpPlus6);
+    emit(assign,JumpFalse,nullptr,tmpExpr);
+    return tmpExpr;
 }

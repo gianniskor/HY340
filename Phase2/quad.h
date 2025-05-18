@@ -19,7 +19,7 @@ typedef enum iopcode{
     if_eq,
     if_noteq,
     if_lesseq,
-    if_geatereq,
+    if_greatereq,
     if_less,
     if_greater,
     jump,

@@ -206,12 +206,24 @@ expression: assignexpr                                  { fprintf(yacc_out,"expr
                                                            $$ = evaluateNumber($1, $3, mod);
                                                         }
 
-          | expression DOUBLE_EQUALS expression         { fprintf(yacc_out,"expr -> ==\n");} 
-          | expression NOT_EQUALS expression            { fprintf(yacc_out,"expr -> !=\n");}
-          | expression LESS expression                  { fprintf(yacc_out,"expr -> <\n");}
-          | expression GREATER expression               { fprintf(yacc_out,"expr -> >\n");}
-          | expression LESS_EQUALS expression           { fprintf(yacc_out,"expr -> <=\n");}
-          | expression GREATER_EQUALS expression        { fprintf(yacc_out,"expr -> >=\n");}
+          | expression DOUBLE_EQUALS expression         { fprintf(yacc_out,"expr -> ==\n");
+                                                         $$ = evaluateBoolean($1,$3,if_eq);
+                                                        } 
+          | expression NOT_EQUALS expression            { fprintf(yacc_out,"expr -> !=\n");
+                                                          $$ = evaluateBoolean($1,$3,if_noteq);
+                                                        }
+          | expression LESS expression                  { fprintf(yacc_out,"expr -> <\n");
+                                                          $$ = evaluateBoolean($1,$3,if_less);
+                                                        }
+          | expression GREATER expression               { fprintf(yacc_out,"expr -> >\n");
+                                                          $$ = evaluateBoolean($1,$3,if_greater);
+                                                        }
+          | expression LESS_EQUALS expression           { fprintf(yacc_out,"expr -> <=\n");
+                                                          $$ = evaluateBoolean($1,$3,if_lesseq);
+                                                        }
+          | expression GREATER_EQUALS expression        { fprintf(yacc_out,"expr -> >=\n");
+                                                          $$ = evaluateBoolean($1,$3,if_greatereq);
+                                                        }
 
           | expression AND expression                   { fprintf(yacc_out,"expr -> AND\n");}
           | expression OR expression                    { fprintf(yacc_out,"expr -> OR\n");} 

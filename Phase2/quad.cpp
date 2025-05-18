@@ -15,7 +15,7 @@ int currQuad = 0;
 static unsigned temp_count = 0;
 
 char quadString[26][32] = {
-    "assing", "sub", "add", "div", "mul", "mod", "uminus",
+    "assign", "sub", "add", "div", "mul", "mod", "uminus",
     "and", "or", "not", "if_eq", "if_noteq", "if_lesseq",
     "if_greatereq", "if_less", "if_greater", "jump", "param",
     "call", "return", "getretval", "funcstart", "funcend",
