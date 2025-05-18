@@ -340,5 +340,13 @@ class SymbolTable{
         }
         return e;
     }
+    Symbol* rvalue_default(string name, int scope, int line) {
+        Symbol *e = lookupActiveBottomUp(name, scope);
+        if(e == nullptr) {
+            printf("Error: Undeclared identifier %s at line %d\n", name.c_str(), line);
+            return NULL;
+        }
+        return e;
+    }
 };
 #endif

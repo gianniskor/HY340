@@ -110,7 +110,8 @@ void print_quads() {
     }
 }
 
-expr* newTempExpr() {
+expr* newTempExpr(string F_callee) {
+    fprintf(debug_temp, "called form: %s\n", F_callee.c_str());
     string tempName = "_t" + to_string(tmpCount++);
     Symbol* sym = symbolTable.lookupInScope(tempName, 0);
     if (!sym) {

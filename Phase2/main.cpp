@@ -4,6 +4,7 @@
 #include <iostream>
 #include "lexLib.hpp"
 #include "headerLib.h"
+FILE *debug_temp;
 // extern "C++" int yylex() {
 //     static alpha_token_t token;
 //     return alpha_yylex(&token);
@@ -36,6 +37,7 @@ char libFuncs [][30]={
 };
 
 int main(int argc, char *argv[]) {
+    debug_temp = fopen("deb.txt", "w");
     if (argc > 1)
     {
         if (!(yyin = fopen(argv[1], "r")))

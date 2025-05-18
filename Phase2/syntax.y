@@ -106,10 +106,12 @@
 %nonassoc LESS LESS_EQUALS GREATER GREATER_EQUALS
 %left PLUS MINUS
 %left MULTIPLY DIVIDE MOD
+
 %left NOT PLUS_PLUS MINUS_MINUS NEGATIVE_VAL
 %left PERIOD DOUBLE_PERIOD
 %left LEFT_PARENTHESIS LEFT_BRACKET
 %left RIGHT_PARENTHESIS RIGHT_BRACKET
+
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -143,15 +145,20 @@
   BUSULAS: 
   arithmitika done;
   object def done;
+  object assign, access,incr;
 
   KANW: 
-  object assign, access
 
   TODO:
   oliki (!)
   if else
   while
   for
+
+  PROBLEMS
+  t2 = [1,2,print];
+    "Error: Cannot use function print as an lvalue at line 1"
+    "Error in SymToExpr function, symbol -> null"
 */
 
 %%
@@ -273,7 +280,9 @@ lvalue:     ID                                          { Symbol *s = symbolTabl
 member:     lvalue PERIOD ID                            { fprintf(yacc_out,"member -> lvalue.id\n");
                                                           $$ = tablePeriodId($1, $3);
                                                         }
-            | lvalue LEFT_BRACKET expression RIGHT_BRACKET    {fprintf(yacc_out,"member -> lvalue[expr]\n"); }
+            | lvalue LEFT_BRACKET expression RIGHT_BRACKET    {fprintf(yacc_out,"member -> lvalue[expr]\n"); 
+                                                                $$ = tableBrackets($1,$3);
+                                                              }
             | call PERIOD ID                            { fprintf(yacc_out,"member -> call.id\n");}
             | call LEFT_BRACKET expression RIGHT_BRACKET      { fprintf(yacc_out,"member -> call[expr]\n");}
             ;
@@ -297,17 +306,17 @@ call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
                   paramCount--;
               }
 
-              expr* tmpExpr = newTempExpr();
+              expr* tmpExpr = newTempExpr("call");
               emit(call, nullptr, nullptr, $1);
 
-              expr* result = newTempExpr();
+              expr* result = newTempExpr("call");
               emit(getretval, nullptr, nullptr, result);
               $$ = result;
 
  }
             | lvalue callsuffix                             {
               emit (call, nullptr, nullptr, $1);
-              expr* result = newTempExpr();
+              expr* result = newTempExpr("lvalue call");
               emit(getretval, nullptr, nullptr, result);
               $$ = result;
              }
@@ -330,7 +339,7 @@ call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
 
                   Symbol *s = (Symbol*)$2;
                   emit(call, nullptr, nullptr, symToExpr(s));
-                  expr* result = newTempExpr();
+                  expr* result = newTempExpr("call funcdef");
                   emit(getretval, nullptr, nullptr, result);
                   $$ = result;
               }
@@ -377,7 +386,7 @@ elist:      %empty                                            { $$ = nullptr;
             ;
 
 objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            { 
-                                                          expr* tmpExpr = newTempExpr();
+                                                          expr* tmpExpr = newTempExpr("l_ELIST_r");
                                                           tmpExpr->type = newtable_e;
                                                           emit(tablecreate, nullptr, nullptr, tmpExpr);
                                                           if($2){
@@ -393,7 +402,7 @@ objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            {
                                                           fprintf(yacc_out, "objectdef -> [ elist ]\n");
                                                         }
             | LEFT_BRACKET indexed RIGHT_BRACKET        { 
-                                                          expr* tmpExpr = newTempExpr();
+                                                          expr* tmpExpr = newTempExpr("objectdef l_IDX_r");
                                                           tmpExpr->type = newtable_e;
                                                           emit(tablecreate, nullptr, nullptr, tmpExpr);
                                                           expr* current = $2;
@@ -404,7 +413,7 @@ objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            {
                                                           $$ = tmpExpr;
                                                         }
             | LEFT_BRACKET RIGHT_BRACKET                {
-                                                          expr* tmpExpr = newTempExpr();
+                                                          expr* tmpExpr = newTempExpr("objectdef lr");
                                                           if (!tmpExpr) {
                                                               cerr << "Failed to create temp expression for empty table" << endl;
                                                               exit(-1);
@@ -570,20 +579,20 @@ idlist: %empty                                { fprintf(yacc_out, "idlist -> emp
        ;    
 
 ifstmt: IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt %prec LOWER_THAN_ELSE   {
-          fprintf(yacc_out,"ifstmt -> if (expr) stmt\n"); 
-          $$ = newIfStmt($3, $5, nullptr); 
-          backpatch($3->trueList, nextquad());
-          $$->nextlist = $3->falseList;
+          // fprintf(yacc_out,"ifstmt -> if (expr) stmt\n"); 
+          // $$ = newIfStmt($3, $5, nullptr); 
+          // backpatch($3->trueList, nextquad());
+          // $$->nextlist = $3->falseList;
                     
         }
        | IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt ELSE stmt { 
-          fprintf(yacc_out,"ifstmt -> if (expr) else stmt\n");
-          $$ = newIfStmt($3, $5, $7);   //de briskei to newifstmt eno to exo orisei pantou me to idio onoma ...
-          unsigned thenQuad = nextquad();
-          emit(jump, nullptr, nullptr, nullptr);
-          unsigned elseQuad = nextquad();
-          backpatch($3->trueList, thenQuad);
-          backpatch($3->falseList, elseQuad);
+          // fprintf(yacc_out,"ifstmt -> if (expr) else stmt\n");
+          // $$ = newIfStmt($3, $5, $7);   //de briskei to newifstmt eno to exo orisei pantou me to idio onoma ...
+          // unsigned thenQuad = nextquad();
+          // emit(jump, nullptr, nullptr, nullptr);
+          // unsigned elseQuad = nextquad();
+          // backpatch($3->trueList, thenQuad);
+          // backpatch($3->falseList, elseQuad);
         }
        ;
 

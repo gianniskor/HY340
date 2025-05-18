@@ -7,15 +7,20 @@ extern int tmpCount;
 extern SymbolTable symbolTable;
 extern int yylineno;
 
+void setToNULL(expr* e){
+    e->trueList = nullptr;
+    e->falseList = nullptr;
+    e->nextList = nullptr;
+    e->next = nullptr;
+    e->prev = nullptr;
+}
+
 expr* newStringExpr(const string & val) {
     expr* e = new expr();
     e->type = conststring_e;
     e->sym = nullptr;
     e->index = nullptr;
-    e->trueList = nullptr;
-    e->falseList = nullptr;
-    e->nextList = nullptr;
-    e->next = nullptr;
+    setToNULL(e);
     e->value.stringValue = new string(val);
     return e;
 }
@@ -24,11 +29,7 @@ expr* newBoolExpr(bool val){
     expr* e = new expr();
     e->type = constbool_e;
     e->sym = nullptr;
-    e->trueList = nullptr;
-    e->falseList = nullptr;
-    e->nextList = nullptr;
-    e->index = nullptr;
-    e->next = nullptr;
+    setToNULL(e);
     e->value.boolValue = val;
     return e;
 }
@@ -37,11 +38,7 @@ expr* newIntExpr(int val){
     expr* e = new expr();
     e->type = constint_e;
     e->sym = nullptr;
-    e->trueList = nullptr;
-    e->falseList = nullptr;
-    e->nextList = nullptr;
-    e->index = nullptr;
-    e->next = nullptr;
+    setToNULL(e);
     e->value.intValue = val;
     return e;
 }
@@ -51,10 +48,7 @@ expr* newDoubleExpr(double val){
     e->type = constdouble_e;
     e->sym = nullptr;
     e->index = nullptr;
-    e->next = nullptr;
-    e->trueList = nullptr;
-    e->falseList = nullptr;
-    e->nextList = nullptr;
+    setToNULL(e);
     e->value.doubleValue = val;
     return e;
 }
@@ -64,10 +58,7 @@ expr* newNilExpr(){
     e->type = nil_e;
     e->sym = nullptr;
     e->index = nullptr;
-    e->next = nullptr;
-    e->trueList = nullptr;
-    e->falseList = nullptr;
-    e->nextList = nullptr;
+    setToNULL(e);
     return e;
 }
 
@@ -86,11 +77,7 @@ expr* newSymbolExpr(type_t t,Symbol* symToExpr){
     e->type = t;
     e->sym = symToExpr;
     e->index = nullptr;
-    e->next = nullptr;
-    e->prev = nullptr;
-    e->trueList = nullptr;
-    e->falseList = nullptr;
-    e->nextList = nullptr;
+    setToNULL(e);
     return e;
 } 
 
@@ -117,7 +104,12 @@ bool validNumberExpr(expr *e) {
         return true;
     if (e->type == arithexpr_e)
         return true; //idk
-        
+    if (e->type == tableitem_e) {
+        if (e->index && (e->index->type == constint_e || e->index->type == constdouble_e ||e->index->type ==conststring_e)) 
+            return true;
+        else if (e->index && e->index->type == var_e && e->index->sym) 
+            return true;
+    }
     return false;
 }
 
@@ -148,7 +140,7 @@ expr* evaluateNumber(expr* e, expr* e2, iopcode opcode) {
     } else if (tmpCheck(e2)) {
         tmpExpr = symToExpr(e2->sym);
     } else {
-        tmpExpr = newTempExpr();
+        tmpExpr = newTempExpr("evalNum");
     }
     if (opcode != sub && opcode != add && opcode != div_op && opcode != mul && opcode != mod) {
         cerr << "Invalid opcode in function evaluateNumber" << endl;
@@ -179,7 +171,7 @@ expr* evaluateUminus(expr* e){
         emit(uminus,e,nullptr,e);
         return e;
     } else {
-        tmpExpr = newTempExpr();
+        tmpExpr = newTempExpr("evaluninus");
         emit(uminus,e,nullptr,tmpExpr);
         return tmpExpr;
     }
@@ -187,7 +179,7 @@ expr* evaluateUminus(expr* e){
 
 expr* evalMem(expr* e){
     expr* ret;
-    ret = newTempExpr();
+    ret = newTempExpr("evalmem");
     ret->type = var_e;
     emit(tablegetelem, e, e->index, ret);
     return ret;
@@ -195,21 +187,22 @@ expr* evalMem(expr* e){
 
 expr* evaluateAssignExp(expr* e, expr *e2){
     expr* tmpExpr = nullptr;
-    tmpExpr = newTempExpr();
+    //tmpExpr = newTempExpr("evalassign");
     if (e2->type == newtable_e) {
+        tmpExpr = newTempExpr("evalassign");
         emit(assign, e2, nullptr, e);
         emit(assign, e, nullptr, tmpExpr);
         return tmpExpr;
     }
     if (e->type == tableitem_e) {
         if (e2->type == tableitem_e) {
-            expr* rightValue = newTempExpr();
+            expr* rightValue = newTempExpr("evalassin ifif");
             emit(tablegetelem, e2, e2->index, rightValue);
             emit(tablesetelem, e->index, rightValue,e);
         } else {
             emit(tablesetelem, e->index, e2,e);
         }
-        expr* result = newTempExpr();
+        expr* result = newTempExpr("evalassin if");
         emit(tablegetelem, e, e->index, result);
         return result;
     }
@@ -231,18 +224,60 @@ void equalsExprHelper(expr* lvalue, expr* rvalue, expr* tmpExpr){
     else ++a
 */
 expr* evaluatePP(expr *e, expr* e2, bool flag, iopcode t){
-    if(!e || !validNumberExpr(e)){
-        cerr << "Invalid lvalue in increment/decrement operation at line "<< yylineno<< endl;
-        return nullptr;
-    }
-    expr* tmpExpr = newTempExpr();
+    // if(!e || !validNumberExpr(e)){
+    //     cerr << "Invalid lvalue in increment/decrement operation at line "<< yylineno<< endl;
+    //     return nullptr;
+    // }
+    expr* tmpExpr = newTempExpr("evalPP");
     tmpExpr->type = arithexpr_e;
-    if(flag == true){
-        emit(assign, e, nullptr, tmpExpr);
-        emit(t, e, e2, e);
-    } else {
-        emit(t, e, e2, e);
-        emit(assign, e, nullptr, tmpExpr);
+    // if (e->type == tableitem_e) {
+    //     expr* term;
+    //     cerr<<"HEEYY"<<endl;
+    //     if (flag==true) {
+
+    //         cerr<<"HEEYY"<<endl;
+    //     }
+    //     else {
+    //         // prefix: value after
+    //         cerr<<"HEEYY"<<endl;
+    //         // // term = term ± 1
+    //         // emit(t, term, e2, term);
+    //         // // write back
+    //         // emit(tablesetelem, e, e->index, term);
+    //         // emit(assign, term, nullptr, tmpExpr);
+    //     }
+
+    //     return tmpExpr;
+    // } else {
+        if(flag == true){ // postfix: a++
+            if(!e || !validNumberExpr(e)){
+                cerr << "Invalid lvalue in increment/decrement operation at line "<< yylineno<< endl;
+                return nullptr;
+            }
+            if (e->type == tableitem_e) {
+                expr* getelem = newTempExpr("emit_Table");
+                getelem->type = var_e;
+                emit(tablegetelem,e,e->index,getelem);
+                emit(assign, getelem, nullptr, tmpExpr);
+                emit(t, getelem, e2, getelem);
+                emit(tablesetelem, e->index, getelem, e);
+            }else{
+            emit(assign, e, nullptr, tmpExpr);
+            emit(t, e, e2, e);}
+        } else { // prefix: ++a
+            if(!e2 || !validNumberExpr(e2)){
+                cerr << "Invalid lvalue in increment/decrement operation at line "<< yylineno<< endl;
+                return nullptr;
+            }
+            if (e2->type == tableitem_e) {
+                tmpExpr->type = arithexpr_e;
+                emit(tablegetelem,e2,e2->index,tmpExpr);
+                emit(t, tmpExpr, e, tmpExpr);
+                emit(tablesetelem, e2->index, tmpExpr, e2);
+            }else{
+            emit(t, e2, e, e2);
+            emit(assign, e2, nullptr, tmpExpr);}
+        // }
     }
     
     return tmpExpr;
@@ -256,11 +291,11 @@ bool isFunc(expr *ptr){
 }
 
 expr* newMember(expr *table, string key) {
-    expr *t = newTempExpr();
+    expr *t = new expr();
     t->type = tableitem_e;
     t->sym = table->sym;
     t->index = newStringExpr(key);
-    
+    setToNULL(t);
     return t;
 }
 
@@ -279,4 +314,55 @@ expr* tablePeriodId(expr *table, string pointer) {
     } else {
         return newMember(table, pointer);
     }
+}
+
+expr* tableBrackets(expr *table,expr *index){
+    expr *tableitem;
+    if (!table) {
+        cerr << "Nullptr at tableBrackets" << endl;
+        exit(-1);
+    }
+    if (isFunc(table)) {
+        cerr << "Error, Function as name in value, in tableBrackets" << endl;
+        exit(-1);
+    }
+    if(table->type == tableitem_e) {
+        expr* tmp = evalMem(table);
+        tableitem = new expr();
+        tableitem->type = tableitem_e;
+        tableitem->sym = tmp->sym;
+        tableitem->index = index;
+        setToNULL(tableitem);
+        return tableitem;
+    } else {
+        tableitem = new expr();
+        tableitem->type = tableitem_e;
+        tableitem->sym = table->sym;
+        tableitem->index = index;
+        setToNULL(tableitem);
+        return tableitem;
+    }
+
+}
+
+// expr* evaluateBoolean(expr* e, expr* e2, iopcode opcode){
+//     expr* retArg = nullptr;
+//     if(e->)
+// }
+
+bool isTableItem(expr* e){
+    if(e->type == tableitem_e){
+        return true;
+    }
+    return false;
+}
+
+expr* emit_table(expr* e){
+    if(isTableItem(e)){
+        return e;
+    }
+    expr* retArg = newTempExpr("emit_Table");
+    retArg->type = (var_e);
+    emit(tablegetelem,e,e->index,retArg);
+    return retArg;
 }

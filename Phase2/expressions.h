@@ -106,4 +106,13 @@ expr* tablePeriodId(expr *table, string pointer);
 expr* newMember(expr *member, string key);
 
 expr* evalMem(expr* e);
+
+expr* tableBrackets(expr *table,expr *index);
+
+void setToNULL(expr* e);
+
+bool isTableItem(expr* e);
+ 
+expr* emit_table(expr* e);
+
 #endif

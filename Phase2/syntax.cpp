@@ -585,16 +585,16 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   159,   159,   160,   163,   164,   167,   169,   170,   171,
-     172,   173,   174,   175,   179,   180,   184,   185,   186,   189,
-     192,   195,   198,   202,   203,   204,   205,   206,   207,   209,
-     210,   213,   216,   219,   222,   227,   231,   235,   239,   242,
-     250,   251,   252,   253,   254,   258,   262,   266,   270,   273,
-     276,   277,   278,   281,   308,   314,   340,   341,   344,   346,
-     359,   363,   373,   379,   395,   406,   421,   422,   433,   440,
-     440,   452,   457,   457,   489,   489,   509,   512,   515,   518,
-     519,   522,   527,   528,   549,   572,   579,   590,   592,   594,
-     595
+       0,   166,   166,   167,   170,   171,   174,   176,   177,   178,
+     179,   180,   181,   182,   186,   187,   191,   192,   193,   196,
+     199,   202,   205,   209,   210,   211,   212,   213,   214,   216,
+     217,   220,   223,   226,   229,   234,   238,   242,   246,   249,
+     257,   258,   259,   260,   261,   265,   269,   273,   277,   280,
+     283,   286,   287,   290,   317,   323,   349,   350,   353,   355,
+     368,   372,   382,   388,   404,   415,   430,   431,   442,   449,
+     449,   461,   466,   466,   498,   498,   518,   521,   524,   527,
+     528,   531,   536,   537,   558,   581,   588,   599,   601,   603,
+     604
 };
 #endif
 
@@ -1355,74 +1355,74 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: stmts  */
-#line 159 "syntax.y"
+#line 166 "syntax.y"
                                                         { fprintf(yacc_out,"liststmt -> stmt\n"); fclose(yacc_out);}
 #line 1361 "syntax.cpp"
     break;
 
   case 3: /* program: %empty  */
-#line 160 "syntax.y"
+#line 167 "syntax.y"
                                                         { fprintf(yacc_out,"empty program\n"); fclose(yacc_out);}
 #line 1367 "syntax.cpp"
     break;
 
   case 4: /* stmts: stmt  */
-#line 163 "syntax.y"
+#line 170 "syntax.y"
                                                         { fprintf(yacc_out,"liststmt -> liststmt stmt\n");}
 #line 1373 "syntax.cpp"
     break;
 
   case 5: /* stmts: stmts stmt  */
-#line 164 "syntax.y"
+#line 171 "syntax.y"
                                                         { fprintf(yacc_out,"liststmt -> stmt\n");}
 #line 1379 "syntax.cpp"
     break;
 
   case 6: /* stmt: expression ";"  */
-#line 167 "syntax.y"
+#line 174 "syntax.y"
                                                         { tmpCount = 0;
                                                           fprintf(yacc_out,"stmt -> expr;\n");}
 #line 1386 "syntax.cpp"
     break;
 
   case 7: /* stmt: ifstmt  */
-#line 169 "syntax.y"
+#line 176 "syntax.y"
                                                         { fprintf(yacc_out,"stmt -> ifstmt;\n");}
 #line 1392 "syntax.cpp"
     break;
 
   case 8: /* stmt: whilestmt  */
-#line 170 "syntax.y"
+#line 177 "syntax.y"
                                                         { fprintf(yacc_out,"stmt -> whilestmt;\n");}
 #line 1398 "syntax.cpp"
     break;
 
   case 9: /* stmt: forstmt  */
-#line 171 "syntax.y"
+#line 178 "syntax.y"
                                                         { fprintf(yacc_out,"stmt -> forstmt;\n");}
 #line 1404 "syntax.cpp"
     break;
 
   case 10: /* stmt: returnstmt  */
-#line 172 "syntax.y"
+#line 179 "syntax.y"
                                                         { fprintf(yacc_out,"stmt -> returnstmt;\n");}
 #line 1410 "syntax.cpp"
     break;
 
   case 11: /* stmt: "break" ";"  */
-#line 173 "syntax.y"
+#line 180 "syntax.y"
                                                         { fprintf(yacc_out,"stmt -> breakstmt;\n");}
 #line 1416 "syntax.cpp"
     break;
 
   case 12: /* stmt: "continue" ";"  */
-#line 174 "syntax.y"
+#line 181 "syntax.y"
                                                         { fprintf(yacc_out,"stmt -> continuestmt;\n");}
 #line 1422 "syntax.cpp"
     break;
 
   case 13: /* stmt: block  */
-#line 175 "syntax.y"
+#line 182 "syntax.y"
                                                         { fprintf(yacc_out,"stmt -> blockstmt;\n");
                                                           tmpCount = 0;
                                                           (yyval.statementT) = (yyvsp[0].statementT);
@@ -1431,31 +1431,31 @@ yyreduce:
     break;
 
   case 14: /* stmt: funcdef  */
-#line 179 "syntax.y"
+#line 186 "syntax.y"
                                                         { fprintf(yacc_out,"stmt -> functstmt;\n");}
 #line 1437 "syntax.cpp"
     break;
 
   case 15: /* stmt: ";"  */
-#line 180 "syntax.y"
+#line 187 "syntax.y"
                                                         { fprintf(yacc_out,"stmt -> semicolon;\n");}
 #line 1443 "syntax.cpp"
     break;
 
   case 16: /* expression: assignexpr  */
-#line 184 "syntax.y"
+#line 191 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> assignexpr\n");}
 #line 1449 "syntax.cpp"
     break;
 
   case 17: /* expression: term  */
-#line 185 "syntax.y"
+#line 192 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> term\n");}
 #line 1455 "syntax.cpp"
     break;
 
   case 18: /* expression: expression "+" expression  */
-#line 186 "syntax.y"
+#line 193 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> +\n");
                                                            (yyval.exprV) = evaluateNumber((yyvsp[-2].exprV), (yyvsp[0].exprV), add);
                                                         }
@@ -1463,7 +1463,7 @@ yyreduce:
     break;
 
   case 19: /* expression: expression "-" expression  */
-#line 189 "syntax.y"
+#line 196 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> -\n");
                                                            (yyval.exprV) = evaluateNumber((yyvsp[-2].exprV), (yyvsp[0].exprV), sub);
                                                         }
@@ -1471,7 +1471,7 @@ yyreduce:
     break;
 
   case 20: /* expression: expression "*" expression  */
-#line 192 "syntax.y"
+#line 199 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> *\n");
                                                            (yyval.exprV) = evaluateNumber((yyvsp[-2].exprV), (yyvsp[0].exprV), mul);
                                                         }
@@ -1479,7 +1479,7 @@ yyreduce:
     break;
 
   case 21: /* expression: expression "/" expression  */
-#line 195 "syntax.y"
+#line 202 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> /\n");
                                                            (yyval.exprV) = evaluateNumber((yyvsp[-2].exprV), (yyvsp[0].exprV), div_op);
                                                         }
@@ -1487,7 +1487,7 @@ yyreduce:
     break;
 
   case 22: /* expression: expression "%" expression  */
-#line 198 "syntax.y"
+#line 205 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> %%\n");
                                                            (yyval.exprV) = evaluateNumber((yyvsp[-2].exprV), (yyvsp[0].exprV), mod);
                                                         }
@@ -1495,55 +1495,55 @@ yyreduce:
     break;
 
   case 23: /* expression: expression "==" expression  */
-#line 202 "syntax.y"
+#line 209 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> ==\n");}
 #line 1501 "syntax.cpp"
     break;
 
   case 24: /* expression: expression "!=" expression  */
-#line 203 "syntax.y"
+#line 210 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> !=\n");}
 #line 1507 "syntax.cpp"
     break;
 
   case 25: /* expression: expression "<" expression  */
-#line 204 "syntax.y"
+#line 211 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> <\n");}
 #line 1513 "syntax.cpp"
     break;
 
   case 26: /* expression: expression ">" expression  */
-#line 205 "syntax.y"
+#line 212 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> >\n");}
 #line 1519 "syntax.cpp"
     break;
 
   case 27: /* expression: expression "<=" expression  */
-#line 206 "syntax.y"
+#line 213 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> <=\n");}
 #line 1525 "syntax.cpp"
     break;
 
   case 28: /* expression: expression ">=" expression  */
-#line 207 "syntax.y"
+#line 214 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> >=\n");}
 #line 1531 "syntax.cpp"
     break;
 
   case 29: /* expression: expression "and" expression  */
-#line 209 "syntax.y"
+#line 216 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> AND\n");}
 #line 1537 "syntax.cpp"
     break;
 
   case 30: /* expression: expression "or" expression  */
-#line 210 "syntax.y"
+#line 217 "syntax.y"
                                                         { fprintf(yacc_out,"expr -> OR\n");}
 #line 1543 "syntax.cpp"
     break;
 
   case 31: /* term: "(" expression ")"  */
-#line 213 "syntax.y"
+#line 220 "syntax.y"
                                                               { fprintf(yacc_out,"expr -> (term)\n");
                                                                 (yyval.exprV) = (yyvsp[-1].exprV);
                                                               }
@@ -1551,7 +1551,7 @@ yyreduce:
     break;
 
   case 32: /* term: "-" expression  */
-#line 216 "syntax.y"
+#line 223 "syntax.y"
                                                               { fprintf(yacc_out,"expr -> -term\n");
                                                                 (yyval.exprV) = evaluateUminus((yyvsp[0].exprV));
                                                               }
@@ -1559,7 +1559,7 @@ yyreduce:
     break;
 
   case 33: /* term: "not" expression  */
-#line 219 "syntax.y"
+#line 226 "syntax.y"
                                                               {
                                                                fprintf(yacc_out,"expr -> !term\n");
                                                               }
@@ -1567,7 +1567,7 @@ yyreduce:
     break;
 
   case 34: /* term: "++" lvalue  */
-#line 222 "syntax.y"
+#line 229 "syntax.y"
                                                               {
                                                                 expr* oneoneoneone = newIntExpr(1);
                                                                 (yyval.exprV) = evaluatePP(oneoneoneone, (yyvsp[0].exprV), false, add); //antrea ,dua lipa kosovo 1 , 2 i 3 augoustoy 
@@ -1577,7 +1577,7 @@ yyreduce:
     break;
 
   case 35: /* term: lvalue "++"  */
-#line 227 "syntax.y"
+#line 234 "syntax.y"
                                                               {
                                                                 expr* oneoneoneone = newIntExpr(1);
                                                                 (yyval.exprV) = evaluatePP((yyvsp[-1].exprV), oneoneoneone, true, add);
@@ -1586,7 +1586,7 @@ yyreduce:
     break;
 
   case 36: /* term: "--" lvalue  */
-#line 231 "syntax.y"
+#line 238 "syntax.y"
                                                               {
                                                                 expr* oneoneoneone = newIntExpr(1);
                                                                 (yyval.exprV) = evaluatePP(oneoneoneone, (yyvsp[0].exprV), false, sub);
@@ -1595,7 +1595,7 @@ yyreduce:
     break;
 
   case 37: /* term: lvalue "--"  */
-#line 235 "syntax.y"
+#line 242 "syntax.y"
                                                               {
                                                                 expr* oneoneoneone = newIntExpr(1);
                                                                 (yyval.exprV) = evaluatePP((yyvsp[-1].exprV), oneoneoneone, true, sub);
@@ -1604,13 +1604,13 @@ yyreduce:
     break;
 
   case 38: /* term: primary  */
-#line 239 "syntax.y"
+#line 246 "syntax.y"
                                                               { fprintf(yacc_out,"expr -> primary\n");}
 #line 1610 "syntax.cpp"
     break;
 
   case 39: /* assignexpr: lvalue "=" expression  */
-#line 242 "syntax.y"
+#line 249 "syntax.y"
                                                               { 
                                                                 (yyval.exprV) = evaluateAssignExp((yyvsp[-2].exprV), (yyvsp[0].exprV));
                                                                 //table items;
@@ -1622,37 +1622,37 @@ yyreduce:
     break;
 
   case 40: /* primary: lvalue  */
-#line 250 "syntax.y"
+#line 257 "syntax.y"
                                                         { fprintf(yacc_out,"primary -> lvalue\n");}
 #line 1628 "syntax.cpp"
     break;
 
   case 41: /* primary: call  */
-#line 251 "syntax.y"
+#line 258 "syntax.y"
                                                         { fprintf(yacc_out,"primary -> call\n");}
 #line 1634 "syntax.cpp"
     break;
 
   case 42: /* primary: objectdef  */
-#line 252 "syntax.y"
+#line 259 "syntax.y"
                                                         { fprintf(yacc_out,"primary -> objectdef\n");}
 #line 1640 "syntax.cpp"
     break;
 
   case 43: /* primary: "(" funcdef ")"  */
-#line 253 "syntax.y"
+#line 260 "syntax.y"
                                                         { fprintf(yacc_out,"primary -> (funcdef)\n");}
 #line 1646 "syntax.cpp"
     break;
 
   case 44: /* primary: const  */
-#line 254 "syntax.y"
+#line 261 "syntax.y"
                                                         { fprintf(yacc_out,"primary -> const\n");}
 #line 1652 "syntax.cpp"
     break;
 
   case 45: /* lvalue: ID  */
-#line 258 "syntax.y"
+#line 265 "syntax.y"
                                                         { Symbol *s = symbolTable.lvalue_default((yyvsp[0].stringConst),symbolTable.currentScope,yylineno);
                                                           fprintf(yacc_out,"lvalue -> id\n");
                                                           (yyval.exprV) = symToExpr(s);
@@ -1661,7 +1661,7 @@ yyreduce:
     break;
 
   case 46: /* lvalue: "local" ID  */
-#line 262 "syntax.y"
+#line 269 "syntax.y"
                                                         { Symbol *s = symbolTable.local_lvalue((yyvsp[0].stringConst),symbolTable.currentScope,yylineno);
                                                           fprintf(yacc_out,"lvalue -> local id\n");
                                                           (yyval.exprV) = symToExpr(s);
@@ -1670,7 +1670,7 @@ yyreduce:
     break;
 
   case 47: /* lvalue: "::" ID  */
-#line 266 "syntax.y"
+#line 273 "syntax.y"
                                                         { Symbol *s = symbolTable.local_lvalue((yyvsp[0].stringConst),0,yylineno);
                                                           fprintf(yacc_out,"lvalue -> global id\n");
                                                           (yyval.exprV) = symToExpr(s);
@@ -1679,13 +1679,13 @@ yyreduce:
     break;
 
   case 48: /* lvalue: member  */
-#line 270 "syntax.y"
+#line 277 "syntax.y"
                                                         { fprintf(yacc_out,"lvalue -> id\n");}
 #line 1685 "syntax.cpp"
     break;
 
   case 49: /* member: lvalue "." ID  */
-#line 273 "syntax.y"
+#line 280 "syntax.y"
                                                         { fprintf(yacc_out,"member -> lvalue.id\n");
                                                           (yyval.exprV) = tablePeriodId((yyvsp[-2].exprV), (yyvsp[0].stringConst));
                                                         }
@@ -1693,25 +1693,27 @@ yyreduce:
     break;
 
   case 50: /* member: lvalue "[" expression "]"  */
-#line 276 "syntax.y"
-                                                              {fprintf(yacc_out,"member -> lvalue[expr]\n"); }
-#line 1699 "syntax.cpp"
+#line 283 "syntax.y"
+                                                              {fprintf(yacc_out,"member -> lvalue[expr]\n"); 
+                                                                (yyval.exprV) = tableBrackets((yyvsp[-3].exprV),(yyvsp[-1].exprV));
+                                                              }
+#line 1701 "syntax.cpp"
     break;
 
   case 51: /* member: call "." ID  */
-#line 277 "syntax.y"
+#line 286 "syntax.y"
                                                         { fprintf(yacc_out,"member -> call.id\n");}
-#line 1705 "syntax.cpp"
+#line 1707 "syntax.cpp"
     break;
 
   case 52: /* member: call "[" expression "]"  */
-#line 278 "syntax.y"
+#line 287 "syntax.y"
                                                               { fprintf(yacc_out,"member -> call[expr]\n");}
-#line 1711 "syntax.cpp"
+#line 1713 "syntax.cpp"
     break;
 
   case 53: /* call: call "(" elist ")"  */
-#line 281 "syntax.y"
+#line 290 "syntax.y"
                                                             {
               expr* current = (yyvsp[-1].exprV);
               int  paramCount = 0;
@@ -1731,30 +1733,30 @@ yyreduce:
                   paramCount--;
               }
 
-              expr* tmpExpr = newTempExpr();
+              expr* tmpExpr = newTempExpr("call");
               emit(call, nullptr, nullptr, (yyvsp[-3].exprV));
 
-              expr* result = newTempExpr();
+              expr* result = newTempExpr("call");
               emit(getretval, nullptr, nullptr, result);
               (yyval.exprV) = result;
 
  }
-#line 1743 "syntax.cpp"
+#line 1745 "syntax.cpp"
     break;
 
   case 54: /* call: lvalue callsuffix  */
-#line 308 "syntax.y"
+#line 317 "syntax.y"
                                                             {
               emit (call, nullptr, nullptr, (yyvsp[-1].exprV));
-              expr* result = newTempExpr();
+              expr* result = newTempExpr("lvalue call");
               emit(getretval, nullptr, nullptr, result);
               (yyval.exprV) = result;
              }
-#line 1754 "syntax.cpp"
+#line 1756 "syntax.cpp"
     break;
 
   case 55: /* call: "(" funcdef ")" "(" elist ")"  */
-#line 314 "syntax.y"
+#line 323 "syntax.y"
                                                                                                   {
               expr* current = (yyvsp[-1].exprV);
               int  paramCount = 0;
@@ -1774,34 +1776,34 @@ yyreduce:
 
                   Symbol *s = (Symbol*)(yyvsp[-4].symbol_P);
                   emit(call, nullptr, nullptr, symToExpr(s));
-                  expr* result = newTempExpr();
+                  expr* result = newTempExpr("call funcdef");
                   emit(getretval, nullptr, nullptr, result);
                   (yyval.exprV) = result;
               }
              }
-#line 1783 "syntax.cpp"
+#line 1785 "syntax.cpp"
     break;
 
   case 56: /* callsuffix: normcall  */
-#line 340 "syntax.y"
+#line 349 "syntax.y"
                                                         {(yyval.exprV) = (yyvsp[0].exprV);}
-#line 1789 "syntax.cpp"
+#line 1791 "syntax.cpp"
     break;
 
   case 57: /* callsuffix: methodcall  */
-#line 341 "syntax.y"
+#line 350 "syntax.y"
                                                         {(yyval.exprV) = (yyvsp[0].exprV);}
-#line 1795 "syntax.cpp"
+#line 1797 "syntax.cpp"
     break;
 
   case 58: /* normcall: "(" elist ")"  */
-#line 344 "syntax.y"
+#line 353 "syntax.y"
                                                         {(yyval.exprV) =(yyvsp[-1].exprV);}
-#line 1801 "syntax.cpp"
+#line 1803 "syntax.cpp"
     break;
 
   case 59: /* methodcall: ".." ID "(" elist ")"  */
-#line 346 "syntax.y"
+#line 355 "syntax.y"
                                                                         {
                                                                            expr* current = (yyvsp[-1].exprV);
                                                                            int  paramCount = 0;
@@ -1814,19 +1816,19 @@ yyreduce:
                                                                                }
                                                                            }
                                                                            (yyval.exprV) = (yyvsp[-1].exprV); }
-#line 1818 "syntax.cpp"
+#line 1820 "syntax.cpp"
     break;
 
   case 60: /* elist: %empty  */
-#line 359 "syntax.y"
+#line 368 "syntax.y"
                                                               { (yyval.exprV) = nullptr; 
                                                                 fprintf(yacc_out,"elist -> null;\n");
                                                               }
-#line 1826 "syntax.cpp"
+#line 1828 "syntax.cpp"
     break;
 
   case 61: /* elist: elist "," expression  */
-#line 363 "syntax.y"
+#line 372 "syntax.y"
                                                               {
                                                                 while((yyvsp[-2].exprV)->next){
                                                                   (yyvsp[-2].exprV) = (yyvsp[-2].exprV)-> next;
@@ -1837,22 +1839,22 @@ yyreduce:
                                                                 (yyvsp[-2].exprV)->next = (yyvsp[0].exprV);
                                                                 (yyvsp[0].exprV)->prev = (yyvsp[-2].exprV);
                                                               }
-#line 1841 "syntax.cpp"
+#line 1843 "syntax.cpp"
     break;
 
   case 62: /* elist: expression  */
-#line 373 "syntax.y"
+#line 382 "syntax.y"
                                                               { (yyval.exprV) = (yyvsp[0].exprV);
                                                                 (yyval.exprV)->next = nullptr;
                                                                 (yyval.exprV)->prev = nullptr;
                                                                 }
-#line 1850 "syntax.cpp"
+#line 1852 "syntax.cpp"
     break;
 
   case 63: /* objectdef: "[" elist "]"  */
-#line 379 "syntax.y"
+#line 388 "syntax.y"
                                                         { 
-                                                          expr* tmpExpr = newTempExpr();
+                                                          expr* tmpExpr = newTempExpr("l_ELIST_r");
                                                           tmpExpr->type = newtable_e;
                                                           emit(tablecreate, nullptr, nullptr, tmpExpr);
                                                           if((yyvsp[-1].exprV)){
@@ -1867,13 +1869,13 @@ yyreduce:
                                                           (yyval.exprV) = tmpExpr;
                                                           fprintf(yacc_out, "objectdef -> [ elist ]\n");
                                                         }
-#line 1871 "syntax.cpp"
+#line 1873 "syntax.cpp"
     break;
 
   case 64: /* objectdef: "[" indexed "]"  */
-#line 395 "syntax.y"
+#line 404 "syntax.y"
                                                         { 
-                                                          expr* tmpExpr = newTempExpr();
+                                                          expr* tmpExpr = newTempExpr("objectdef l_IDX_r");
                                                           tmpExpr->type = newtable_e;
                                                           emit(tablecreate, nullptr, nullptr, tmpExpr);
                                                           expr* current = (yyvsp[-1].exprV);
@@ -1883,13 +1885,13 @@ yyreduce:
                                                           }
                                                           (yyval.exprV) = tmpExpr;
                                                         }
-#line 1887 "syntax.cpp"
+#line 1889 "syntax.cpp"
     break;
 
   case 65: /* objectdef: "[" "]"  */
-#line 406 "syntax.y"
+#line 415 "syntax.y"
                                                         {
-                                                          expr* tmpExpr = newTempExpr();
+                                                          expr* tmpExpr = newTempExpr("objectdef lr");
                                                           if (!tmpExpr) {
                                                               cerr << "Failed to create temp expression for empty table" << endl;
                                                               exit(-1);
@@ -1901,17 +1903,17 @@ yyreduce:
                                                           emit(tablecreate, nullptr, nullptr, tmpExpr);
                                                           (yyval.exprV) = tmpExpr;
                                                         }
-#line 1905 "syntax.cpp"
+#line 1907 "syntax.cpp"
     break;
 
   case 66: /* indexed: indexedelem  */
-#line 421 "syntax.y"
+#line 430 "syntax.y"
                                                         { (yyval.exprV) = (yyvsp[0].exprV);}
-#line 1911 "syntax.cpp"
+#line 1913 "syntax.cpp"
     break;
 
   case 67: /* indexed: indexedelem "," indexedelem  */
-#line 422 "syntax.y"
+#line 431 "syntax.y"
                                                         { 
                                                         expr* current = (yyvsp[-2].exprV);
                                                         while(current->next) {
@@ -1921,50 +1923,50 @@ yyreduce:
                                                         (yyvsp[0].exprV)->prev = current;
                                                         (yyval.exprV) = (yyvsp[-2].exprV);
                                                         }
-#line 1925 "syntax.cpp"
+#line 1927 "syntax.cpp"
     break;
 
   case 68: /* indexedelem: "{" expression ":" expression "}"  */
-#line 433 "syntax.y"
+#line 442 "syntax.y"
                                                                         { 
                                                                           (yyval.exprV) = (yyvsp[-1].exprV);
                                                                           (yyval.exprV)->index = (yyvsp[-3].exprV);
                                                                           (yyval.exprV)->next = nullptr;
                                                                           (yyval.exprV)->prev = nullptr; 
                                                                         }
-#line 1936 "syntax.cpp"
+#line 1938 "syntax.cpp"
     break;
 
   case 69: /* $@1: %empty  */
-#line 440 "syntax.y"
+#line 449 "syntax.y"
                      {
          symbolTable.enterScope();
          fprintf(yacc_out, "Entered block scope %d\n", symbolTable.currentScope);
          
        }
-#line 1946 "syntax.cpp"
+#line 1948 "syntax.cpp"
     break;
 
   case 70: /* block: "{" $@1 stmts "}"  */
-#line 446 "syntax.y"
+#line 455 "syntax.y"
                       {
          symbolTable.exitScope();
          fprintf(yacc_out, "Exited block scope %d\n", symbolTable.currentScope);
          (yyval.statementT) = (yyvsp[-1].statementT);
        }
-#line 1956 "syntax.cpp"
+#line 1958 "syntax.cpp"
     break;
 
   case 71: /* block: "{" "}"  */
-#line 452 "syntax.y"
+#line 461 "syntax.y"
                                     {
          fprintf(yacc_out, "Empty block\n");
        }
-#line 1964 "syntax.cpp"
+#line 1966 "syntax.cpp"
     break;
 
   case 72: /* $@2: %empty  */
-#line 457 "syntax.y"
+#line 466 "syntax.y"
                                          {
              Symbol *s = symbolTable.lookupInScope((yyvsp[-1].stringConst), symbolTable.currentScope);
               if(s!= nullptr){
@@ -1989,11 +1991,11 @@ yyreduce:
               }
               
             }
-#line 1993 "syntax.cpp"
+#line 1995 "syntax.cpp"
     break;
 
   case 73: /* funcdef: "function" ID "(" $@2 idlist ")" block  */
-#line 481 "syntax.y"
+#line 490 "syntax.y"
                                            { 
               Symbol *s = symbolTable.lookup((yyvsp[-5].stringConst))[0];
               if (s && s->type == USER_FUNC) {
@@ -2002,11 +2004,11 @@ yyreduce:
                   emit(funcend, nullptr, nullptr, symToExpr(s));
               }
             }
-#line 2006 "syntax.cpp"
+#line 2008 "syntax.cpp"
     break;
 
   case 74: /* $@3: %empty  */
-#line 489 "syntax.y"
+#line 498 "syntax.y"
                                         {
               string name = "_f" + to_string(anonCount);
               fprintf(yacc_out, "funcdef -> function %s\n", name.c_str());
@@ -2015,11 +2017,11 @@ yyreduce:
               emit(funcstart, nullptr, nullptr, symToExpr(s));
               anonCount++;
               }
-#line 2019 "syntax.cpp"
+#line 2021 "syntax.cpp"
     break;
 
   case 75: /* funcdef: "function" "(" $@3 ")" block  */
-#line 497 "syntax.y"
+#line 506 "syntax.y"
                                             { 
               int currentFuncIndex = anonCount - 1;
               string name = "_f" + to_string(currentFuncIndex);
@@ -2030,63 +2032,63 @@ yyreduce:
                   emit(funcend, nullptr, nullptr, symToExpr(s));
               }
             }
-#line 2034 "syntax.cpp"
+#line 2036 "syntax.cpp"
     break;
 
   case 76: /* const: INT  */
-#line 509 "syntax.y"
+#line 518 "syntax.y"
                                                         { fprintf(yacc_out,"const -> number\n");
                                                           (yyval.exprV) = newIntExpr((yyvsp[0].intConst));
                                                         }
-#line 2042 "syntax.cpp"
+#line 2044 "syntax.cpp"
     break;
 
   case 77: /* const: REAL  */
-#line 512 "syntax.y"
+#line 521 "syntax.y"
                                                         { fprintf(yacc_out,"const -> number\n");
                                                           (yyval.exprV) = newDoubleExpr((yyvsp[0].realConst));
                                                         }
-#line 2050 "syntax.cpp"
+#line 2052 "syntax.cpp"
     break;
 
   case 78: /* const: STRING  */
-#line 515 "syntax.y"
+#line 524 "syntax.y"
                                                         { fprintf(yacc_out,"const -> string\n");
                                                           (yyval.exprV) = newStringExpr((yyvsp[0].stringConst));
                                                         }
-#line 2058 "syntax.cpp"
+#line 2060 "syntax.cpp"
     break;
 
   case 79: /* const: "nil"  */
-#line 518 "syntax.y"
+#line 527 "syntax.y"
                                                         { fprintf(yacc_out,"const -> nil\n");}
-#line 2064 "syntax.cpp"
+#line 2066 "syntax.cpp"
     break;
 
   case 80: /* const: TRUE  */
-#line 519 "syntax.y"
+#line 528 "syntax.y"
                                                         { fprintf(yacc_out,"const -> true\n");
                                                           (yyval.exprV) = newBoolExpr(true);
                                                         }
-#line 2072 "syntax.cpp"
+#line 2074 "syntax.cpp"
     break;
 
   case 81: /* const: FALSE  */
-#line 522 "syntax.y"
+#line 531 "syntax.y"
                                                         { fprintf(yacc_out,"const -> false\n");
                                                           (yyval.exprV) = newBoolExpr(false);
                                                         }
-#line 2080 "syntax.cpp"
+#line 2082 "syntax.cpp"
     break;
 
   case 82: /* idlist: %empty  */
-#line 527 "syntax.y"
+#line 536 "syntax.y"
                                               { fprintf(yacc_out, "idlist -> empty\n"); }
-#line 2086 "syntax.cpp"
+#line 2088 "syntax.cpp"
     break;
 
   case 83: /* idlist: ID  */
-#line 528 "syntax.y"
+#line 537 "syntax.y"
                                                    { 
         Symbol *s = symbolTable.lookupInScope((yyvsp[0].stringConst), symbolTable.currentScope);
         if(s!= nullptr){
@@ -2108,11 +2110,11 @@ yyreduce:
               }
           }
        }
-#line 2112 "syntax.cpp"
+#line 2114 "syntax.cpp"
     break;
 
   case 84: /* idlist: idlist "," ID  */
-#line 549 "syntax.y"
+#line 558 "syntax.y"
                                                    { 
         Symbol *s = symbolTable.lookupInScope((yyvsp[0].stringConst), symbolTable.currentScope);
         if(s!= nullptr){
@@ -2134,61 +2136,61 @@ yyreduce:
               }
           }
        }
-#line 2138 "syntax.cpp"
+#line 2140 "syntax.cpp"
     break;
 
   case 85: /* ifstmt: "if" "(" expression ")" stmt  */
-#line 572 "syntax.y"
+#line 581 "syntax.y"
                                                                                       {
-          fprintf(yacc_out,"ifstmt -> if (expr) stmt\n"); 
-          (yyval.Ifstmt) = newIfStmt((yyvsp[-2].exprV), (yyvsp[0].statementT), nullptr); 
-          backpatch((yyvsp[-2].exprV)->trueList, nextquad());
-          (yyval.Ifstmt)->nextlist = (yyvsp[-2].exprV)->falseList;
+          // fprintf(yacc_out,"ifstmt -> if (expr) stmt\n"); 
+          // $$ = newIfStmt($3, $5, nullptr); 
+          // backpatch($3->trueList, nextquad());
+          // $$->nextlist = $3->falseList;
                     
         }
-#line 2150 "syntax.cpp"
+#line 2152 "syntax.cpp"
     break;
 
   case 86: /* ifstmt: "if" "(" expression ")" stmt "else" stmt  */
-#line 579 "syntax.y"
+#line 588 "syntax.y"
                                                                          { 
-          fprintf(yacc_out,"ifstmt -> if (expr) else stmt\n");
-          (yyval.Ifstmt) = newIfStmt((yyvsp[-4].exprV), (yyvsp[-2].statementT), (yyvsp[0].statementT));   //de briskei to newifstmt eno to exo orisei pantou me to idio onoma ...
-          unsigned thenQuad = nextquad();
-          emit(jump, nullptr, nullptr, nullptr);
-          unsigned elseQuad = nextquad();
-          backpatch((yyvsp[-4].exprV)->trueList, thenQuad);
-          backpatch((yyvsp[-4].exprV)->falseList, elseQuad);
+          // fprintf(yacc_out,"ifstmt -> if (expr) else stmt\n");
+          // $$ = newIfStmt($3, $5, $7);   //de briskei to newifstmt eno to exo orisei pantou me to idio onoma ...
+          // unsigned thenQuad = nextquad();
+          // emit(jump, nullptr, nullptr, nullptr);
+          // unsigned elseQuad = nextquad();
+          // backpatch($3->trueList, thenQuad);
+          // backpatch($3->falseList, elseQuad);
         }
-#line 2164 "syntax.cpp"
+#line 2166 "syntax.cpp"
     break;
 
   case 87: /* whilestmt: "while" "(" expression ")" stmt  */
-#line 590 "syntax.y"
+#line 599 "syntax.y"
                                                                           { }
-#line 2170 "syntax.cpp"
+#line 2172 "syntax.cpp"
     break;
 
   case 88: /* forstmt: "for" "(" elist ";" expression ";" elist ")" stmt  */
-#line 592 "syntax.y"
+#line 601 "syntax.y"
                                                                                                       { }
-#line 2176 "syntax.cpp"
+#line 2178 "syntax.cpp"
     break;
 
   case 89: /* returnstmt: "return" expression ";"  */
-#line 594 "syntax.y"
+#line 603 "syntax.y"
                                                                { }
-#line 2182 "syntax.cpp"
+#line 2184 "syntax.cpp"
     break;
 
   case 90: /* returnstmt: "return" ";"  */
-#line 595 "syntax.y"
+#line 604 "syntax.y"
                                                                { }
-#line 2188 "syntax.cpp"
+#line 2190 "syntax.cpp"
     break;
 
 
-#line 2192 "syntax.cpp"
+#line 2194 "syntax.cpp"
 
       default: break;
     }
@@ -2381,7 +2383,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 598 "syntax.y"
+#line 607 "syntax.y"
 
 
 

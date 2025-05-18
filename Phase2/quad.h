@@ -2,7 +2,7 @@
 #define __QUADS__
 
 #include "expressions.h"
-
+extern FILE *debug_temp;
 extern int tmpCount;
 
 typedef enum iopcode{
@@ -48,6 +48,6 @@ typedef struct quad {
 void print_quads();
 void enumToString();
 void emit(iopcode op, expr* arg1, expr* arg2, expr* result);
-expr* newTempExpr();
+expr* newTempExpr(string F_callee);
 unsigned nextquad();
 #endif
