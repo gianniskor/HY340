@@ -114,4 +114,8 @@ void setToNULL(expr* e);
 bool isTableItem(expr* e);
  
 expr* evaluateBoolean(expr* e, expr* e2, iopcode opcode);
+
+expr* evaluateAND_OR(expr* e, expr* e2, iopcode opcode);
+
+expr* evaluateNOT(expr* e);
 #endif

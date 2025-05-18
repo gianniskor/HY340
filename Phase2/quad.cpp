@@ -35,6 +35,20 @@ void emit(iopcode op, expr* arg1, expr* arg2, expr* result){
     currQuad++;
 }
 
+void emit(iopcode op, expr* arg1, expr* arg2, expr* result, int label){
+    quad *new_quad = new quad();
+    new_quad->op = op;
+    new_quad->arg1 = arg1;
+    new_quad->arg2 = arg2;
+    new_quad->result = result;
+    new_quad->label = label;
+    new_quad->line = yylineno; 
+    quads.push_back(new_quad);
+    currQuad++;
+}
+
+
+
 expr* newetempvar(){
     string name = "_t%u" + to_string(temp_count++);
     Symbol* tempsym = symbolTable.insert(name, symbolTable.currentScope, yylineno, LOCAL_VAR);
@@ -106,7 +120,7 @@ void print_quads() {
         if (q->label != 0) {
             cout << setw(5) << q->label;
         }
-        cout << "    [line " << q->line << "]" << endl;
+        cout<< endl;
     }
 }
 

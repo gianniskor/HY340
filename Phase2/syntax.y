@@ -135,7 +135,9 @@
 %type <symbol_P> funcdef //working on it
 %type <exprV> const //done 
 %type <symbol_P> idlist
-%type <Ifstmt> ifstmt
+%type <intConst> ifprefix 
+%type <intConst> elseprefix
+%type <statementT> ifstmt
 %type <symbol_P> whilestmt
 %type <symbol_P> forstmt
 %type <symbol_P> returnstmt
@@ -146,8 +148,10 @@
   arithmitika done;
   object def done;
   object assign, access,incr;
+  a {<,>,<=,>=,==,!=} b;
 
   KANW: 
+  NOT OR
 
   TODO:
   oliki (!)
@@ -225,8 +229,12 @@ expression: assignexpr                                  { fprintf(yacc_out,"expr
                                                           $$ = evaluateBoolean($1,$3,if_greatereq);
                                                         }
 
-          | expression AND expression                   { fprintf(yacc_out,"expr -> AND\n");}
-          | expression OR expression                    { fprintf(yacc_out,"expr -> OR\n");} 
+          | expression AND expression                   { fprintf(yacc_out,"expr -> AND\n");
+                                                          evaluateAND_OR($1,$3,and_op);
+                                                        }
+          | expression OR expression                    { fprintf(yacc_out,"expr -> OR\n");
+                                                          evaluateAND_OR($1,$3,or_op);  
+                                                        } 
           ;
 
 term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out,"expr -> (term)\n");
@@ -237,6 +245,7 @@ term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out
                                                               }
             | NOT expression                                  {
                                                                fprintf(yacc_out,"expr -> !term\n");
+                                                               $$ = evaluateNOT($2);
                                                               }
             | PLUS_PLUS lvalue                                {
                                                                 expr* oneoneoneone = newIntExpr(1);
@@ -424,19 +433,19 @@ objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            {
                                                           }
                                                           $$ = tmpExpr;
                                                         }
-            | LEFT_BRACKET RIGHT_BRACKET                {
-                                                          expr* tmpExpr = newTempExpr("objectdef lr");
-                                                          if (!tmpExpr) {
-                                                              cerr << "Failed to create temp expression for empty table" << endl;
-                                                              exit(-1);
-                                                          }
-                                                          tmpExpr->type = newtable_e;
-                                                          tmpExpr->next = nullptr;
-                                                          tmpExpr->prev = nullptr;
-                                                          tmpExpr->index = nullptr;
-                                                          emit(tablecreate, nullptr, nullptr, tmpExpr);
-                                                          $$ = tmpExpr;
-                                                        }
+            // | LEFT_BRACKET RIGHT_BRACKET                {
+            //                                               expr* tmpExpr = newTempExpr("objectdef lr");
+            //                                               if (!tmpExpr) {
+            //                                                   cerr << "Failed to create temp expression for empty table" << endl;
+            //                                                   exit(-1);
+            //                                               }
+            //                                               tmpExpr->type = newtable_e;
+            //                                               tmpExpr->next = nullptr;
+            //                                               tmpExpr->prev = nullptr;
+            //                                               tmpExpr->index = nullptr;
+            //                                               emit(tablecreate, nullptr, nullptr, tmpExpr);
+            //                                               $$ = tmpExpr;
+            //                                             }
             ;
 
 indexed:    indexedelem                                 { $$ = $1;}
@@ -590,14 +599,18 @@ idlist: %empty                                { fprintf(yacc_out, "idlist -> emp
        }
        ;    
 
-ifstmt: IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt %prec LOWER_THAN_ELSE   {
+ifprefix: IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS { }
+
+elseprefix: ELSE {}
+
+ifstmt: ifprefix stmt elseprefix stmt {
           // fprintf(yacc_out,"ifstmt -> if (expr) stmt\n"); 
           // $$ = newIfStmt($3, $5, nullptr); 
           // backpatch($3->trueList, nextquad());
           // $$->nextlist = $3->falseList;
                     
         }
-       | IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS stmt ELSE stmt { 
+       | ifprefix stmt %prec LOWER_THAN_ELSE{ 
           // fprintf(yacc_out,"ifstmt -> if (expr) else stmt\n");
           // $$ = newIfStmt($3, $5, $7);   //de briskei to newifstmt eno to exo orisei pantou me to idio onoma ...
           // unsigned thenQuad = nextquad();

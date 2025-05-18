@@ -50,4 +50,5 @@ void enumToString();
 void emit(iopcode op, expr* arg1, expr* arg2, expr* result);
 expr* newTempExpr(string F_callee);
 unsigned nextquad();
+void emit(iopcode op, expr* arg1, expr* arg2, expr* result, int label);
 #endif

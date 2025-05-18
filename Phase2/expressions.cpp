@@ -211,7 +211,9 @@ expr* evaluateAssignExp(expr* e, expr *e2){
         return nullptr;
     }
     
-    equalsExprHelper(e,e2,tmpExpr);
+    // equalsExprHelper(e,e2,tmpExpr);
+    tmpExpr = newTempExpr("evalassign");
+    equalsExprHelper(e, e2, tmpExpr);
     return tmpExpr;
 }
 
@@ -389,10 +391,56 @@ expr* evaluateBoolean(expr* e, expr* e2, iopcode opcode){
     // emit(assign,JumpFalse,nullptr,tmpExpr);
     // emit(jump,nullptr,nullptr,JumpPlus5);
     // emit(assign,JumpTrue,nullptr,tmpExpr);
-    emit(opcode, e2,JumpPlus3,e);
-    emit(jump,nullptr,nullptr,JumpPlus5);
+    emit(opcode, e,e2,nullptr,quad_counter+3);
+    emit(jump,nullptr,nullptr,nullptr,quad_counter+5);
     emit(assign,JumpTrue,nullptr,tmpExpr);
-    emit(jump,nullptr,nullptr,JumpPlus6);
+    emit(jump,nullptr,nullptr,nullptr,quad_counter+6);
     emit(assign,JumpFalse,nullptr,tmpExpr);
+    return tmpExpr;
+}
+
+expr* evaluateAND_OR(expr* e, expr* e2, iopcode opcode){
+    if (!e || !e2) {
+        cerr << "Error: Null expression in evaluatebool" << endl;
+        return nullptr;
+    }
+    bool flag1 = validNumberExpr(e) || (e->type == constbool_e);
+    bool flag2 = validNumberExpr(e2) || (e2->type == constbool_e);
+    if (!flag1 || !flag2) {
+        printf("Error, flag in eNum is false \n");
+        exit(-1);
+    }
+    //res
+    expr* tmpExpr = nullptr;
+    if (tmpCheck(e)) {
+        tmpExpr = symToExpr(e->sym);
+    } else if (tmpCheck(e2)) {
+        tmpExpr = symToExpr(e2->sym);
+    } else {
+        tmpExpr = newTempExpr("evalandOR");
+    }
+    emit(opcode,e,e2,tmpExpr);
+    return tmpExpr;
+}
+
+expr* evaluateNOT(expr* e){
+    if (!e) {
+        cerr << "Error: Null expression in evaluatebool" << endl;
+        return nullptr;
+    }
+    bool flag1 = validNumberExpr(e) || (e->type == constbool_e);
+    if (!flag1) {
+        printf("Error, flag in eNum is false \n");
+        exit(-1);
+    }
+    //res
+    expr* tmpExpr = nullptr;
+    if (tmpCheck(e)) {
+        tmpExpr = symToExpr(e->sym);
+    }
+    else {
+        tmpExpr = newTempExpr("evalnot");
+    }
+    emit(not_op,e,nullptr,tmpExpr);
     return tmpExpr;
 }
