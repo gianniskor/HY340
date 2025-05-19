@@ -149,13 +149,12 @@
   object def done;
   object assign, access,incr;
   a {<,>,<=,>=,==,!=} b;
+  NOT, OR, AND;
+  IF, IF-ELSE, IF-ELSE_IF-ELSE;
 
   KANW: 
-  NOT OR
 
   TODO:
-  oliki (!)
-  if else
   while
   for
 
