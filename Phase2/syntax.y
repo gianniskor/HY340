@@ -599,25 +599,22 @@ idlist: %empty                                { fprintf(yacc_out, "idlist -> emp
        }
        ;    
 
-ifprefix: IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS { 
-      int quad_counter = nextquad();
-    //expr* JumpPlus2 = newIntExpr(quad_counter+2);
-    expr* JumpTrue = newBoolExpr(true);
-    emit(if_eq,$3,JumpTrue,nullptr,quad_counter+3);
-    $$ = nextquad();
-    //0 is gonnafixed
-    emit(jump,nullptr,nullptr,0);
-                                                          //  $$ = ifPrefix($3,*help);
-                                                          }
+ifprefix: IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS {
+                                                            $$ = ifPrefix($3);
+                                                           }
 
-elseprefix: ELSE {}
+elseprefix: ELSE                                           {
+                                                            $$ = elsePrefix();
+                                                           }
 
 ifstmt: ifprefix stmt elseprefix stmt {
           // fprintf(yacc_out,"ifstmt -> if (expr) stmt\n"); 
           // $$ = newIfStmt($3, $5, nullptr); 
           // backpatch($3->trueList, nextquad());
           // $$->nextlist = $3->falseList;
-                    
+          fixLabel($1,$3+1);
+          int quad_counter = nextquad();
+          fixLabel($3,quad_counter);
         }
        | ifprefix stmt %prec LOWER_THAN_ELSE{ 
           $$ = $2;

@@ -119,7 +119,9 @@ expr* evaluateAND_OR(expr* e, expr* e2, iopcode opcode);
 
 expr* evaluateNOT(expr* e);
 
-void ifPrefix(expr* e, int& res);
+int ifPrefix(expr* e);
 
 void fixLabel(int quad_id, int label);
+
+int elsePrefix();
 #endif

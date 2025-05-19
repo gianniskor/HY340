@@ -1,1 +1,7 @@
-a <= b;
+if (a)
+	if (b)
+		d-0;
+	else
+		d-4;
+else
+	0-d;

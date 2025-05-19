@@ -445,14 +445,15 @@ expr* evaluateNOT(expr* e){
     return tmpExpr;
 }
 
-void ifPrefix(expr* e,int &res){
+int ifPrefix(expr* e){
     int quad_counter = nextquad();
     //expr* JumpPlus2 = newIntExpr(quad_counter+2);
     expr* JumpTrue = newBoolExpr(true);
     emit(if_eq,e,JumpTrue,nullptr,quad_counter+3);
-    res = nextquad();
+    quad_counter = nextquad();
     //0 is gonnafixed
     emit(jump,nullptr,nullptr,0);
+    return quad_counter;
 }
 
 void fixLabel(int quad_id, int label){
@@ -461,6 +462,12 @@ void fixLabel(int quad_id, int label){
         exit(-1);
     }
     else{
-        quads[quad_id]->label = label;
+        quads[quad_id]->label = label+1;
     }
+}
+
+int elsePrefix(){
+    int returnArg = nextquad();
+    emit(jump,nullptr,nullptr,nullptr,0);
+    return returnArg;
 }
