@@ -262,7 +262,6 @@ expr* evaluatePP(expr *e, expr* e2, bool flag, iopcode t){
             }else{
             emit(t, e2, e, e2);
             emit(assign, e2, nullptr, tmpExpr);}
-        // }
     }
     
     return tmpExpr;
@@ -286,23 +285,7 @@ expr* newMember(expr *table, string key) {
 
 
 
-
 expr* tablePeriodId(expr *table, string pointer) {
-    // if (!table) {
-    //     cerr << "Nullptr at tablePeriodId" << endl;
-    //     exit(-1);
-    // }
-    // if (isFunc(table)) {
-    //     cerr << "Error, Function as name in value, in tablePeriodId" << endl;
-    //     exit(-1);
-    // }
-    // expr* member = newMember(table, pointer);
-    // expr* result = newTempExpr();
-    // emit(tablegetelem, member, member->index, result);
-    
-    // return result; // Return the temp, not the member itself
-
-    //palio de doulevei to a.r.g;
     if (!table) {
         cerr << "Nullptr at tablePeriodId" << endl;
         exit(-1);
@@ -315,58 +298,12 @@ expr* tablePeriodId(expr *table, string pointer) {
         expr* tmp = evalMem(table);
         return newMember(tmp, pointer);
     } else {
-        expr*  es = newMember(table, pointer);
-        return es;
+        return newMember(table, pointer);
     }
-    
-    //lathos
-    // if (!table) {
-    //     cerr << "Nullptr at tablePeriodId" << endl;
-    //     exit(-1);
-    // }
-    // if (isFunc(table)) {
-    //     cerr << "Error, Function as name in value, in tablePeriodId" << endl;
-    //     exit(-1);
-    // }
-    // expr* member = new expr();
-    // member->type = tableitem_e;
-    // member->sym = table->sym;
-    // member->index = newStringExpr(pointer);
-    // setToNULL(member);
-    
-    // expr* result = newTempExpr();
-    // result->type = var_e;
-    // emit(tablegetelem, member, member->index, result);
-    
-    // return result;
 }
 
 expr* tableBrackets(expr *table,expr *index){
-    // expr *tableitem;
-    // if (!table) {
-    //     cerr << "Nullptr at tableBrackets" << endl;
-    //     exit(-1);
-    // }
-    // if (isFunc(table)) {
-    //     cerr << "Error, Function as name in value, in tableBrackets" << endl;
-    //     exit(-1);
-    // }
-    // if(table->type == tableitem_e) {
-    //     expr* tmp = evalMem(table);
-    //     tableitem = new expr();
-    //     tableitem->type = tableitem_e;
-    //     tableitem->sym = tmp->sym;
-    //     tableitem->index = index;
-    //     setToNULL(tableitem);
-    //     return tableitem;
-    // } else {
-    //     tableitem = new expr();
-    //     tableitem->type = tableitem_e;
-    //     tableitem->sym = table->sym;
-    //     tableitem->index = index;
-    //     setToNULL(tableitem);
-    //     return tableitem;
-    // }
+    expr *tableitem;
     if (!table) {
         cerr << "Nullptr at tableBrackets" << endl;
         exit(-1);
@@ -375,23 +312,25 @@ expr* tableBrackets(expr *table,expr *index){
         cerr << "Error, Function as name in value, in tableBrackets" << endl;
         exit(-1);
     }
-    
-    expr* member = new expr();
-    member->type = tableitem_e;
-    member->sym = table->sym;
-    member->index = index;
-    setToNULL(member);
-    expr* result = newTempExpr();
-    result->type = var_e;
-    emit(tablegetelem, member, member->index, result);
-    
-    return result;
+    if(table->type == tableitem_e) {
+        expr* tmp = evalMem(table);
+        tableitem = new expr();
+        tableitem->type = tableitem_e;
+        tableitem->sym = tmp->sym;
+        tableitem->index = index;
+        setToNULL(tableitem);
+        return tableitem;
+    } else {
+        tableitem = new expr();
+        tableitem->type = tableitem_e;
+        tableitem->sym = table->sym;
+        tableitem->index = index;
+        setToNULL(tableitem);
+        return tableitem;
+    }
+
 }
 
-// expr* evaluateBoolean(expr* e, expr* e2, iopcode opcode){
-//     expr* retArg = nullptr;
-//     if(e->)
-// }
 
 bool isTableItem(expr* e){
     if(e->type == tableitem_e){
