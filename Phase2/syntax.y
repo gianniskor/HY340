@@ -124,7 +124,7 @@
 %type <statement> stmt 
 %type <exprV> term //working on it
 %type <exprV> assignexpr //done
-%type <symbol_P> primary
+%type <exprV> primary
 %type <exprV> lvalue
 %type <exprV> member //working on it
 %type <exprV> call
@@ -314,7 +314,8 @@ term:       LEFT_PARENTHESIS expression RIGHT_PARENTHESIS     { fprintf(yacc_out
                                                                 expr* oneoneoneone = newIntExpr(1);
                                                                 $$ = evaluatePP($1, oneoneoneone, true, sub);
                                                               }
-            | primary                                         { fprintf(yacc_out,"expr -> primary\n");}
+            | primary                                         { $$ = $1;
+                                                                fprintf(yacc_out,"expr -> primary\n");}
             ;
 
 assignexpr: lvalue EQUALS expression                          { 
@@ -644,6 +645,7 @@ ifstmt: ifprefix stmt elseprefix stmt {
           fixLabel($1,$3+1);
           int quad_counter = nextquad();
           fixLabel($3,quad_counter);
+          $$ = evaluateIfElse($1, $3, $2, $4);
         }
        | ifprefix stmt %prec LOWER_THAN_ELSE{ 
           $$ = $2;

@@ -278,6 +278,20 @@ expr* newMember(expr *table, string key) {
 }
 
 expr* tablePeriodId(expr *table, string pointer) {
+    // if (!table) {
+    //     cerr << "Nullptr at tablePeriodId" << endl;
+    //     exit(-1);
+    // }
+    // if (isFunc(table)) {
+    //     cerr << "Error, Function as name in value, in tablePeriodId" << endl;
+    //     exit(-1);
+    // }
+    // if (table->type == tableitem_e) {
+    //     expr* tmp = evalMem(table);
+    //     return newMember(tmp, pointer);
+    // } else {
+    //     return newMember(table, pointer);
+    // }
     if (!table) {
         cerr << "Nullptr at tablePeriodId" << endl;
         exit(-1);
@@ -286,16 +300,48 @@ expr* tablePeriodId(expr *table, string pointer) {
         cerr << "Error, Function as name in value, in tablePeriodId" << endl;
         exit(-1);
     }
-    if (table->type == tableitem_e) {
-        expr* tmp = evalMem(table);
-        return newMember(tmp, pointer);
-    } else {
-        return newMember(table, pointer);
-    }
+    
+    // Create the member expression
+    expr* member = new expr();
+    member->type = tableitem_e;
+    member->sym = table->sym;
+    member->index = newStringExpr(pointer);
+    setToNULL(member);
+    
+    // Always emit a tablegetelem operation
+    expr* result = newTempExpr();
+    result->type = var_e;
+    emit(tablegetelem, member, member->index, result);
+    
+    return result;
 }
 
 expr* tableBrackets(expr *table,expr *index){
-    expr *tableitem;
+    // expr *tableitem;
+    // if (!table) {
+    //     cerr << "Nullptr at tableBrackets" << endl;
+    //     exit(-1);
+    // }
+    // if (isFunc(table)) {
+    //     cerr << "Error, Function as name in value, in tableBrackets" << endl;
+    //     exit(-1);
+    // }
+    // if(table->type == tableitem_e) {
+    //     expr* tmp = evalMem(table);
+    //     tableitem = new expr();
+    //     tableitem->type = tableitem_e;
+    //     tableitem->sym = tmp->sym;
+    //     tableitem->index = index;
+    //     setToNULL(tableitem);
+    //     return tableitem;
+    // } else {
+    //     tableitem = new expr();
+    //     tableitem->type = tableitem_e;
+    //     tableitem->sym = table->sym;
+    //     tableitem->index = index;
+    //     setToNULL(tableitem);
+    //     return tableitem;
+    // }
     if (!table) {
         cerr << "Nullptr at tableBrackets" << endl;
         exit(-1);
@@ -304,23 +350,20 @@ expr* tableBrackets(expr *table,expr *index){
         cerr << "Error, Function as name in value, in tableBrackets" << endl;
         exit(-1);
     }
-    if(table->type == tableitem_e) {
-        expr* tmp = evalMem(table);
-        tableitem = new expr();
-        tableitem->type = tableitem_e;
-        tableitem->sym = tmp->sym;
-        tableitem->index = index;
-        setToNULL(tableitem);
-        return tableitem;
-    } else {
-        tableitem = new expr();
-        tableitem->type = tableitem_e;
-        tableitem->sym = table->sym;
-        tableitem->index = index;
-        setToNULL(tableitem);
-        return tableitem;
-    }
-
+    
+    // Create the member expression
+    expr* member = new expr();
+    member->type = tableitem_e;
+    member->sym = table->sym;
+    member->index = index;
+    setToNULL(member);
+    
+    // Always emit a tablegetelem operation
+    expr* result = newTempExpr();
+    result->type = var_e;
+    emit(tablegetelem, member, member->index, result);
+    
+    return result;
 }
 
 // expr* evaluateBoolean(expr* e, expr* e2, iopcode opcode){
@@ -545,4 +588,12 @@ stmt_t* evaluateWhile(int cond, stmt_t* stmt, int start){
     fixList(stmt->breakLabel,tmp);
     fixList(stmt->continueLabel,start);
     return stmt;
+}
+
+stmt_t* evaluateIfElse(int ifConst, int elseConst, stmt_t* s1, stmt_t* s2){
+    stmt_t* s= initLists();
+    s->breakLabel = mergeList(s1->breakLabel, s2->breakLabel); 
+    s->continueLabel = mergeList(s1->continueLabel, s2->continueLabel); 
+    s->returnLabel = mergeList(s1->returnLabel, s2->returnLabel); 
+    return s;
 }

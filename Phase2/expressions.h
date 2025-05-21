@@ -139,5 +139,7 @@ void fixList(int list, int label);
 
 int setWhileCont(expr* e);
 
+stmt_t* evaluateIfElse(int ifConst, int elseConst, stmt_t* s1, stmt_t* s2);
+
 stmt_t* evaluateWhile(int cond, stmt_t* stmt, int start);
 #endif
