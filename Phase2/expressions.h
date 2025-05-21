@@ -61,6 +61,11 @@ typedef struct stmt_t{
     int returnLabel;
 } stmt_t;
 
+typedef struct forConst_t{
+    int test;
+    int enter;
+} forConst_t;
+
 void incLoop();
 
 void decLoop();
@@ -142,4 +147,6 @@ int setWhileCont(expr* e);
 stmt_t* evaluateIfElse(int ifConst, int elseConst, stmt_t* s1, stmt_t* s2);
 
 stmt_t* evaluateWhile(int cond, stmt_t* stmt, int start);
+
+forConst_t* evaluateForPrefix(expr* e, int M);
 #endif

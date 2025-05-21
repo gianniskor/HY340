@@ -6,6 +6,8 @@ using namespace std;
 extern int tmpCount;
 extern SymbolTable symbolTable;
 extern int yylineno;
+int flagg1 = 1;
+int flagg2 = 2;
 // extern vector<int> continueList;
 // extern vector<int> breakList;
 
@@ -196,6 +198,8 @@ expr* evaluateAssignExp(expr* e, expr *e2){
         return tmpExpr;
     }
     if (e->type == tableitem_e) {
+           flagg1 = e->type;
+    flagg2 = e->type;
         if (e2->type == tableitem_e) {
             expr* rightValue = newTempExpr();
             emit(tablegetelem, e2, e2->index, rightValue);
@@ -206,19 +210,22 @@ expr* evaluateAssignExp(expr* e, expr *e2){
         expr* result = newTempExpr();
         emit(tablegetelem, e, e->index, result);
         return result;
+        //return e2;
     }
     if(!validNumberExpr(e)){
         cerr << "Invalid assignment target, not a valid lvalue at line " << yylineno << endl;
         return nullptr;
     }
     tmpExpr = newTempExpr();
+    flagg1 = e->type;
+    flagg2 = e->type;
     equalsExprHelper(e, e2, tmpExpr);
     return tmpExpr;
 }
 
 void equalsExprHelper(expr* lvalue, expr* rvalue, expr* tmpExpr){
-    emit(assign, rvalue, nullptr, lvalue);
-    emit(assign,lvalue, nullptr,tmpExpr);
+    emit(assign, rvalue, nullptr, lvalue,flagg1);
+    emit(assign,lvalue, nullptr,tmpExpr,flagg2);
 }
 /*  
     if bool == true, a++
@@ -277,6 +284,9 @@ expr* newMember(expr *table, string key) {
     return t;
 }
 
+
+
+
 expr* tablePeriodId(expr *table, string pointer) {
     // if (!table) {
     //     cerr << "Nullptr at tablePeriodId" << endl;
@@ -286,12 +296,13 @@ expr* tablePeriodId(expr *table, string pointer) {
     //     cerr << "Error, Function as name in value, in tablePeriodId" << endl;
     //     exit(-1);
     // }
-    // if (table->type == tableitem_e) {
-    //     expr* tmp = evalMem(table);
-    //     return newMember(tmp, pointer);
-    // } else {
-    //     return newMember(table, pointer);
-    // }
+    // expr* member = newMember(table, pointer);
+    // expr* result = newTempExpr();
+    // emit(tablegetelem, member, member->index, result);
+    
+    // return result; // Return the temp, not the member itself
+
+    //palio de doulevei to a.r.g;
     if (!table) {
         cerr << "Nullptr at tablePeriodId" << endl;
         exit(-1);
@@ -300,20 +311,34 @@ expr* tablePeriodId(expr *table, string pointer) {
         cerr << "Error, Function as name in value, in tablePeriodId" << endl;
         exit(-1);
     }
+    if (table->type == tableitem_e) {
+        expr* tmp = evalMem(table);
+        return newMember(tmp, pointer);
+    } else {
+        expr*  es = newMember(table, pointer);
+        return es;
+    }
     
-    // Create the member expression
-    expr* member = new expr();
-    member->type = tableitem_e;
-    member->sym = table->sym;
-    member->index = newStringExpr(pointer);
-    setToNULL(member);
+    //lathos
+    // if (!table) {
+    //     cerr << "Nullptr at tablePeriodId" << endl;
+    //     exit(-1);
+    // }
+    // if (isFunc(table)) {
+    //     cerr << "Error, Function as name in value, in tablePeriodId" << endl;
+    //     exit(-1);
+    // }
+    // expr* member = new expr();
+    // member->type = tableitem_e;
+    // member->sym = table->sym;
+    // member->index = newStringExpr(pointer);
+    // setToNULL(member);
     
-    // Always emit a tablegetelem operation
-    expr* result = newTempExpr();
-    result->type = var_e;
-    emit(tablegetelem, member, member->index, result);
+    // expr* result = newTempExpr();
+    // result->type = var_e;
+    // emit(tablegetelem, member, member->index, result);
     
-    return result;
+    // return result;
 }
 
 expr* tableBrackets(expr *table,expr *index){
@@ -351,14 +376,11 @@ expr* tableBrackets(expr *table,expr *index){
         exit(-1);
     }
     
-    // Create the member expression
     expr* member = new expr();
     member->type = tableitem_e;
     member->sym = table->sym;
     member->index = index;
     setToNULL(member);
-    
-    // Always emit a tablegetelem operation
     expr* result = newTempExpr();
     result->type = var_e;
     emit(tablegetelem, member, member->index, result);
@@ -470,7 +492,7 @@ int ifPrefix(expr* e){
     expr* JumpTrue = newBoolExpr(true);
     emit(if_eq,e,JumpTrue,nullptr,quad_counter+3);
     quad_counter = nextquad();
-    //0 is gonnafixed
+    //0 is gonnabefixed
     emit(jump,nullptr,nullptr,0);
     return quad_counter;
 }
@@ -596,4 +618,14 @@ stmt_t* evaluateIfElse(int ifConst, int elseConst, stmt_t* s1, stmt_t* s2){
     s->continueLabel = mergeList(s1->continueLabel, s2->continueLabel); 
     s->returnLabel = mergeList(s1->returnLabel, s2->returnLabel); 
     return s;
+}
+
+forConst_t* evaluateForPrefix(expr* e, int M){
+    forConst_t* ret = new forConst_t();
+    ret->test = M;
+    ret->enter = nextquad();
+    int quad_counter = nextquad();
+    expr* JumpTrue = newBoolExpr(true);
+    emit(if_eq,e,JumpTrue,nullptr,quad_counter);
+    return ret;
 }

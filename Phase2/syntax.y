@@ -43,6 +43,7 @@
     //type_t * statementT;
     expr* expression;
     stmt_t* statement;
+    forConst_t* forCnst;
     /*menei na dw to for_type*/
 }
 %initial-action
@@ -148,12 +149,13 @@
 %type <exprV> objectdef //done
 %type <intConst> whileflag //woi
 %type <intConst> startwhile //woi
-%type <intConst> forprefix //woi
+//%type <intConst> forprefix //woi
 %type <intConst> forstmt //woi
 %type <intConst> N //woi
 %type <intConst> M //woi
 %type <statement> program
 %type <statement> loop
+%type <forCnst> forprefix;
 
 /*
   BUSULAS: 
@@ -674,10 +676,12 @@ N: %empty{  $$ = nextquad();
 M: %empty{  $$ = nextquad();  }
 
 forprefix: FOR LEFT_PARENTHESIS elist SEMICOLON M expression SEMICOLON {
-                                                          }
+                                                                          $$ = evaluateForPrefix($6,$5);
+                                                                       }
 
-forstmt: forprefix N elist RIGHT_PARENTHESIS N stmt N {
-                          }
+forstmt: forprefix N elist RIGHT_PARENTHESIS N stmt N                  {
+                                                                          
+                                                                       }
 
 returnstmt: RETURN expression SEMICOLON                        { }  
             | RETURN SEMICOLON                                 { }
