@@ -264,6 +264,7 @@ unsigned int getTotalLoc(int functionScope) {
         for (auto* symbol : scopeTable[functionScope]) {
             if (symbol->isActive() && symbol->getType() == LOCAL_VAR) {
                 count++;
+                // cout << "variables : " << count << " " << symbol->getName() << endl;
             }
         }
     }

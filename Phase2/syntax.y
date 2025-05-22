@@ -151,7 +151,8 @@
 %type <intConst> M 
 %type <statement> program
 %type <statement> loop
-%type <forCnst> forprefix;
+%type <forCnst> forprefix
+%type <symbol_P> funcprefix;
 
 /*
   BUSULAS: 
@@ -400,7 +401,7 @@ call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
                   current = current->prev;
                   paramCount--;
               }
-              expr* e_tmp = newNillExpr();
+              expr* e_tmp = newNilExpr();
 
               emit(call, nullptr, nullptr, $1);
 
@@ -422,8 +423,9 @@ call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
                       paramCount--;
                   }
                   expr* result = newTempExpr();
+                  expr* funcExpr = symToExpr($2);
                   
-                  emit(call, nullptr, nullptr, nullptr,$2);
+                  emit(call, nullptr, nullptr, funcExpr);
                   emit(getretval, nullptr, nullptr, result);
                   $$ = result;
              }
@@ -439,17 +441,28 @@ callsuffix: normcall                                    {$$ = $1;
 normcall:   LEFT_PARENTHESIS elist RIGHT_PARENTHESIS    {$$ =$2;}
 
 methodcall: DOUBLE_PERIOD ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
-                                                                           expr* current = $4;
-                                                                           int  paramCount = 0;
-                                                                           expr* last = nullptr;
-                                                                           while (current) {
-                                                                               paramCount++;
-                                                                               if (current->next) {
-                                                                                   last = current;
-                                                                                   current = current->next;
-                                                                               }
-                                                                           }
-                                                                           $$ = $4; }
+                                                          expr* current = $4;
+                                                          int  paramCount = 0;
+
+                                                          while (current) {
+                                                              paramCount++;
+                                                              if (!current->next) break;
+                                                                  current = current->next;
+                                                              }
+                                                              
+
+                                                          while (current && paramCount > 0) {
+                                                              emit (param, current, nullptr, nullptr);
+                                                              current = current->prev;
+                                                              paramCount--;
+                                                          }
+                                                          expr* method = newStringExpr($2);
+                                                          emit(call, nullptr, nullptr, method);
+                                                          expr* result = newTempExpr();
+                                                          emit(getretval, nullptr, nullptr, result);
+                                                          $$ = result;
+                                                        }
+                                                        ;             
 
 elist:      %empty                                            { $$ = nullptr; 
                                                                 fprintf(yacc_out,"elist -> null;\n");
@@ -532,50 +545,51 @@ block: LEFT_CBRACKET {
          fprintf(yacc_out, "Empty block\n");
        }
        ;
+funcprefix: FUNCTION ID LEFT_PARENTHESIS {
+                  localOffset = -1;
+                  Symbol *s = symbolTable.lookupInScope($2, symbolTable.currentScope);
+                  if(s != nullptr) {
+                      fprintf(stderr, "ERROR at line %d, with scope %d: function %s already declared\n", 
+                              yylineno, symbolTable.currentScope, $2);
+                  } else {
+                      // Check for library function conflicts
+                      vector <Symbol*> temp_sym = symbolTable.lookup($2);
+                      bool isLib = false;
+                      for (auto& sym : temp_sym) {
+                          if (sym->type == LIB_FUNC) {
+                              isLib = true;
+                              break;
+                          }
+                      }
+                      
+                      if (isLib) {
+                          fprintf(stderr, "ERROR at line %d, with scope %d: function %s already declared as a library function\n", 
+                                  yylineno, symbolTable.currentScope, $2);
+                      } else {
+                          s = symbolTable.insert($2, symbolTable.currentScope, yylineno, USER_FUNC);
+                          s->setIaddress(nextquad());
+                          emit(funcstart, nullptr, nullptr, symToExpr(s));
+                          fprintf(yacc_out, "funcdef -> function %s\n", $2);
+                                  }
+                  }
+                  $$ = s;
+              }
+              
 
-funcdef:    FUNCTION ID LEFT_PARENTHESIS {
-              localOffset = -1;
-             Symbol *s = symbolTable.lookupInScope($2, symbolTable.currentScope);
-              if(s!= nullptr){
-                fprintf(stderr, "ERROR at line %d, with scope %d: function %s already declared\n", yylineno, symbolTable.currentScope, $2);
-              } else {
-               vector <Symbol*> temp_sym = symbolTable.lookup($2);
-               bool isLib = false;
-                for (auto& sym : temp_sym) {
-                    if (sym->type == LIB_FUNC) {
-                        isLib = true;
-                        break;
-                    }
-                }
-                if (isLib) {
-                    fprintf(stderr, "ERROR at line %d, with scope %d: function %s already declared as a library function\n", yylineno, symbolTable.currentScope, $2);
-                } else {
-                   Symbol *s = symbolTable.insert($2, symbolTable.currentScope, yylineno, USER_FUNC);
-                   s->setIaddress(nextquad());
-                   emit(funcstart, nullptr, nullptr, symToExpr(s));
-                   fprintf(yacc_out, "funcdef -> function %s\n", $2);
-                }
+funcdef:      funcprefix idlist RIGHT_PARENTHESIS LEFT_CBRACKET {
+                    symbolTable.enterScope();
+                    fprintf(yacc_out, "Function body using scope %d\n", symbolTable.currentScope);
+              } stmts RIGHT_CBRACKET { 
+                  Symbol *s = $1;
+                  if (s && s->type == USER_FUNC) {
+                      unsigned int localCount = symbolTable.getTotalLoc(symbolTable.currentScope);
+                      s->setTotalLoc(localCount);
+                      emit(funcend, nullptr, nullptr, symToExpr(s));
+                  }
+                  symbolTable.exitScope();
+                  fprintf(yacc_out, "Exited function scope %d\n", symbolTable.currentScope);
+                  $$ = s;
               }
-               int functionScope = symbolTable.currentScope + 1;
-               if (s) s->setFuncScope(functionScope);
-               //$$ = s;
-            }
-            idlist RIGHT_PARENTHESIS LEFT_CBRACKET {
-              symbolTable.enterScope();
-              fprintf(yacc_out, "Entered function body scope %d\n", symbolTable.currentScope);
-            }
-            stmts
-            RIGHT_CBRACKET { 
-              Symbol *s = symbolTable.lookup($2)[0];
-              if (s && s->type == USER_FUNC) {
-                int funcScope = s->getFuncScope();
-                unsigned int localCount = symbolTable.getTotalLoc(funcScope);
-                s->setTotalLoc(localCount);
-                emit(funcend, nullptr, nullptr, symToExpr(s));
-              }
-              symbolTable.exitScope();
-              fprintf(yacc_out, "Exited function body scope %d\n", symbolTable.currentScope);
-            }
             | FUNCTION LEFT_PARENTHESIS {
                 localOffset = -1;
                 string name = "_f" + to_string(anonCount);
@@ -606,6 +620,7 @@ funcdef:    FUNCTION ID LEFT_PARENTHESIS {
                }
                symbolTable.exitScope();
                fprintf(yacc_out, "Exited anonymous function body scope %d\n", symbolTable.currentScope);
+               $$ = s;
             }
             ;
 
