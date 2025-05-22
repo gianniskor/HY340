@@ -437,8 +437,11 @@ int ifPrefix(expr* e){
 }
 
 void fixLabel(int quad_id, int label){
-    if(quad_id > label){
-        cerr <<"quad_id < label"<<endl;
+    static int i = 0;
+    ++i;
+    if(quad_id > nextquad()){
+        cerr <<"quad_id < label, i: "<<i<<endl;
+        cerr <<"a = "<< quad_id<< " b = "<<label<<endl;
         exit(-1);
     }
     else{
@@ -469,11 +472,6 @@ void decLoop(){
 }
 
 
-
-void flagWhileLabel(int &start){
-    incLoop();
-
-}
 
 /*
 if flag == 0 then "break"
@@ -568,3 +566,4 @@ forConst_t* evaluateForPrefix(expr* e, int M){
     emit(if_eq,e,JumpTrue,nullptr,quad_counter);
     return ret;
 }
+

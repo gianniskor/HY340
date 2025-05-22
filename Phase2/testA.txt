@@ -1,9 +1,2 @@
-function f(h, cc, aa){
-    function k(b, c, a){
-    function (d, e, f){
-    }
-    }
-}
-
-function m (bb, x, z){
-}
+for(i=0;i<1;i++)
+    x = 1;
