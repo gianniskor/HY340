@@ -39,7 +39,7 @@
     int boolConst;
     /*Gia thn trith fash prosethikan 
     ta parakatw sto union*/
-    unsigned int flowLabel_V;
+    //unsigned int flowLabel_V;
     //type_t * statementT;
     expr* expression;
     stmt_t* statement;
@@ -150,7 +150,7 @@
 %type <intConst> whileflag //woi
 %type <intConst> startwhile //woi
 //%type <intConst> forprefix //woi
-%type <intConst> forstmt //woi
+%type <statement> forstmt //woi
 %type <intConst> N //woi
 %type <intConst> M //woi
 %type <statement> program
@@ -442,9 +442,6 @@ elist:      %empty                                            { $$ = nullptr;
                                                                 while($1->next){
                                                                   $1 = $1-> next;
                                                                 }
-                                                                if($3->type == boolexpr_e){
-                                                                  int lala;
-                                                                }
                                                                 $1->next = $3;
                                                                 $3->prev = $1;
                                                               }
@@ -630,7 +627,7 @@ idlist: %empty                                { fprintf(yacc_out, "idlist -> emp
               fprintf(stderr, "ERROR at line %d : formal argument shadows library function '%s'\n", yylineno, $1);
               } else {
                 Symbol *param = symbolTable.insert($1, symbolTable.currentScope, yylineno, FUNCTION_PARAM);
-                param->setOffset(++localOffset);
+                //param->setOffset(++localOffset);
                 fprintf(yacc_out, "idlist -> %s ( offset 0 )\n", $1);
               }
           }
@@ -653,7 +650,7 @@ idlist: %empty                                { fprintf(yacc_out, "idlist -> emp
           } else {
               
               Symbol *param = symbolTable.insert($3, symbolTable.currentScope, yylineno, FUNCTION_PARAM);
-              param->setOffset(++localOffset);
+              //param->setOffset(++localOffset);
               fprintf(yacc_out, "idlist -> %s ( offset %d )\n", $3, localOffset);
           }
         }
@@ -702,10 +699,23 @@ M: %empty{  $$ = nextquad();  }
 
 forprefix: FOR LEFT_PARENTHESIS elist SEMICOLON M expression SEMICOLON {
                                                                           $$ = evaluateForPrefix($6,$5);
-                                                                       }
+                                                                          // $$ = new forConst_t();
+                                                                          // $$->test = $5;
+                                                                          // $$->enter = nextquad();
+                                                                          // expr* JumpTrue = newBoolExpr(true);
+                                                                          // emit(if_eq,$6,JumpTrue,nullptr,nextquad());
+                                                                        }
 
-forstmt: forprefix N elist RIGHT_PARENTHESIS N stmt N                  {
-                                                                          
+forstmt: forprefix N elist RIGHT_PARENTHESIS N loop N                  {
+                                                                          cerr << "N{1,2,3} " << $2 << " "<< $5 <<" "<< $7 << " next q" << nextquad() << "  forConstP->enter " << $1->enter << " forConstP->test" << $1->test<< endl;
+                                                                          // fixLabel($1->enter,$5+1);
+                                                                          fixLabel($1->enter,$5+1);
+                                                                          fixLabel($2,nextquad());
+                                                                          fixLabel($5,$1->test);
+                                                                          fixLabel($7, $2 + 1);
+                                                                          //fixList($6->breakLabel, nextquad());
+                                                                          // fixList($6->continueLabel, $2+1);
+                                                                          $$ = $6;
                                                                        }
 
 returnstmt: RETURN expression SEMICOLON                        { }  
