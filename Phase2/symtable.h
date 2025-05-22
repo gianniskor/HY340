@@ -94,13 +94,13 @@ class Symbol{
     int getFuncScope() const {
         return functionscope;
     }
-//     void setOffset(int offset) {
-//     this->offset = offset;
-// }
+    void setOffset(int offset) {
+    this->offset = offset;
+}
 
-// int getOffset() const {
-//     return this->offset;
-// }
+int getOffset() const {
+    return this->offset;
+}
  };
 
 class SymbolTable{
@@ -126,12 +126,9 @@ class SymbolTable{
     }
 
     Symbol* insert(string name, int scope, int line, SymbolType type, string value = "") {
-        // Check if we need to add new scope levels
         while (scopeTable.size() <= scope) {
             scopeTable.push_back(vector<Symbol*>());
         }
-        
-        // Check if it's a library function
         if (type == LIB_FUNC) {
             // Can't redefine library functions
             auto symbols = lookup(name);
@@ -354,10 +351,10 @@ unsigned int getTotalLoc(int functionScope) {
             }
             return newSymbol;
         } else {
-            if (e->getType() == USER_FUNC || e->getType() == LIB_FUNC) {
-                printf("Error: Cannot use function %s as an lvalue at line %d\n", name.c_str(), line);
-                return NULL;
-            }
+            // if (e->getType() == USER_FUNC || e->getType() == LIB_FUNC) {
+            //     printf("Error: Cannot use function %s as an lvalue at line %d\n", name.c_str(), line);
+            //     return NULL;
+            // }
             if(!value.empty()) {
                 e->setValue(value);
             }
@@ -372,20 +369,5 @@ unsigned int getTotalLoc(int functionScope) {
         }
         return e;
     }
-    // vector<Symbol*> getSymbolsInScope(int scope) {
-    //     vector<Symbol*> result;
-    //     if (scope >= scopeTable.size()) {
-    //         return result; 
-    //     }
-        
-    //     for (auto* symbol : scopeTable[scope]) {
-    //         if (symbol->scope == scope) {
-    //             result.push_back(symbol);
-    //         }
-    //     }
-    //     return result;
-    // }
-
-
 };
 #endif

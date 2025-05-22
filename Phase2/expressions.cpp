@@ -8,13 +8,8 @@ extern SymbolTable symbolTable;
 extern int yylineno;
 int flagg1 = 1;
 int flagg2 = 2;
-// extern vector<int> continueList;
-// extern vector<int> breakList;
 
 void setToNULL(expr* e){
-    //e->trueList = nullptr;
-    //e->falseList = nullptr;
-    //e->nextList = nullptr;
     e->next = nullptr;
     e->prev = nullptr;
 }
@@ -427,7 +422,6 @@ expr* evaluateNOT(expr* e){
 
 int ifPrefix(expr* e){
     int quad_counter = nextquad();
-    //expr* JumpPlus2 = newIntExpr(quad_counter+2);
     expr* JumpTrue = newBoolExpr(true);
     emit(if_eq,e,JumpTrue,nullptr,quad_counter+3);
     quad_counter = nextquad();
@@ -466,7 +460,7 @@ void incLoop(){
 
 void decLoop(){
     --loopCounter;
-    if(loopCounter < -1){
+    if(loopCounter == 0){
         cerr << "weird, loopcounter negval" << endl;
     }
 }
@@ -482,7 +476,7 @@ else idk error
 
 stmt_t* setStmtList(int flag){
     if (loopCounter == 0) {
-        cerr << "Error: break statement not inside a loop" << endl;
+        cerr << "Error: break/continue statement not inside a loop" << endl;
         return nullptr;
     }
     stmt_t *s = new stmt_t();
@@ -575,4 +569,23 @@ stmt_t* evaluateFor(forConst_t* forConstP, int N1,stmt_t* loop,int N2,int N3){
     fixList(loop->breakLabel,nextQ);
     fixList(loop->continueLabel,N1 +1);
     return loop;
+}
+/*
+(type == 1) -> glob
+(type == 2) -> local
+(type == 3) -> reg
+*/
+expr* lvaluesIncert(string name, int type){
+    Symbol *ret = nullptr;
+    if(type == 1){
+       ret = symbolTable.local_lvalue(name,0,yylineno);
+    }else if(type == 2){
+        ret = symbolTable.local_lvalue(name,symbolTable.currentScope,yylineno);
+    }else if(type == 3){
+        ret = symbolTable.lvalue_default(name,symbolTable.currentScope,yylineno);
+    }else{
+        cerr << "unknown type in lvaluesIncert " << yylineno << endl;
+    }
+    expr* e = symToExpr(ret);
+    return e;
 }

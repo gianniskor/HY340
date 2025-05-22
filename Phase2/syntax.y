@@ -121,12 +121,12 @@
 
 %type <exprV> expression 
 %type <statement> stmt 
-%type <exprV> term //working on it
-%type <exprV> assignexpr //done
+%type <exprV> term
+%type <exprV> assignexpr
 %type <exprV> primary
 %type <exprV> lvalue
-%type <exprV> member //working on it
-%type <exprV> call//working on it
+%type <exprV> member
+%type <exprV> call
 %type <exprV> callsuffix
 %type <exprV> normcall
 %type <exprV> methodcall
@@ -135,22 +135,20 @@
 %type <exprV> indexedelem
 %type <statement> block 
 %type <statement> stmts
-%type <statement> funcdef //done
-%type <exprV> const //done 
+%type <symbol_P> funcdef
+%type <exprV> const
 %type <symbol_P> idlist
 %type <intConst> ifprefix 
 %type <intConst> elseprefix
 %type <statement> ifstmt
 %type <statement> whilestmt
-//%type <symbol_P> forstmt
 %type <statement> returnstmt
-%type <exprV> objectdef //done
-%type <intConst> whileflag //woi
-%type <intConst> startwhile //woi
-//%type <intConst> forprefix //woi
-%type <statement> forstmt //woi
-%type <intConst> N //woi
-%type <intConst> M //woi
+%type <exprV> objectdef
+%type <intConst> whileflag
+%type <intConst> startwhile
+%type <statement> forstmt
+%type <intConst> N 
+%type <intConst> M 
 %type <statement> program
 %type <statement> loop
 %type <forCnst> forprefix;
@@ -334,17 +332,23 @@ primary:    lvalue                                      { fprintf(yacc_out,"prim
             ;
 
 
-lvalue:     ID                                          { Symbol *s = symbolTable.lvalue_default($1,symbolTable.currentScope,yylineno);
-                                                          fprintf(yacc_out,"lvalue -> id\n");
-                                                          $$ = symToExpr(s);
+lvalue:     ID                                          { 
+                                                          // Symbol *s = symbolTable.lvalue_default($1,symbolTable.currentScope,yylineno);
+                                                          // fprintf(yacc_out,"lvalue -> id\n");
+                                                          // $$ = symToExpr(s);
+                                                          $$ = lvaluesIncert($1,3);
                                                         }                                                                   
-            | LOCAL ID                                  { Symbol *s = symbolTable.local_lvalue($2,symbolTable.currentScope,yylineno);
-                                                          fprintf(yacc_out,"lvalue -> local id\n");
-                                                          $$ = symToExpr(s);
+            | LOCAL ID                                  { 
+                                                          // Symbol *s = symbolTable.local_lvalue($2,symbolTable.currentScope,yylineno);
+                                                          // fprintf(yacc_out,"lvalue -> local id\n");
+                                                          // $$ = symToExpr(s);
+                                                          $$ = lvaluesIncert($2,2);
                                                         }
-            | DOUBLE_COLON ID                           { Symbol *s = symbolTable.local_lvalue($2,0,yylineno);
-                                                          fprintf(yacc_out,"lvalue -> global id\n");
-                                                          $$ = symToExpr(s);
+            | DOUBLE_COLON ID                           { 
+                                                          // Symbol *s = symbolTable.local_lvalue($2,0,yylineno);
+                                                          // fprintf(yacc_out,"lvalue -> global id\n");
+                                                          // $$ = symToExpr(s);
+                                                          $$ = lvaluesIncert($2,1);
                                                         }
             | member                                    { fprintf(yacc_out,"lvalue -> id\n");}
             ;
@@ -362,23 +366,18 @@ member:     lvalue PERIOD ID                            { fprintf(yacc_out,"memb
 call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
               expr* current = $3;
               int  paramCount = 0;
-              expr* last = nullptr;
+
               while (current) {
                   paramCount++;
-                  if (current->next) {
-                      last = current;
+                  if (!current->next) break;
                       current = current->next;
                   }
-              }
 
-              current =last;
               while (current && paramCount > 0) {
                   emit (param, current, nullptr, nullptr);
                   current = current->prev;
                   paramCount--;
               }
-
-              expr* tmpExpr = newTempExpr();
               emit(call, nullptr, nullptr, $1);
 
               expr* result = newTempExpr();
@@ -387,7 +386,24 @@ call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
 
  }
             | lvalue callsuffix                             {
-              emit (call, nullptr, nullptr, $1);
+              expr* current = $2;
+              int  paramCount = 0;
+
+              while (current) {
+                  paramCount++;
+                  if (!current->next) break;
+                      current = current->next;
+                  }
+
+              while (current && paramCount > 0) {
+                  emit (param, current, nullptr, nullptr);
+                  current = current->prev;
+                  paramCount--;
+              }
+              expr* e_tmp = newNillExpr();
+
+              emit(call, nullptr, nullptr, $1);
+
               expr* result = newTempExpr();
               emit(getretval, nullptr, nullptr, result);
               $$ = result;
@@ -395,27 +411,31 @@ call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
             | LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
               expr* current = $5;
               int  paramCount = 0;
-              expr* last = nullptr;
               while (current) {
                   paramCount++;
-                  if (current->next) {
-                      last = current;
+                  if (!current->next)break;
                       current = current->next;
-                  }
-                  current = last;
+              }
                   while (current && paramCount > 0) {
                       emit(param, current, nullptr, nullptr);
                       current = current->prev;
                       paramCount--;
                   }
-              }
+                  expr* result = newTempExpr();
+                  
+                  emit(call, nullptr, nullptr, nullptr,$2);
+                  emit(getretval, nullptr, nullptr, result);
+                  $$ = result;
              }
             ;
 
-callsuffix: normcall                                    {$$ = $1;}  
-            | methodcall                                {$$ = $1;}
+callsuffix: normcall                                    {$$ = $1;
+                                                          fprintf(yacc_out,"callsuffix -> normcall\n");
+                                                        }  
+            | methodcall                                {$$ = $1;
+                                                          fprintf(yacc_out,"callsuffix -> methodcall\n");
+                                                        }
             ;
-
 normcall:   LEFT_PARENTHESIS elist RIGHT_PARENTHESIS    {$$ =$2;}
 
 methodcall: DOUBLE_PERIOD ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
@@ -538,6 +558,7 @@ funcdef:    FUNCTION ID LEFT_PARENTHESIS {
               }
                int functionScope = symbolTable.currentScope + 1;
                if (s) s->setFuncScope(functionScope);
+               //$$ = s;
             }
             idlist RIGHT_PARENTHESIS LEFT_CBRACKET {
               symbolTable.enterScope();
@@ -624,7 +645,7 @@ idlist: %empty                                { fprintf(yacc_out, "idlist -> emp
               fprintf(stderr, "ERROR at line %d : formal argument shadows library function '%s'\n", yylineno, $1);
               } else {
                 Symbol *param = symbolTable.insert($1, symbolTable.currentScope, yylineno, FUNCTION_PARAM);
-                //param->setOffset(++localOffset);
+                param->setOffset(++localOffset);
                 fprintf(yacc_out, "idlist -> %s ( offset 0 )\n", $1);
               }
           }
@@ -647,7 +668,7 @@ idlist: %empty                                { fprintf(yacc_out, "idlist -> emp
           } else {
               
               Symbol *param = symbolTable.insert($3, symbolTable.currentScope, yylineno, FUNCTION_PARAM);
-              //param->setOffset(++localOffset);
+              param->setOffset(++localOffset);
               fprintf(yacc_out, "idlist -> %s ( offset %d )\n", $3, localOffset);
           }
         }

@@ -30,14 +30,14 @@ typedef enum type_t {
     nil_e,
 } type_t;
 
-struct list {
-    vector<unsigned> quadLabels;
-    void merge(list* other) {
-        quadLabels.insert(quadLabels.end(), 
-                          other->quadLabels.begin(), 
-                          other->quadLabels.end());
-    }
-};
+// struct list {
+//     vector<unsigned> quadLabels;
+//     void merge(list* other) {
+//         quadLabels.insert(quadLabels.end(), 
+//                           other->quadLabels.begin(), 
+//                           other->quadLabels.end());
+//     }
+// };
 
 
 
@@ -84,6 +84,8 @@ void deleteExpr(expr* e);
 
 expr* newSymbolExpr(type_t t,Symbol* symToExpr);
 
+expr* lvaluesIncert(string name, int type);
+
 expr* symToExpr(Symbol* symToExpr);
 
 expr* newBoolExpr(bool val);
@@ -96,7 +98,7 @@ expr* evaluateNumber(expr* e, expr* e2, iopcode opcode);
 
 expr* newTempExpr();
 
-void backpatch(list* list, unsigned label);
+//void backpatch(list* list, unsigned label);
 
 expr* evaluateUminus(expr* e);
 
@@ -132,7 +134,7 @@ int elsePrefix();
 
 void jumpStartWhile(int &start);
 
-void flagWhileLabel(int &start);
+//void flagWhileLabel(int &start);
 
 stmt_t* setStmtList(int flag);
 

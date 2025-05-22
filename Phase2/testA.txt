@@ -1,1 +1,1 @@
-t2 = [1,2,function foo();];
+x = 1;
