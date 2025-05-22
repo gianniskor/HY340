@@ -19,6 +19,7 @@ class Symbol{
         unsigned int Iaddress;
         unsigned int totalLoc;
         int functionscope;
+        int offset = -1;
 
     public:
         string name;
@@ -46,8 +47,8 @@ class Symbol{
         bool isActive() const{
             return active;
         }
-        void setActive(bool active){
-            active = active;
+        void setActive(bool isActive){
+            this->active = isActive;  
         }
         string getValue() const{
             return value;
@@ -93,6 +94,13 @@ class Symbol{
     int getFuncScope() const {
         return functionscope;
     }
+//     void setOffset(int offset) {
+//     this->offset = offset;
+// }
+
+// int getOffset() const {
+//     return this->offset;
+// }
  };
 
 class SymbolTable{
@@ -243,14 +251,21 @@ class SymbolTable{
     }
 
     
-unsigned int getTotalLoc(int scope) const {
+unsigned int getTotalLoc(int functionScope) {
     unsigned int count = 0;
     
-    if (scope < scopeTable.size()) {
-        for (auto* symbol : scopeTable[scope]) {
-            if (symbol->isActive() && 
-                (symbol->getType() == LOCAL_VAR)) {
-                    cout << "mpainw edw" << endl;
+    if (functionScope < scopeTable.size()) {
+        string functionName = "";
+        for (auto* sym : scopeTable[0]) { 
+            if (sym->getFuncScope() == functionScope && 
+                (sym->getType() == USER_FUNC || sym->getType() == LIB_FUNC)) {
+                functionName = sym->getName();
+                break;
+            }
+        }
+
+        for (auto* symbol : scopeTable[functionScope]) {
+            if (symbol->isActive() && symbol->getType() == LOCAL_VAR) {
                 count++;
             }
         }
@@ -357,5 +372,20 @@ unsigned int getTotalLoc(int scope) const {
         }
         return e;
     }
+    // vector<Symbol*> getSymbolsInScope(int scope) {
+    //     vector<Symbol*> result;
+    //     if (scope >= scopeTable.size()) {
+    //         return result; 
+    //     }
+        
+    //     for (auto* symbol : scopeTable[scope]) {
+    //         if (symbol->scope == scope) {
+    //             result.push_back(symbol);
+    //         }
+    //     }
+    //     return result;
+    // }
+
+
 };
 #endif

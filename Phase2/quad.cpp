@@ -119,8 +119,8 @@ void print_quads() {
             cout << setw(5) << q->label;
         }
         cout<< endl;
-        //ayto prepei na faei delete \/
-        //cout << symbolTable.getTotalLoc(symbolTable.currentScope) << endl;
+        
+        
     }
 }
 

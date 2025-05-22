@@ -20,7 +20,7 @@
     int max_scope = 0;
     extern SymbolTable symbolTable; 
     static int anonCount = 0;
- 
+    int localOffset = 0;
     int tmpCount = 0;
     int loopCounter = 0;
     // vector<int> continueList;
@@ -128,7 +128,7 @@
 %type <exprV> primary
 %type <exprV> lvalue
 %type <exprV> member //working on it
-%type <exprV> call
+%type <exprV> call//working on it
 %type <exprV> callsuffix
 %type <exprV> normcall
 %type <exprV> methodcall
@@ -137,7 +137,7 @@
 %type <exprV> indexedelem
 %type <statement> block 
 %type <statement> stmts
-%type <statement> funcdef //working on it
+%type <statement> funcdef //done
 %type <exprV> const //done 
 %type <symbol_P> idlist
 %type <intConst> ifprefix 
@@ -161,6 +161,7 @@
   BUSULAS: 
   arithmitika done;
   object def done;
+  function def done;
   object assign, access,incr;
   a {<,>,<=,>=,==,!=} b;
   NOT, OR, AND;
@@ -240,6 +241,10 @@ stmt:       expression SEMICOLON                        {
                                                           fprintf(yacc_out,"stmt -> semicolon;\n");
                                                           $$ = initLists();
                                                           tmpCount = 0;
+                                                        }
+            | %empty                                    { 
+                                                          fprintf(yacc_out,"stmt -> empty;\n");
+                                                          $$ = initLists(); //evala ayto
                                                         }
             ;
 
@@ -515,6 +520,7 @@ block: LEFT_CBRACKET {
        ;
 
 funcdef:    FUNCTION ID LEFT_PARENTHESIS {
+              localOffset = -1;
              Symbol *s = symbolTable.lookupInScope($2, symbolTable.currentScope);
               if(s!= nullptr){
                 fprintf(stderr, "ERROR at line %d, with scope %d: function %s already declared\n", yylineno, symbolTable.currentScope, $2);
@@ -539,36 +545,52 @@ funcdef:    FUNCTION ID LEFT_PARENTHESIS {
                int functionScope = symbolTable.currentScope + 1;
                if (s) s->setFuncScope(functionScope);
             }
-            idlist RIGHT_PARENTHESIS block { 
+            idlist RIGHT_PARENTHESIS LEFT_CBRACKET {
+              symbolTable.enterScope();
+              fprintf(yacc_out, "Entered function body scope %d\n", symbolTable.currentScope);
+            }
+            stmts
+            RIGHT_CBRACKET { 
               Symbol *s = symbolTable.lookup($2)[0];
               if (s && s->type == USER_FUNC) {
-                //kai kala gia ta Local Variables
-                  int funcScope = s->getFuncScope();
-                  unsigned int localCount = symbolTable.getTotalLoc(funcScope);
-                  s->setTotalLoc(localCount);
-                  
-                  emit(funcend, nullptr, nullptr, symToExpr(s));
-              } 
+                int funcScope = s->getFuncScope();
+                unsigned int localCount = symbolTable.getTotalLoc(funcScope);
+                s->setTotalLoc(localCount);
+                emit(funcend, nullptr, nullptr, symToExpr(s));
+              }
+              symbolTable.exitScope();
+              fprintf(yacc_out, "Exited function body scope %d\n", symbolTable.currentScope);
             }
             | FUNCTION LEFT_PARENTHESIS {
-              string name = "_f" + to_string(anonCount);
-              fprintf(yacc_out, "funcdef -> function %s\n", name.c_str());
-              Symbol *s = symbolTable.insert(name.c_str(), symbolTable.currentScope, yylineno, USER_FUNC);
-              s->setIaddress(nextquad());
-              emit(funcstart, nullptr, nullptr, symToExpr(s));
-              anonCount++;
+                localOffset = -1;
+                string name = "_f" + to_string(anonCount);
+                fprintf(yacc_out, "funcdef -> function %s\n", name.c_str());
+                Symbol *s = symbolTable.insert(name.c_str(), symbolTable.currentScope, yylineno, USER_FUNC);
+                s->setIaddress(nextquad());
+                emit(funcstart, nullptr, nullptr, symToExpr(s));
+                
+                int functionScope = symbolTable.currentScope + 1;
+                s->setFuncScope(functionScope);
+                
+                anonCount++;
               }
-            idlist RIGHT_PARENTHESIS block         { 
-              int currentFuncIndex = anonCount - 1;
-              string name = "_f" + to_string(currentFuncIndex);
-              Symbol *s = symbolTable.lookup(name.c_str())[0];
-              if (s && s->type == USER_FUNC) {
-                  //kai kala gia ta Local Variables
-                  unsigned int localCount = symbolTable.getTotalLoc(s->getFuncScope());
-                  s->setTotalLoc(localCount);
-
-                  emit(funcend, nullptr, nullptr, symToExpr(s));
+              idlist RIGHT_PARENTHESIS LEFT_CBRACKET {
+                symbolTable.enterScope();
+                fprintf(yacc_out, "Entered anonymous function body scope %d\n", symbolTable.currentScope);
               }
+            stmts
+            RIGHT_CBRACKET { 
+               int currentFuncIndex = anonCount - 1;
+               string name = "_f" + to_string(currentFuncIndex);
+               Symbol *s = symbolTable.lookup(name.c_str())[0];
+               if (s && s->type == USER_FUNC) {
+                   int funcScope = s->getFuncScope();
+                   unsigned int localCount = symbolTable.getTotalLoc(funcScope);
+                   s->setTotalLoc(localCount);
+                   emit(funcend, nullptr, nullptr, symToExpr(s));
+               }
+               symbolTable.exitScope();
+               fprintf(yacc_out, "Exited anonymous function body scope %d\n", symbolTable.currentScope);
             }
             ;
 
@@ -608,7 +630,8 @@ idlist: %empty                                { fprintf(yacc_out, "idlist -> emp
               fprintf(stderr, "ERROR at line %d : formal argument shadows library function '%s'\n", yylineno, $1);
               } else {
                 Symbol *param = symbolTable.insert($1, symbolTable.currentScope, yylineno, FUNCTION_PARAM);
-                fprintf(yacc_out, "idlist -> %s\n", $1);
+                param->setOffset(++localOffset);
+                fprintf(yacc_out, "idlist -> %s ( offset 0 )\n", $1);
               }
           }
        }
@@ -627,11 +650,13 @@ idlist: %empty                                { fprintf(yacc_out, "idlist -> emp
           }
           if (isLib) {
               fprintf(stderr, "ERROR at line %d : formal argument shadows library function '%s'\n", yylineno, $3);
-              } else {
-                Symbol *param = symbolTable.insert($3, symbolTable.currentScope, yylineno, FUNCTION_PARAM);
-                fprintf(yacc_out, "idlist -> %s\n", $3);
-              }
+          } else {
+              
+              Symbol *param = symbolTable.insert($3, symbolTable.currentScope, yylineno, FUNCTION_PARAM);
+              param->setOffset(++localOffset);
+              fprintf(yacc_out, "idlist -> %s ( offset %d )\n", $3, localOffset);
           }
+        }
        }
        ;    
 

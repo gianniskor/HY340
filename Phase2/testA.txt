@@ -1,1 +1,9 @@
-a = [{1:2},{0:1}];
+function f(h, cc, aa){
+    function k(b, c, a){
+    function (d, e, f){
+    }
+    }
+}
+
+function m (bb, x, z){
+}
