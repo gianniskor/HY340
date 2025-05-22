@@ -149,4 +149,6 @@ stmt_t* evaluateIfElse(int ifConst, int elseConst, stmt_t* s1, stmt_t* s2);
 stmt_t* evaluateWhile(int cond, stmt_t* stmt, int start);
 
 forConst_t* evaluateForPrefix(expr* e, int M);
+
+stmt_t* evaluateFor(forConst_t* forConstP, int N1,stmt_t* loop,int N2,int N3);
 #endif

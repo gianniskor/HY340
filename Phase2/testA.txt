@@ -1,2 +1,1 @@
-for(i=0;i<1;i++)
-    x = 1;
+t2 = [1,2,function foo();];

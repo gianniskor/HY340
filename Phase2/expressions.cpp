@@ -566,4 +566,13 @@ forConst_t* evaluateForPrefix(expr* e, int M){
     emit(if_eq,e,JumpTrue,nullptr,quad_counter);
     return ret;
 }
-
+stmt_t* evaluateFor(forConst_t* forConstP, int N1,stmt_t* loop,int N2,int N3){
+    int nextQ = nextquad();
+    fixLabel(forConstP->enter,N2+1);
+    fixLabel(N1,nextQ);
+    fixLabel(N2,forConstP->test);
+    fixLabel(N3, N1 + 1);
+    fixList(loop->breakLabel,nextQ);
+    fixList(loop->continueLabel,N1 +1);
+    return loop;
+}

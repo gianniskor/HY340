@@ -93,8 +93,6 @@
 %token IF "if"
 %token ELSE "else"
 %token WHILE "while"
-// %token TRUE "true"
-// %token FALSE "false"
 %token NIL "nil"
 %token RETURN "return"
 %token FUNCTION "function"
@@ -166,11 +164,10 @@
   a {<,>,<=,>=,==,!=} b;
   NOT, OR, AND;
   IF, IF-ELSE, IF-ELSE_IF-ELSE;
-  while, cont, break
+  while, cont, break for
   KANW:
 
   TODO:
-  for
 
   PROBLEMS
   t2 = [1,2,print];
@@ -699,23 +696,10 @@ M: %empty{  $$ = nextquad();  }
 
 forprefix: FOR LEFT_PARENTHESIS elist SEMICOLON M expression SEMICOLON {
                                                                           $$ = evaluateForPrefix($6,$5);
-                                                                          // $$ = new forConst_t();
-                                                                          // $$->test = $5;
-                                                                          // $$->enter = nextquad();
-                                                                          // expr* JumpTrue = newBoolExpr(true);
-                                                                          // emit(if_eq,$6,JumpTrue,nullptr,nextquad());
                                                                         }
 
 forstmt: forprefix N elist RIGHT_PARENTHESIS N loop N                  {
-                                                                          cerr << "N{1,2,3} " << $2 << " "<< $5 <<" "<< $7 << " next q" << nextquad() << "  forConstP->enter " << $1->enter << " forConstP->test" << $1->test<< endl;
-                                                                          // fixLabel($1->enter,$5+1);
-                                                                          fixLabel($1->enter,$5+1);
-                                                                          fixLabel($2,nextquad());
-                                                                          fixLabel($5,$1->test);
-                                                                          fixLabel($7, $2 + 1);
-                                                                          //fixList($6->breakLabel, nextquad());
-                                                                          // fixList($6->continueLabel, $2+1);
-                                                                          $$ = $6;
+                                                                          $$ = evaluateFor($1,$2 ,$6,$5,$7);
                                                                        }
 
 returnstmt: RETURN expression SEMICOLON                        { }  
