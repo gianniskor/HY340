@@ -487,10 +487,7 @@ else idk error
 */
 
 stmt_t* setStmtList(int flag){
-    if (loopCounter == 0) {
-        cerr << "Error: break/continue statement not inside a loop, at:"<<yylineno << endl;
-        return nullptr;
-    }
+
     stmt_t *s = new stmt_t();
     s->breakLabel = 0;
     s->continueLabel = 0;
