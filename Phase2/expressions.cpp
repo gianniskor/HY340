@@ -464,6 +464,7 @@ void decLoop(){
     --loopCounter;
     if(loopCounter == 0){
         cerr << "weird, loopcounter negval" << endl;
+        exit(-1);
     }
 }
 
@@ -475,6 +476,7 @@ void decFunc(){
     --funcCounter;
     if(funcCounter == 0){
         cerr << "weird, funcCounter negval" << endl;
+        exit(-1);
     }
 }
 

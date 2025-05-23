@@ -338,9 +338,7 @@ primary:    lvalue                                      { fprintf(yacc_out,"prim
 
 
 lvalue:     ID                                          { 
-                                                          // Symbol *s = symbolTable.lvalue_default($1,symbolTable.currentScope,yylineno);
                                                           fprintf(yacc_out,"lvalue -> id\n");
-                                                          // $$ = symToExpr(s);
                                                           $$ = lvaluesIncert($1,3);
                                                         }                                                                   
             | LOCAL ID                                  { 
@@ -516,7 +514,7 @@ objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            {
             ;
 
 indexed:    indexedelem                                 { $$ = $1;}
-            | indexedelem COMMA indexedelem             { 
+            | indexed COMMA indexedelem             { 
                                                         expr* current = $1;
                                                         while(current->next) {
                                                             current = current->next;
@@ -618,12 +616,15 @@ funcdef:      funcprefix idlist RIGHT_PARENTHESIS {
                 localOffset = -1;
                 string name = "_f" + to_string(anonCount);
                 fprintf(yacc_out, "funcdef -> function %s\n", name.c_str());
+                int jump_quad = nextquad();
+                emit(jump, nullptr, nullptr, nullptr, 0);
                 Symbol *s = symbolTable.insert(name.c_str(), symbolTable.currentScope, yylineno, USER_FUNC);
                 s->setIaddress(nextquad());
                 emit(funcstart, nullptr, nullptr, symToExpr(s));
+                s->funcJumpQuad = jump_quad;
                 // int functionScope = symbolTable.currentScope;
                 // s->setFuncScope(functionScope);
-                
+
                 anonCount++;
               }
               idlist RIGHT_PARENTHESIS {
@@ -638,7 +639,8 @@ funcdef:      funcprefix idlist RIGHT_PARENTHESIS {
                   //  int funcScope = s->getFuncScope() ;
                   //  unsigned int localCount = symbolTable.getTotalLoc(funcScope);
                   //  s->setTotalLoc(localCount);
-                   emit(funcend, nullptr, nullptr, symToExpr(s));
+                  emit(funcend, nullptr, nullptr, symToExpr(s));
+                  quads[s->funcJumpQuad]->label = nextquad() +1;
                }
                //symbolTable.exitScope();
                decFunc();
