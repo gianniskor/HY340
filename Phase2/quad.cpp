@@ -1,9 +1,9 @@
-
 #include <iostream>
 #include <cstring>
 #include <vector>
 #include <iomanip>
 #include "headerLib.h"
+#include <fstream>
 using namespace std;
 
 extern int yylineno;
@@ -66,14 +66,37 @@ unsigned nextquad(){
     return currQuad;
 }
 
-void print_quads() {
-    cout << "NO.  OPCODE          RESULT      ARG1        ARG2        LABEL\n\n";
+void print_quads(const string& filename = "") {
+    ofstream outfile;
+    ostream* out_stream = &cout; 
+    
+    if (!filename.empty()) {
+        #ifdef _WIN32
+        system("if not exist outputs mkdir outputs");
+        #else
+        system("mkdir -p outputs");
+        #endif
+
+        string out_filename = "outputs/" + filename + ".quad";
+        outfile.open(out_filename);
+        if (outfile.is_open()) {
+            cout << "Writing quads to " << out_filename << endl;
+            out_stream = &outfile;
+        } else {
+            cerr << "Error: Failed to open output file " << out_filename << endl;
+        }
+    }
+
+    // Print header
+    *out_stream << "NO.  OPCODE          RESULT      ARG1        ARG2        LABEL\n\n";
     
     for (unsigned i = 0; i < quads.size(); i++) {
         quad* q = quads[i];
         string result_str = "";
         string arg1_str = "";
         string arg2_str = "";
+        
+        // Convert result to string
         if (q->result) {
             if (q->result->type == constint_e) 
                 result_str = to_string(q->result->value.intValue);
@@ -86,6 +109,8 @@ void print_quads() {
             else if (q->result->sym) 
                 result_str = q->result->sym->getName();
         }
+        
+        // Convert arg1 to string
         if (q->arg1) {
             if (q->arg1->type == constint_e) 
                 arg1_str = to_string(q->arg1->value.intValue);
@@ -98,6 +123,8 @@ void print_quads() {
             else if (q->arg1->sym) 
                 arg1_str = q->arg1->sym->getName();
         }
+        
+        // Convert arg2 to string
         if (q->arg2) {
             if (q->arg2->type == constint_e) 
                 arg2_str = to_string(q->arg2->value.intValue);
@@ -110,17 +137,22 @@ void print_quads() {
             else if (q->arg2->sym) 
                 arg2_str = q->arg2->sym->getName();
         }
-        cout << "#" << (i+1) << left << setw(4) << " " 
+        
+        // Format and output the quad
+        *out_stream << "#" << (i+1) << left << setw(4) << " " 
              << setw(15) << quadString[q->op]
              << setw(12) << result_str
              << setw(12) << arg1_str
              << setw(12) << arg2_str;
         if (q->label != 0) {
-            cout << setw(5) << q->label;
+            *out_stream << setw(5) << q->label;
         }
-        cout<< endl;
-        
-        
+        *out_stream << endl;
+    }
+    
+    // Close file if it was opened
+    if (outfile.is_open()) {
+        outfile.close();
     }
 }
 

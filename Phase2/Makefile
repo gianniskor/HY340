@@ -13,5 +13,5 @@ bisonC:
 	bison --defines  -v --output=syntax.cpp syntax.y
 	
 clean:
-	rm -f *.o a.out al.cpp yacc_output.txt syntax.hpp syntax.cpp al.hpp
-	
+	rm -f *.o a.out al.cpp yacc_output.txt syntax.hpp syntax.cpp al.hpp 
+	rm -rf outputs/
