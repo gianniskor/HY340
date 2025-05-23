@@ -1,0 +1,58 @@
+funcdef:      funcprefix idlist RIGHT_PARENTHESIS {}LEFT_CBRACKET {
+                    incFunc();
+                    symbolTable.enterScope();
+                    fprintf(yacc_out, "Function body using scope %d\n", symbolTable.currentScope);
+              } stmts RIGHT_CBRACKET { 
+                  Symbol *s = $1;
+                  if (s && s->type == USER_FUNC) {
+                      unsigned int localCount = symbolTable.getTotalLoc(symbolTable.currentScope);
+                      s->setTotalLoc(localCount);
+                      expr* retval = newTempExpr();
+                      expr* funcname = symToExpr(s);
+                      //emit(assign, retval, funcname, nullptr);
+                      
+                      emit(funcend, nullptr, nullptr, symToExpr(s));
+                      quads[s->funcJumpQuad]->label = nextquad() + 1;
+                      //emit(funcend, nullptr, nullptr, symToExpr(s));
+                      //emit(funcend, nullptr, nullptr, symToExpr(s));
+                  }
+                  symbolTable.exitScope();
+                  fprintf(yacc_out, "Exited function scope %d\n", symbolTable.currentScope);
+                  decFunc();
+                  $$ = s;
+              }
+            | FUNCTION LEFT_PARENTHESIS {
+                localOffset = -1;
+                string name = "_f" + to_string(anonCount);
+                fprintf(yacc_out, "funcdef -> function %s\n", name.c_str());
+                Symbol *s = symbolTable.insert(name.c_str(), symbolTable.currentScope, yylineno, USER_FUNC);
+                s->setIaddress(nextquad());
+                emit(funcstart, nullptr, nullptr, symToExpr(s));
+                
+                int functionScope = symbolTable.currentScope + 1;
+                s->setFuncScope(functionScope);
+                
+                anonCount++;
+              }
+              idlist RIGHT_PARENTHESIS LEFT_CBRACKET {
+                symbolTable.enterScope();
+                incFunc();
+                fprintf(yacc_out, "Entered anonymous function body scope %d\n", symbolTable.currentScope);
+              }
+            stmts
+            RIGHT_CBRACKET { 
+               int currentFuncIndex = anonCount - 1;
+               string name = "_f" + to_string(currentFuncIndex);
+               Symbol *s = symbolTable.lookup(name.c_str())[0];
+               if (s && s->type == USER_FUNC) {
+                   int funcScope = s->getFuncScope();
+                   unsigned int localCount = symbolTable.getTotalLoc(funcScope);
+                   s->setTotalLoc(localCount);
+                   emit(funcend, nullptr, nullptr, symToExpr(s));
+               }
+               symbolTable.exitScope();
+               decFunc();
+               fprintf(yacc_out, "Exited anonymous function body scope %d\n", symbolTable.currentScope);
+               $$ = s;
+            }
+            ;

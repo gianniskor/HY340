@@ -9,6 +9,7 @@ struct quad;
 #include "quad.h"
 extern vector<quad*> quads;
 extern int loopCounter;
+extern int funcCounter;
 
 typedef enum type_t { 
     var_e ,
@@ -140,6 +141,10 @@ stmt_t* setStmtList(int flag);
 
 stmt_t* initLists();
 
+void incFunc();
+
+void decFunc();
+
 int mergeList(int l1,int l2);
 
 void fixList(int list, int label);
@@ -153,4 +158,5 @@ stmt_t* evaluateWhile(int cond, stmt_t* stmt, int start);
 forConst_t* evaluateForPrefix(expr* e, int M);
 
 stmt_t* evaluateFor(forConst_t* forConstP, int N1,stmt_t* loop,int N2,int N3);
+
 #endif

@@ -20,8 +20,9 @@ class Symbol{
         unsigned int totalLoc;
         int functionscope;
         int offset = -1;
-
+        //int funcJumpQuad;
     public:
+        int funcJumpQuad;
         string name;
         int scope;
         int line;
@@ -264,7 +265,7 @@ unsigned int getTotalLoc(int functionScope) {
         for (auto* symbol : scopeTable[functionScope]) {
             if (symbol->isActive() && symbol->getType() == LOCAL_VAR) {
                 count++;
-                // cout << "variables : " << count << " " << symbol->getName() << endl;
+                cout << "variables : " << count << " " << symbol->getName() << endl;
             }
         }
     }

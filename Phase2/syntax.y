@@ -23,6 +23,7 @@
     int localOffset = 0;
     int tmpCount = 0;
     int loopCounter = 0;
+    int funcCounter = 0;
     // vector<int> continueList;
     // vector<int> breakList;
 %}
@@ -169,9 +170,7 @@
   TODO:
 
   PROBLEMS
-  t2 = [1,2,print];
-    "Error: Cannot use function print as an lvalue at line 1"
-    "Error in SymToExpr function, symbol -> null"
+  
 */
 
 %%
@@ -328,14 +327,19 @@ assignexpr: lvalue EQUALS expression                          {
 primary:    lvalue                                      { fprintf(yacc_out,"primary -> lvalue\n");}
             | call                                      { fprintf(yacc_out,"primary -> call\n");}
             | objectdef                                 { fprintf(yacc_out,"primary -> objectdef\n");}
-            | LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS{ fprintf(yacc_out,"primary -> (funcdef)\n");}
+            | LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS{ 
+                                                          $$ = newNilExpr();
+                                                          $$->type = programfunc_e;
+                                                          $$->sym = $2;
+                                                          fprintf(yacc_out,"primary -> (funcdef)\n");
+                                                        }
             | const                                     { fprintf(yacc_out,"primary -> const\n");}
             ;
 
 
 lvalue:     ID                                          { 
                                                           // Symbol *s = symbolTable.lvalue_default($1,symbolTable.currentScope,yylineno);
-                                                          // fprintf(yacc_out,"lvalue -> id\n");
+                                                          fprintf(yacc_out,"lvalue -> id\n");
                                                           // $$ = symToExpr(s);
                                                           $$ = lvaluesIncert($1,3);
                                                         }                                                                   
@@ -457,9 +461,9 @@ methodcall: DOUBLE_PERIOD ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
                                                               paramCount--;
                                                           }
                                                           expr* method = newStringExpr($2);
-                                                          emit(call, nullptr, nullptr, method);
+                                                          //emit(call, nullptr, nullptr, method);
                                                           expr* result = newTempExpr();
-                                                          emit(getretval, nullptr, nullptr, result);
+                                                          //emit(getretval, nullptr, nullptr, result);
                                                           $$ = result;
                                                         }
                                                         ;             
@@ -507,6 +511,7 @@ objectdef:  LEFT_BRACKET elist RIGHT_BRACKET            {
                                                               current = current->next;
                                                           }
                                                           $$ = tmpExpr;
+                                                          fprintf(yacc_out, "objectdef -> [indexed ]\n");
                                                         }
             ;
 
@@ -536,6 +541,7 @@ block: LEFT_CBRACKET {
        }
        stmts
        RIGHT_CBRACKET {
+
          symbolTable.exitScope();
          fprintf(yacc_out, "Exited block scope %d\n", symbolTable.currentScope);
          $$ = $3;
@@ -566,28 +572,46 @@ funcprefix: FUNCTION ID LEFT_PARENTHESIS {
                           fprintf(stderr, "ERROR at line %d, with scope %d: function %s already declared as a library function\n", 
                                   yylineno, symbolTable.currentScope, $2);
                       } else {
-                          s = symbolTable.insert($2, symbolTable.currentScope, yylineno, USER_FUNC);
-                          s->setIaddress(nextquad());
-                          emit(funcstart, nullptr, nullptr, symToExpr(s));
-                          fprintf(yacc_out, "funcdef -> function %s\n", $2);
-                                  }
+                          // s = symbolTable.insert($2, symbolTable.currentScope, yylineno, USER_FUNC);
+                          // s->setIaddress(nextquad());
+                          // emit(funcstart, nullptr, nullptr, symToExpr(s));
+                          // fprintf(yacc_out, "funcdef -> function %s\n", $2);
+                      int jump_quad = nextquad();
+                      emit(jump, nullptr, nullptr, nullptr, 0);
+                      s = symbolTable.insert($2, symbolTable.currentScope, yylineno, USER_FUNC);
+                      s->setIaddress(nextquad());
+                      emit(funcstart, nullptr, nullptr, symToExpr(s));
+                      s->funcJumpQuad = jump_quad;
+                      fprintf(yacc_out, "funcdef -> function %s\n", $2);
+                      }
                   }
                   $$ = s;
               }
               
 
-funcdef:      funcprefix idlist RIGHT_PARENTHESIS LEFT_CBRACKET {
-                    symbolTable.enterScope();
+funcdef:      funcprefix idlist RIGHT_PARENTHESIS {
+              incFunc();
+                    //symbolTable.enterScope();
                     fprintf(yacc_out, "Function body using scope %d\n", symbolTable.currentScope);
-              } stmts RIGHT_CBRACKET { 
+              }block{ 
                   Symbol *s = $1;
                   if (s && s->type == USER_FUNC) {
-                      unsigned int localCount = symbolTable.getTotalLoc(symbolTable.currentScope);
-                      s->setTotalLoc(localCount);
+                      // unsigned int localCount = symbolTable.getTotalLoc(symbolTable.currentScope);
+                      // s->setTotalLoc(localCount);
+                      expr* retval = newTempExpr();
+                      expr* funcname = symToExpr(s);
+                      //emit(assign, retval, funcname, nullptr);
+                      
                       emit(funcend, nullptr, nullptr, symToExpr(s));
+                      quads[s->funcJumpQuad]->label = nextquad() + 1;
+                      // emit(funcend, nullptr, nullptr, symToExpr(s));
+                      // emit(funcend, nullptr, nullptr, symToExpr(s));
                   }
-                  symbolTable.exitScope();
-                  fprintf(yacc_out, "Exited function scope %d\n", symbolTable.currentScope);
+                  //symbolTable.exitScope();
+                  // fprintf(yacc_out, "Exited function scope %d\n", symbolTable.currentScope);
+                  //TWRA AUTO GIATI EINAI 5?
+                  fixList($5->returnLabel,nextquad()-1);
+                  decFunc();
                   $$ = s;
               }
             | FUNCTION LEFT_PARENTHESIS {
@@ -597,31 +621,33 @@ funcdef:      funcprefix idlist RIGHT_PARENTHESIS LEFT_CBRACKET {
                 Symbol *s = symbolTable.insert(name.c_str(), symbolTable.currentScope, yylineno, USER_FUNC);
                 s->setIaddress(nextquad());
                 emit(funcstart, nullptr, nullptr, symToExpr(s));
-                
-                int functionScope = symbolTable.currentScope + 1;
-                s->setFuncScope(functionScope);
+                // int functionScope = symbolTable.currentScope;
+                // s->setFuncScope(functionScope);
                 
                 anonCount++;
               }
-              idlist RIGHT_PARENTHESIS LEFT_CBRACKET {
-                symbolTable.enterScope();
+              idlist RIGHT_PARENTHESIS {
+                //symbolTable.enterScope();
+                incFunc();
                 fprintf(yacc_out, "Entered anonymous function body scope %d\n", symbolTable.currentScope);
-              }
-            stmts
-            RIGHT_CBRACKET { 
-               int currentFuncIndex = anonCount - 1;
+              }block{
+                int currentFuncIndex = anonCount - 1;
                string name = "_f" + to_string(currentFuncIndex);
                Symbol *s = symbolTable.lookup(name.c_str())[0];
                if (s && s->type == USER_FUNC) {
-                   int funcScope = s->getFuncScope();
-                   unsigned int localCount = symbolTable.getTotalLoc(funcScope);
-                   s->setTotalLoc(localCount);
+                  //  int funcScope = s->getFuncScope() ;
+                  //  unsigned int localCount = symbolTable.getTotalLoc(funcScope);
+                  //  s->setTotalLoc(localCount);
                    emit(funcend, nullptr, nullptr, symToExpr(s));
                }
-               symbolTable.exitScope();
+               //symbolTable.exitScope();
+               decFunc();
+               //fixList($2->returnList,nextquad());
+               //TWRA AUTO GIATI EINAI 7?
+              fixList($7->returnLabel,nextquad()-1);
                fprintf(yacc_out, "Exited anonymous function body scope %d\n", symbolTable.currentScope);
-               $$ = s;
-            }
+               $$ = s;}
+            
             ;
 
 const:      INT                                         { fprintf(yacc_out,"const -> number\n");
@@ -738,8 +764,14 @@ forstmt: forprefix N elist RIGHT_PARENTHESIS N loop N                  {
                                                                           $$ = evaluateFor($1,$2 ,$6,$5,$7);
                                                                        }
 
-returnstmt: RETURN expression SEMICOLON                        { }  
-            | RETURN SEMICOLON                                 { }
+returnstmt: RETURN expression SEMICOLON                        { 
+                                                                  $$ = initLists();
+                                                                  emit(return_op,$2,nullptr,nullptr);
+                                                                }  
+            | RETURN SEMICOLON                                 { 
+                                                                  $$ = initLists();
+                                                                  emit(return_op,nullptr,nullptr,nullptr);
+                                                               }
             ;
 
 %%

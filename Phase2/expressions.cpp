@@ -290,9 +290,11 @@ expr* tablePeriodId(expr *table, string pointer) {
         exit(-1);
     }
     if (table->type == tableitem_e) {
+        cerr << "lal" <<endl;
         expr* tmp = evalMem(table);
         return newMember(tmp, pointer);
     } else {
+        cerr << "la3l" <<endl;
         return newMember(table, pointer);
     }
 }
@@ -465,6 +467,16 @@ void decLoop(){
     }
 }
 
+void incFunc(){
+    --funcCounter;
+}
+
+void decFunc(){
+    --funcCounter;
+    if(funcCounter == 0){
+        cerr << "weird, funcCounter negval" << endl;
+    }
+}
 
 
 /*
@@ -475,10 +487,6 @@ else idk error
 */
 
 stmt_t* setStmtList(int flag){
-    if (loopCounter == 0) {
-        cerr << "Error: break/continue statement not inside a loop" << endl;
-        return nullptr;
-    }
     stmt_t *s = new stmt_t();
     s->breakLabel = 0;
     s->continueLabel = 0;
