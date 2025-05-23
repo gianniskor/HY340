@@ -487,16 +487,37 @@ else idk error
 */
 
 stmt_t* setStmtList(int flag){
+    if (loopCounter == 0) {
+        cerr << "Error: break/continue statement not inside a loop, at:"<<yylineno << endl;
+        return nullptr;
+    }
     stmt_t *s = new stmt_t();
     s->breakLabel = 0;
     s->continueLabel = 0;
     s->returnLabel = 0;
     int idx = nextquad();
     emit(jump, nullptr, nullptr, nullptr);
-    if      (flag == 0) s->breakLabel    = idx;
-    else if (flag == 1) s->continueLabel = idx;
-    else if (flag == 2) s->returnLabel   = idx;
-
+    if(flag == 0){ 
+        if (loopCounter == 0) {
+            cerr << "Error: break/continue statement not inside a loop, at:"<<yylineno << endl;
+            return nullptr;
+        }   
+        s->breakLabel = idx;                   
+    }
+    else if (flag == 1){
+        if (loopCounter == 0) {
+            cerr << "Error: break/continue statement not inside a loop, at:"<<yylineno << endl;
+            return nullptr;
+        }
+        s->continueLabel = idx;
+    }
+    else if (flag == 2){
+        if (funcCounter == 0) {
+            cerr << "Error: return statement not inside a func, at:"<<yylineno << endl;
+            return nullptr;
+        }  
+        s->returnLabel   = idx;
+    }
     return s;
 }
 
