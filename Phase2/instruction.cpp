@@ -5,6 +5,9 @@ vector <string*> stringConsts;
 vector <string*> libFuncs;
 vector <string*> userFuncs;
 vector <bool> boolConst;
+vector <instruction*> instructions;
+
+int instrStep = 1;
 
 typedef void (*generator_func_t)(quad*);
 avm_memcell stack[AVM_STACKSIZE];
@@ -38,6 +41,43 @@ generator_func_t generators[] = {
     generate_JUMP,
     generate_NOP
 };
+
+void generate_ADD (quad* q){
+    generate(add_v,q);
+}
+
+void generate_SUB (quad* q){
+    generate(sub_v,q);
+}
+
+void generate_MUL (quad* q){
+    generate(mul_v,q);
+}
+
+void generate_ADD (quad* q){
+    generate(div_v,q);
+}
+
+void generate_MOD (quad* q){
+    generate(mod_v,q);
+}
+
+void generate_TABLEGETELEM (quad* q){
+    generate(tablegetelem_v,q);
+}
+
+void generate_TABLESETELEM (quad* q){
+    generate(tablesetelem_v,q);
+}
+
+void generate_NEWTABLE (quad* q){
+    generate(tablecreate_v,q);
+}
+
+void generate_JUMP(quad* q){
+    //generate_relational(jump_v, q);
+}
+
 
 string instruction_opcode_names[] = {
     "assign_v",
@@ -183,15 +223,54 @@ void make_operand(expr* e, vmarg* arg){
         }
     }
 }
+//helper, vale se allo
+void emit_instr(instruction*i){
+    if(i == nullptr){
+        cerr << "assert null at emit_inst" << endl;
+    }
+    instructions.push_back(i);
+}
 
-void generate(vmopcode op,quad *q){
+//helper, vale se allo
+instruction* generate_Proc(vmopcode op,quad *q){
     instruction* i = new instruction;
     i->arg1 = nullptr;
     i->arg2 = nullptr;
     i->opcode = op;
     i->result = nullptr;
     i->srcLine = q->line;
+    return i;
+}
 
+void generate(vmopcode op,quad *q){
+    instruction* i = generate_Proc(op,q);
+    generate_make_op(i, q);
+    if(q->result){
+        i->result = new vmarg;
+        make_operand(q->result,i->result);
+    }
+}
+
+//helper, vale se allo
+void generate_make_op(instruction* i, quad* q){
+    if(q->arg1){
+        i->arg1 = new vmarg;
+        make_operand(q->arg1,i->arg1);
+    }
+    if(q->arg2){
+        i->arg2 = new vmarg;
+        make_operand(q->arg2,i->arg2);
+    }
+    return;
+}
+
+void generate_relational(vmopcode op, quad* q){
+    instruction* i = generate_Proc(op,q);
+    generate_make_op(i, q);
+    i->result = new vmarg;
+    i->result->type = label_a;
+    i->result->val = q->label;
+    emit_instr(i);
 }
 
 void quad_to_instr(void* void_quad){
