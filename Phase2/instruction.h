@@ -4,13 +4,14 @@
 #include <string>
 #include <cstdio>
 #include <vector>
+#include <cassert>
 using namespace std;
+
+#include "headerLib.h"
 
 class Symbol;
 struct expr;
 struct quad;
-
-#include "quad.h"
 
 #define AVM_STACKSIZE 4096
 #define AVM_TABLE_HASHSIZE 211
@@ -80,10 +81,11 @@ typedef struct userfunc{
     const char* id;
 } userfunc;
 
-vector <int> numConsts;
-vector <int> stringConsts;
-vector <int> libFuncs;
-vector <int> userFuncs;
+extern vector <double> numConsts;
+extern vector <string*> stringConsts;
+extern vector <string*> libFuncs;
+extern vector <string*> userFuncs;
+extern vector <bool> boolConst;
 
 void generate_ADD (quad*);
 void generate_SUB (quad*);
@@ -130,18 +132,18 @@ struct avm_memcell{
     avm_memcell_t type;
     union { 
         double numVal;
-        string strVal;
+        char* strVal;
         bool boolVal;
         avm_table * tableVal;
         unsigned funcVal;
-        string libFuncVal;
+        char* libFuncVal;
     } data;
 };
 
-avm_memcell stack[AVM_STACKSIZE];
+extern avm_memcell stack[AVM_STACKSIZE];
 
 avm_table* avm_tablenew(void);
-void avm_tabledestory(avm_table* t);
+void avm_tabledestroy(avm_table* t);
 avm_memcell* avm_tablegetelem(avm_memcell *key);
 void avm_tablesetelem(avm_memcell* key, avm_memcell* value);
 
@@ -170,7 +172,7 @@ void avm_tableincrefcounter(avm_table* t){
 void avm_tabledecrefcounter(avm_table* t){
     assert(t->refCounter>0);
     if(!--t->refCounter){
-        avm_tabledestory(t);
+        avm_tabledestroy(t);
     }
 }
 
