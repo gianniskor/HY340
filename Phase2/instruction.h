@@ -13,39 +13,40 @@ class Symbol;
 struct expr;
 struct quad;
 
+extern int magic_num;
 #define AVM_STACKSIZE 4096
 #define AVM_TABLE_HASHSIZE 211
 #define AVM_WIPEOUT(m) memset(&(m),0,sizeof(m))
 
 
 typedef enum vmopcode{
-    assign_v,
-    add_v,          
-    sub_v,
-    mul_v,          
-    div_v,          
-    mod_v,
-    uminus_v,       
-    and_v,          
-    or_v,
-    not_v,          
-    jeq_v,          
-    jne_v,
-    jle_v,          
-    jge_v,          
-    jlt_v,
-    jgt_v,          
-    callfunc_v,     
-    pusharg_v,
-    ret_v,          
-    getretval_v,    
-    enterfunc_v,    
-    exitfunc_v,     
-    tablecreate_v,  
-    tablegetelem_v, 
-    tablesetelem_v, 
-    jump_v,         
-    nop_v 
+    assign_v=0,
+    add_v=1,          
+    sub_v=2,
+    mul_v=3,          
+    div_v=4,          
+    mod_v=5,
+    uminus_v=6,       
+    and_v=7,          
+    or_v=8,
+    not_v=9,          
+    jeq_v=10,          
+    jne_v=11,
+    jle_v=12,          
+    jge_v=13,          
+    jlt_v=14,
+    jgt_v=15,          
+    callfunc_v=16,     
+    pusharg_v=17,
+    ret_v=18,          
+    getretval_v=19,    
+    enterfunc_v=20,    
+    exitfunc_v=21,     
+    tablecreate_v=22,  
+    tablegetelem_v=23, 
+    tablesetelem_v=24, 
+    jump_v=25,         
+    nop_v=26 
 } vmopcode;
 
 typedef enum vmarg_t{
@@ -173,6 +174,8 @@ struct avm_table_bucket{
     avm_table_bucket* next;
 };
 
+void readMagic(FILE* f);
+
 struct avm_table{
     unsigned refCounter;
     avm_table_bucket* strIndexed[AVM_TABLE_HASHSIZE];
@@ -194,5 +197,14 @@ void avm_memcellclear(avm_memcell* m);
 void avm_tablebucketsdestroy(avm_table_bucket**p);
 
 void avm_tabledestroy (avm_table* t);
+
+void readAbcFile(const string& filename);
+void readMagic(FILE* f);
+void readNumbers(FILE* f);
+void readStrings(FILE* f);
+void readUserFunctions(FILE* f);
+void readLibFunctions(FILE* f);
+void readBoolConstants(FILE* f);
+void readInstructions(FILE* f);
 
 #endif

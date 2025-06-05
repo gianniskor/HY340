@@ -11,6 +11,9 @@ extern FILE*       instructions_out;
 extern FILE*       binary;
 
 int instrStep = 1;
+int magic_num = 0;
+int totalNums = 0;
+
 
 typedef void (*generator_func_t)(quad*);
 avm_memcell stack[AVM_STACKSIZE];
@@ -414,28 +417,26 @@ void make_operand(expr* e, vmarg* arg){
         case tableitem_e:
         case arithexpr_e:
         case boolexpr_e:
-        case newtable_e:    {
+        case newtable_e: {
             if (!e->sym) {
-                // Handle the case where sym is null
-                arg->type = nil_a;  // Or some appropriate default
+                arg->type = nil_a;
                 arg->val = 0;
                 break;
             }
             
             arg->val = e->sym->offset;
-            switch (e->sym->scope)
-            {
-            case programvar:
-                arg->type = global_a;
-                break;
-            case functionlocal:
-                arg->type = local_a;
-                break;  // Add missing break
-            case formalarg:
-                arg->type = formal_a;
-                break;  // Add missing break
-            default:
-                arg->type = global_a;  // Provide a default instead of assert
+            switch (e->sym->scopespace) {  // Changed from 'scope' to 'scopespace'
+                case programvar:
+                    arg->type = global_a;
+                    break;
+                case functionlocal:
+                    arg->type = local_a;
+                    break;
+                case formalarg:
+                    arg->type = formal_a;
+                    break;
+                default:
+                    arg->type = global_a;
             }
             break;
         }
@@ -491,6 +492,184 @@ void emit_instr(instruction*i){
     instructions.push_back(i);
 }
 
+void readMagic(FILE* f) {
+    long int magic;
+    fread(&magic, sizeof(long int), 1, f);
+    cerr <<"m: " <<magic << endl;
+    if (magic != 163847504) {
+        cerr << "Invalid magic number in .abc file" << endl;
+        exit(1);
+    }
+    cout << "Magic number verified: " << magic << endl;
+}
+
+void readNumbers(FILE* f) {
+    int count;
+    fread(&count, sizeof(int), 1, f);
+    cout << "Reading " << count << " number constants:" << endl;
+    
+    for(int i = 0; i < count; i++) {
+        double num;
+        fread(&num, sizeof(double), 1, f);
+        numConsts.push_back(num);
+        cout << i << ": " << num << endl;
+    }
+}
+
+void readStrings(FILE* f) {
+    int count;
+    fread(&count, sizeof(int), 1, f);
+    cout << "Reading " << count << " string constants:" << endl;
+    
+    for(int i = 0; i < count; i++) {
+        int len;
+        fread(&len, sizeof(int), 1, f);
+        
+        char* buffer = new char[len + 1];
+        fread(buffer, sizeof(char), len, f);
+        buffer[len] = '\0';
+        
+        string* str = new string(buffer);
+        stringConsts.push_back(str);
+        cout << i << ": " << *str << endl;
+        
+        delete[] buffer;
+    }
+}
+
+void readUserFunctions(FILE* f) {
+    int count;
+    fread(&count, sizeof(int), 1, f);
+    cout << "Reading " << count << " user functions:" << endl;
+    
+    for(int i = 0; i < count; i++) {
+        int len;
+        fread(&len, sizeof(int), 1, f);
+        
+        char* buffer = new char[len + 1];
+        fread(buffer, sizeof(char), len, f);
+        buffer[len] = '\0';
+        
+        string* str = new string(buffer);
+        userFuncs.push_back(str);
+        cout << i << ": " << *str << endl;
+        
+        delete[] buffer;
+    }
+}
+
+void readLibFunctions(FILE* f) {
+    int count;
+    fread(&count, sizeof(int), 1, f);
+    cout << "Reading " << count << " library functions:" << endl;
+    
+    for(int i = 0; i < count; i++) {
+        int len;
+        fread(&len, sizeof(int), 1, f);
+        
+        char* buffer = new char[len + 1];
+        fread(buffer, sizeof(char), len, f);
+        buffer[len] = '\0';
+        
+        string* str = new string(buffer);
+        libDefFuncs.push_back(str);
+        cout << i << ": " << *str << endl;
+        
+        delete[] buffer;
+    }
+}
+
+void readBoolConstants(FILE* f) {
+    int count;
+    fread(&count, sizeof(int), 1, f);
+    cout << "Reading " << count << " boolean constants:" << endl;
+    
+    for(int i = 0; i < count; i++) {
+        bool b;
+        fread(&b, sizeof(bool), 1, f);
+        boolConst.push_back(b);
+        cout << i << ": " << (b ? "true" : "false") << endl;
+    }
+}
+
+void readInstructions(FILE* f) {
+    int count;
+    fread(&count, sizeof(int), 1, f);
+    cout << "Reading " << count << " instructions:" << endl;
+    
+    for(int i = 0; i < count; i++) {
+        instruction* instr = new instruction;
+        
+        int opcode, result_type, result_val, arg1_type, arg1_val, arg2_type, arg2_val, srcLine;
+        
+        fread(&opcode, sizeof(int), 1, f);
+        fread(&result_type, sizeof(int), 1, f);
+        fread(&result_val, sizeof(int), 1, f);
+        fread(&arg1_type, sizeof(int), 1, f);
+        fread(&arg1_val, sizeof(int), 1, f);
+        fread(&arg2_type, sizeof(int), 1, f);
+        fread(&arg2_val, sizeof(int), 1, f);
+        fread(&srcLine, sizeof(int), 1, f);
+        
+        instr->opcode = (vmopcode)opcode;
+        instr->srcLine = srcLine;
+        
+        // Create result vmarg if it exists
+        if (result_type != -1) {
+            instr->result = new vmarg;
+            instr->result->type = (vmarg_t)result_type;
+            instr->result->val = result_val;
+        } else {
+            instr->result = nullptr;
+        }
+        
+        // Create arg1 vmarg if it exists
+        if (arg1_type != -1) {
+            instr->arg1 = new vmarg;
+            instr->arg1->type = (vmarg_t)arg1_type;
+            instr->arg1->val = arg1_val;
+        } else {
+            instr->arg1 = nullptr;
+        }
+        
+        // Create arg2 vmarg if it exists
+        if (arg2_type != -1) {
+            instr->arg2 = new vmarg;
+            instr->arg2->type = (vmarg_t)arg2_type;
+            instr->arg2->val = arg2_val;
+        } else {
+            instr->arg2 = nullptr;
+        }
+        
+        instructions.push_back(instr);
+        
+        // Print the instruction for verification
+        print_instruction(instr, i);
+    }
+}
+
+void readAbcFile(const string& filename) {
+    FILE* f = fopen(filename.c_str(), "rb");
+    if (!f) {
+        cerr << "Cannot open .abc file: " << filename << endl;
+        return;
+    }
+    
+    cout << "Reading .abc file: " << filename << endl;
+    
+    // Read in the order they were written
+    readMagic(f);
+    readNumbers(f);
+    readStrings(f);
+    readUserFunctions(f);
+    readLibFunctions(f);
+    readBoolConstants(f);
+    readInstructions(f);
+    
+    fclose(f);
+    cout << "Successfully loaded .abc file!" << endl;
+}
+
 //helper, vale se allo
 instruction* generate_Proc(vmopcode op,quad *q){
     instruction* i = new instruction;
@@ -498,7 +677,7 @@ instruction* generate_Proc(vmopcode op,quad *q){
     i->arg2 = nullptr;
     i->opcode = op;
     i->result = nullptr;
-    i->srcLine = q->line;
+    i->srcLine = q ? q->line : 0;  
     return i;
 }
 
@@ -573,17 +752,17 @@ void print_instruction(instruction* i, int step){
     vmarg* arg1 = i->arg1;
     vmarg* arg2 = i->arg2;
     //string opcode = instruction_opcode_names[i->opcode];
-    fprintf(instructions_out,"%d: instruction: %s",step,instruction_opcode_names[i->opcode].c_str());
+    fprintf(instructions_out,"%d: instruction: %s ",step,instruction_opcode_names[i->opcode].c_str());
     if(arg1){
-        fprintf(instructions_out,"arg1:(%s,%d)",vmarg_names[arg1->type].c_str(),arg1->val);
+        fprintf(instructions_out,"arg1:(%s,%d) ",vmarg_names[arg1->type].c_str(),arg1->val);
     }
     if(arg2){
-        fprintf(instructions_out,"arg2:(%s,%d)",vmarg_names[arg2->type].c_str(),arg2->val);
+        fprintf(instructions_out,"arg2:(%s,%d) ",vmarg_names[arg2->type].c_str(),arg2->val);
     }
     if(r){
-        fprintf(instructions_out,"result:(%s,%d)",vmarg_names[r->type].c_str(),r->val);
+        fprintf(instructions_out,"result:(%s,%d) ",vmarg_names[r->type].c_str(),r->val);
     }
-    fprintf(instructions_out,"[srcLine:%d]",i->srcLine);
+    fprintf(instructions_out,"[srcLine:%d] ",i->srcLine);
     fprintf(instructions_out, "\n");
 }
 

@@ -11,6 +11,12 @@ FILE*       instructions_out;
 FILE*       binary;
 
 extern int yyparse();
+
+extern int magic_num;
+
+extern int globalOffset;
+extern int localOffset;
+
 SymbolTable symbolTable;
 vector<int> loopStack;
 char libFuncs [][30]={
@@ -63,15 +69,15 @@ int main(int argc, char *argv[]) {
         test_name = input_file.substr(last_slash_pos, dot_pos - last_slash_pos);
     }
     print_quads(test_name); 
-    std::string instructions_path = "outputs/" + test_name + ".instructions";
-    std::string binary_path = "outputs/" + test_name + ".abc";
+    string instructions_path = test_name + ".instructions";
+    string binary_path = test_name + ".abc";
     instructions_out = fopen(instructions_path.c_str(), "w");
     binary = fopen(binary_path.c_str(), "wb");
     for(int i = 0;i<quads.size();i++){
         quad_to_instr(quads[i]);
     }
-    long int magic_number = 133880085;
-    fprintf(instructions_out, "magicnumber: %ld\n", (long int) 133780085); fwrite(&magic_number, sizeof(long int), 1, binary);
+    magic_num = 163847504;
+    fprintf(instructions_out, "magicnumber: %ld\n", (long int)163847504); fwrite(&magic_num, sizeof(long int), 1, binary);
     fprintf(instructions_out, "*********** NUMCONSTS ***********\n");
     fprintf(instructions_out, "numConsts: %lu\n", numConsts.size());
     int sizee = numConsts.size();
@@ -112,7 +118,15 @@ int main(int argc, char *argv[]) {
         fwrite(&len, sizeof(int), 1, binary);
         fwrite(libDefFuncs[i]->c_str(), sizeof(char), len, binary);
     }
-    
+    fprintf(instructions_out, "*********** BOOL CONSTS ***********\n");
+    fprintf(instructions_out, "boolConsts: %zu\n", boolConst.size());
+    int boolCount = boolConst.size();
+    fwrite(&boolCount, sizeof(int), 1, binary);
+    for(int i = 0; i < boolConst.size(); i++){
+        fprintf(instructions_out, "%d: %s\n", i, boolConst[i] ? "true" : "false");
+        bool tmp_bool = boolConst[i];
+        fwrite(&tmp_bool, sizeof(bool), 1, binary);
+    }
     fprintf(instructions_out, "*********** CODE ***********\n");
     fprintf(instructions_out, "Instructions: %zu\n", instructions.size());
     int instructionsCount = instructions.size();
@@ -124,5 +138,18 @@ int main(int argc, char *argv[]) {
     fclose(instructions_out);
     fclose(binary);
 
+    //test
+    // unsigned sz;
+    // fopen(binary_path.c_str(), "rb");
+    // fseek(binary,0L,SEEK_END);
+    // sz = ftell(binary);
+    // rewind(binary);
+    readAbcFile(binary_path.c_str());
+    
+    // Now you can use the loaded data
+    cout << "Loaded " << instructions.size() << " instructions" << endl;
+    cout << "Loaded " << numConsts.size() << " number constants" << endl;
+    cout << "Loaded " << stringConsts.size() << " string constants" << endl;
+    
     return 0;
 }
