@@ -3,24 +3,16 @@
 #include <stdlib.h>
 #include <iostream>
 #include "lexLib.hpp"
+#include "instruction.h"
 #include "headerLib.h"
 #include <fstream>
-// extern "C++" int yylex() {
-//     static alpha_token_t token;
-//     return alpha_yylex(&token);
-// }
 
-// // Error handler
-// void yyerror(const char* msg) {
-//     fprintf(stderr, "Error: %s\n", msg);
-// }
+FILE*       instructions_out;
+FILE*       binary;
 
-// extern int alpha_yylex(alpha_token_t* yylval);
-// // Definitions (not just declarations)
-// FILE* yyin = nullptr;
-// alpha_token_t* token = nullptr;
 extern int yyparse();
 SymbolTable symbolTable;
+vector<int> loopStack;
 char libFuncs [][30]={
     "print",
     "input",
@@ -66,16 +58,71 @@ int main(int argc, char *argv[]) {
     }
 
     if (dot_pos == std::string::npos || dot_pos < last_slash_pos) {
-        // No extension or dot is part of directory name
         test_name = input_file.substr(last_slash_pos);
     } else {
         test_name = input_file.substr(last_slash_pos, dot_pos - last_slash_pos);
     }
+    print_quads(test_name); 
+    std::string instructions_path = "outputs/" + test_name + ".instructions";
+    std::string binary_path = "outputs/" + test_name + ".abc";
+    instructions_out = fopen(instructions_path.c_str(), "w");
+    binary = fopen(binary_path.c_str(), "wb");
+    for(int i = 0;i<quads.size();i++){
+        quad_to_instr(quads[i]);
+    }
+    long int magic_number = 133880085;
+    fprintf(instructions_out, "magicnumber: %ld\n", (long int) 133780085); fwrite(&magic_number, sizeof(long int), 1, binary);
+    fprintf(instructions_out, "*********** NUMCONSTS ***********\n");
+    fprintf(instructions_out, "numConsts: %lu\n", numConsts.size());
+    int sizee = numConsts.size();
+    fwrite(&sizee, sizeof(int), 1, binary);
+    for(int i = 0;i<numConsts.size();i++){
+        fprintf(instructions_out,"%d: %lf\n",i,numConsts[i]);
+        fwrite(&numConsts[i],sizeof(double),1,binary);
+    }
+    fprintf(instructions_out, "*********** STRING CONSTS ***********\n");
+    fprintf(instructions_out, "stringConsts: %zu\n", stringConsts.size());
+    int stringCount = stringConsts.size();
+    fwrite(&stringCount, sizeof(int), 1, binary);
+    for(int i = 0; i < stringConsts.size(); i++){
+        fprintf(instructions_out, "%d: %s\n", i, stringConsts[i]->c_str());
+        int len = stringConsts[i]->length();
+        fwrite(&len, sizeof(int), 1, binary);
+        fwrite(stringConsts[i]->c_str(), sizeof(char), len, binary);
+    }
 
-    // bool success = true; 
-    // if (success) {
-        print_quads(test_name); 
-    // }
+    fprintf(instructions_out, "*********** USER FUNCTIONS ***********\n");
+    fprintf(instructions_out, "userFuncs: %zu\n", userFuncs.size());
+    int userFuncsCount = userFuncs.size();
+    fwrite(&userFuncsCount, sizeof(int), 1, binary);
+    for(int i = 0; i < userFuncs.size(); i++){
+        fprintf(instructions_out, "%d: %s\n", i, userFuncs[i]->c_str());
+        int len = userFuncs[i]->length();
+        fwrite(&len, sizeof(int), 1, binary);
+        fwrite(userFuncs[i]->c_str(), sizeof(char), len, binary);
+    }
+
+    fprintf(instructions_out, "*********** LIB FUNCTIONS ***********\n");
+    fprintf(instructions_out, "libFuncs: %zu\n", libDefFuncs.size());
+    int libFuncsCount = libDefFuncs.size();
+    fwrite(&libFuncsCount, sizeof(int), 1, binary);
+    for(int i = 0; i < libDefFuncs.size(); i++){
+        fprintf(instructions_out, "%d: %s\n", i, libDefFuncs[i]->c_str());
+        int len = libDefFuncs[i]->length();
+        fwrite(&len, sizeof(int), 1, binary);
+        fwrite(libDefFuncs[i]->c_str(), sizeof(char), len, binary);
+    }
+    
+    fprintf(instructions_out, "*********** CODE ***********\n");
+    fprintf(instructions_out, "Instructions: %zu\n", instructions.size());
+    int instructionsCount = instructions.size();
+    fwrite(&instructionsCount, sizeof(int), 1, binary);
+    for(int i = 0; i < instructions.size(); i++){
+        print_instruction(instructions[i], i);
+        instruction_to_binary(instructions[i]);
+    }
+    fclose(instructions_out);
+    fclose(binary);
 
     return 0;
 }

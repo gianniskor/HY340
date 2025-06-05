@@ -2,16 +2,18 @@
 
 vector <double> numConsts;
 vector <string*> stringConsts;
-vector <string*> libFuncs;
+vector <string*> libDefFuncs;
 vector <string*> userFuncs;
 vector <bool> boolConst;
 vector <instruction*> instructions;
+
+extern FILE*       instructions_out;
+extern FILE*       binary;
 
 int instrStep = 1;
 
 typedef void (*generator_func_t)(quad*);
 avm_memcell stack[AVM_STACKSIZE];
-
 generator_func_t generators[] = {
     generate_ASSIGN,
     generate_ADD,
@@ -54,7 +56,7 @@ void generate_MUL (quad* q){
     generate(mul_v,q);
 }
 
-void generate_ADD (quad* q){
+void generate_DIV (quad* q){
     generate(div_v,q);
 }
 
@@ -74,10 +76,259 @@ void generate_NEWTABLE (quad* q){
     generate(tablecreate_v,q);
 }
 
-void generate_JUMP(quad* q){
-    //generate_relational(jump_v, q);
+void generate_ASSIGN (quad *q){
+    generate(assign_v,q);
 }
 
+void generate_NOT(quad* q) {
+    instruction* t;
+    
+    // First instruction: if arg1 == false jump to "result = true" instruction
+    t = new instruction;
+    t->opcode = jeq_v;
+    t->arg1 = new vmarg;
+    make_operand(q->arg1, t->arg1);
+    t->arg2 = new vmarg;
+    t->arg2->type = bool_a;
+    t->arg2->val = consts_newbool(false);
+    t->result = new vmarg;
+    t->result->type = label_a;
+    t->result->val = nextquad() + 3;  // Jump to "true" assignment if arg1 is false
+    emit_instr(t);
+    
+    // Second instruction: result = false (when arg1 is true)
+    t = new instruction;
+    t->opcode = assign_v;
+    t->arg1 = new vmarg;
+    t->arg1->type = bool_a;
+    t->arg1->val = consts_newbool(false);
+    t->arg2 = nullptr;  // reset_operand
+    t->result = new vmarg;
+    make_operand(q->result, t->result);
+    emit_instr(t);
+    
+    // Third instruction: jump over "result = true" to end
+    t = new instruction;
+    t->opcode = jump_v;
+    t->arg1 = nullptr;  // reset_operand
+    t->arg2 = nullptr;  // reset_operand
+    t->result = new vmarg;
+    t->result->type = label_a;
+    t->result->val = nextquad() + 2;
+    emit_instr(t);
+    
+    // Fourth instruction: result = true (when arg1 is false)
+    t = new instruction;
+    t->opcode = assign_v;
+    t->arg1 = new vmarg;
+    t->arg1->type = bool_a;
+    t->arg1->val = consts_newbool(true);
+    t->arg2 = nullptr;  // reset_operand
+    t->result = new vmarg;
+    make_operand(q->result, t->result);
+    emit_instr(t);
+}
+
+void generate_AND(quad *q){
+    instruction* t;
+    // First instruction: if arg1 == false jump to false-assignment
+    t = new instruction;
+    t->opcode = jeq_v;
+    t->arg1 = new vmarg;
+    make_operand(q->arg1, t->arg1);
+    t->arg2 = new vmarg;
+    t->arg2->type = bool_a;
+    t->arg2->val = consts_newbool(false);
+    t->result = new vmarg;
+    t->result->type = label_a;
+    t->result->val = nextquad() + 4;  // Jump to false-assignment if arg1 is false
+    emit_instr(t);
+    
+    // Second instruction: if arg2 == false jump to false-assignment
+    t = new instruction;
+    t->opcode = jeq_v;
+    t->arg1 = new vmarg;
+    make_operand(q->arg2, t->arg1);
+    t->arg2 = new vmarg;
+    t->arg2->type = bool_a;
+    t->arg2->val = consts_newbool(false);
+    t->result = new vmarg;
+    t->result->type = label_a;
+    t->result->val = nextquad() + 3;  // Jump to false-assignment if arg2 is false
+    emit_instr(t);
+    
+    // Third instruction: result = true (when both arg1 and arg2 are true)
+    t = new instruction;
+    t->opcode = assign_v;
+    t->arg1 = new vmarg;
+    t->arg1->type = bool_a;
+    t->arg1->val = consts_newbool(true);
+    t->arg2 = nullptr;  // reset_operand
+    t->result = new vmarg;
+    make_operand(q->result, t->result);
+    emit_instr(t);
+    
+    // Fourth instruction: jump over false-assignment to end
+    t = new instruction;
+    t->opcode = jump_v;
+    t->arg1 = nullptr;  // reset_operand
+    t->arg2 = nullptr;  // reset_operand
+    t->result = new vmarg;
+    t->result->type = label_a;
+    t->result->val = nextquad() + 2;
+    emit_instr(t);
+    
+    // Fifth instruction: result = false (when either arg1 or arg2 is false)
+    t = new instruction;
+    t->opcode = assign_v;
+    t->arg1 = new vmarg;
+    t->arg1->type = bool_a;
+    t->arg1->val = consts_newbool(false);
+    t->arg2 = nullptr;
+    t->result = new vmarg;
+    make_operand(q->result, t->result);
+    emit_instr(t);
+    return;
+}
+
+void generate_JUMP(quad *q){
+    generate_relational(jump_v,q);
+}
+
+void generate_IF_EQ(quad *q){
+    generate_relational(jeq_v,q);
+}
+
+void generate_IF_NOTEQ(quad *q){
+    generate_relational(jne_v,q);
+}
+
+void generate_IF_GREATER(quad *q){
+    generate_relational(jgt_v,q);
+}
+
+void generate_IF_GREATEREQ(quad *q){
+    generate_relational(jge_v,q);
+}
+
+void generate_IF_LESS(quad *q){
+    generate_relational(jlt_v,q);
+}
+
+void generate_IF_LESSEQ(quad *q){
+    generate_relational(jle_v,q);
+}
+
+void generate_NOP(quad* q){
+    instruction* i = new instruction;
+    i->arg1 = nullptr;
+    i->arg2 = nullptr;
+    i->result = nullptr;
+    i->opcode = nop_v;
+    emit_instr(i);
+}
+
+void generate_OR(quad *q){
+    instruction* t;
+    
+    // First instruction: if arg1 == true jump to true-assignment
+    t = new instruction;
+    t->opcode = jeq_v;
+    t->arg1 = new vmarg;
+    make_operand(q->arg1, t->arg1);
+    t->arg2 = new vmarg;
+    t->arg2->type = bool_a;
+    t->arg2->val = consts_newbool(true);
+    t->result = new vmarg;
+    t->result->type = label_a;
+    t->result->val = nextquad() + 4;  // Jump to true-assignment if arg1 is true
+    emit_instr(t);
+    
+    // Second instruction: if arg2 == true jump to true-assignment
+    t = new instruction;
+    t->opcode = jeq_v;
+    t->arg1 = new vmarg;
+    make_operand(q->arg2, t->arg1);
+    t->arg2 = new vmarg;
+    t->arg2->type = bool_a;
+    t->arg2->val = consts_newbool(true);
+    t->result = new vmarg;
+    t->result->type = label_a;
+    t->result->val = nextquad() + 3;  // Jump to true-assignment if arg2 is true
+    emit_instr(t);
+    
+    // Third instruction: result = false (when both arg1 and arg2 are false)
+    t = new instruction;
+    t->opcode = assign_v;
+    t->arg1 = new vmarg;
+    t->arg1->type = bool_a;
+    t->arg1->val = consts_newbool(false);
+    t->arg2 = nullptr;  // reset_operand
+    t->result = new vmarg;
+    make_operand(q->result, t->result);
+    emit_instr(t);
+    
+    // Fourth instruction: jump over true-assignment to end
+    t = new instruction;
+    t->opcode = jump_v;
+    t->arg1 = nullptr;  // reset_operand
+    t->arg2 = nullptr;  // reset_operand
+    t->result = new vmarg;
+    t->result->type = label_a;
+    t->result->val = nextquad() + 2;
+    emit_instr(t);
+    
+    // Fifth instruction: result = true (when either arg1 or arg2 is true)
+    t = new instruction;
+    t->opcode = assign_v;
+    t->arg1 = new vmarg;
+    t->arg1->type = bool_a;
+    t->arg1->val = consts_newbool(true);
+    t->arg2 = nullptr;
+    t->result = new vmarg;
+    make_operand(q->result, t->result);
+    emit_instr(t);
+}
+
+void generate_UMINUS(quad* q){
+    instruction* i = generate_Proc(mul_v,q);
+    if(q->arg1){
+        i->arg1 = new vmarg;
+        make_operand(q->arg1,i->arg1);
+    }
+    i->arg2 = new vmarg;
+    i->arg2->val = consts_newnumber(-1);
+    i->arg2->type = number_a;
+    if(i->result){
+        i->result = new vmarg;
+        make_operand(q->result,i->result);
+    }
+    emit_instr(i);
+}
+
+void generate_PARAM(quad *q){
+    return;
+}
+
+void generate_CALL(quad *q){
+    return;
+}
+
+void generate_GETRETVAL(quad *q){
+    return;
+}
+
+void generate_FUNCSTART(quad *q){
+    return;
+}
+
+void generate_FUNCEND(quad *q){
+    return;
+}
+
+void generate_RETURN(quad *q){
+    return;
+}
 
 string instruction_opcode_names[] = {
     "assign_v",
@@ -136,8 +387,8 @@ unsigned consts_newnumber(double n){
 
 unsigned libFuncs_newused(string* s){
     string* str = new string(*s);
-    libFuncs.push_back(str);
-    return libFuncs.size() - 1;
+    libDefFuncs.push_back(str);
+    return libDefFuncs.size() - 1;
 }
 
 unsigned userFuncs_newused(string* s){
@@ -164,7 +415,13 @@ void make_operand(expr* e, vmarg* arg){
         case arithexpr_e:
         case boolexpr_e:
         case newtable_e:    {
-            assert(e->sym);
+            if (!e->sym) {
+                // Handle the case where sym is null
+                arg->type = nil_a;  // Or some appropriate default
+                arg->val = 0;
+                break;
+            }
+            
             arg->val = e->sym->offset;
             switch (e->sym->scope)
             {
@@ -173,10 +430,12 @@ void make_operand(expr* e, vmarg* arg){
                 break;
             case functionlocal:
                 arg->type = local_a;
+                break;  // Add missing break
             case formalarg:
                 arg->type = formal_a;
+                break;  // Add missing break
             default:
-                assert(0);
+                arg->type = global_a;  // Provide a default instead of assert
             }
             break;
         }
@@ -223,6 +482,7 @@ void make_operand(expr* e, vmarg* arg){
         }
     }
 }
+
 //helper, vale se allo
 void emit_instr(instruction*i){
     if(i == nullptr){
@@ -249,6 +509,7 @@ void generate(vmopcode op,quad *q){
         i->result = new vmarg;
         make_operand(q->result,i->result);
     }
+    emit_instr(i);
 }
 
 //helper, vale se allo
@@ -270,6 +531,7 @@ void generate_relational(vmopcode op, quad* q){
     i->result = new vmarg;
     i->result->type = label_a;
     i->result->val = q->label;
+    //patch incomplete jump
     emit_instr(i);
 }
 
@@ -279,5 +541,135 @@ void quad_to_instr(void* void_quad){
     }
     quad *q = (quad*) void_quad;
     generators[q->op](q);
-    return;
+}
+
+
+
+// Add this function to your instruction.cpp file
+void avm_memcellclear(avm_memcell* m) {
+    if (m == nullptr) return;
+    
+    // Free dynamically allocated memory based on the cell's type
+    if (m->type == string_m && m->data.strVal != nullptr) {
+        delete[] m->data.strVal;
+        m->data.strVal = nullptr;
+    } else if (m->type == table_m && m->data.tableVal != nullptr) {
+        avm_tabledecrefcounter(m->data.tableVal);
+        m->data.tableVal = nullptr;
+    } else if (m->type == libfunc_m && m->data.libFuncVal != nullptr) {
+        delete[] m->data.libFuncVal;
+        m->data.libFuncVal = nullptr;
+    }
+    
+    // Set the type to undefined
+    m->type = undef_m;
+}
+
+void print_instruction(instruction* i, int step){
+    if(i == nullptr){
+        assert(0);
+    }
+    vmarg* r = i->result;
+    vmarg* arg1 = i->arg1;
+    vmarg* arg2 = i->arg2;
+    //string opcode = instruction_opcode_names[i->opcode];
+    fprintf(instructions_out,"%d: instruction: %s",step,instruction_opcode_names[i->opcode].c_str());
+    if(arg1){
+        fprintf(instructions_out,"arg1:(%s,%d)",vmarg_names[arg1->type].c_str(),arg1->val);
+    }
+    if(arg2){
+        fprintf(instructions_out,"arg2:(%s,%d)",vmarg_names[arg2->type].c_str(),arg2->val);
+    }
+    if(r){
+        fprintf(instructions_out,"result:(%s,%d)",vmarg_names[r->type].c_str(),r->val);
+    }
+    fprintf(instructions_out,"[srcLine:%d]",i->srcLine);
+    fprintf(instructions_out, "\n");
+}
+
+void instruction_to_binary(instruction *i){
+    if(i == nullptr){
+        assert(0);
+    }
+    vmarg* r = i->result;
+    vmarg* arg1 = i->arg1;
+    vmarg* arg2 = i->arg2;
+    int opcode = i->opcode;
+    int result_type = -1, arg1_type = -1, arg2_type = -1;
+    int result_val = -1, arg1_val = -1, arg2_val = -1;
+    
+    if(r) {
+        result_type = r->type;
+        result_val = r->val;
+    }
+    if(arg1) {
+        arg1_type = arg1->type;
+        arg1_val = arg1->val;
+    }
+    if(arg2) {
+        arg2_type = arg2->type;
+        arg2_val = arg2->val;
+    }
+    int srcLine = i->srcLine;
+    
+    // Write the binary data to the file
+    fwrite(&opcode, sizeof(int), 1, binary);
+    fwrite(&result_type, sizeof(int), 1, binary);
+    fwrite(&result_val, sizeof(int), 1, binary);
+    fwrite(&arg1_type, sizeof(int), 1, binary);
+    fwrite(&arg1_val, sizeof(int), 1, binary);
+    fwrite(&arg2_type, sizeof(int), 1, binary);
+    fwrite(&arg2_val, sizeof(int), 1, binary);
+    fwrite(&srcLine, sizeof(int), 1, binary);
+
+}
+
+void avm_tableincrefcounter(avm_table* t){
+    ++t->refCounter;
+}
+
+void avm_tabledecrefcounter(avm_table* t){
+    assert(t->refCounter>0);
+    if(!--t->refCounter){
+        avm_tabledestroy(t);
+    }
+}
+
+void avm_tablebucketsinit(avm_table_bucket** p){
+    for(unsigned i = 0; i < AVM_TABLE_HASHSIZE; ++i){
+        p[i] = (avm_table_bucket*) 0;
+    }
+}
+
+avm_table* avm_tablenew(void){
+    avm_table* t = new avm_table;
+    AVM_WIPEOUT(*t);
+    t->refCounter = t->total = 0;
+    avm_tablebucketsinit(t->boolIndexed);
+    avm_tablebucketsinit(t->strIndexed);
+    avm_tablebucketsinit(t->libIndexed);
+    avm_tablebucketsinit(t->funcIndexed);
+    avm_tablebucketsinit(t->numIndexed);
+    return t;
+}
+
+void avm_tablebucketsdestroy(avm_table_bucket**p){
+    for(unsigned i = 0; i <AVM_TABLE_HASHSIZE;++i,++p){
+        for(avm_table_bucket* b = *p;b;){
+            avm_table_bucket* del = b;
+            b = b->next;
+            avm_memcellclear(&del->key);
+            avm_memcellclear(&del->value);
+            free(del);
+       }
+       p[i] = (avm_table_bucket*) 0;
+    }
+}
+
+void avm_tabledestroy (avm_table* t){
+    avm_tablebucketsdestroy(t->boolIndexed);
+    avm_tablebucketsdestroy(t->strIndexed);
+    avm_tablebucketsdestroy(t->libIndexed);
+    avm_tablebucketsdestroy(t->funcIndexed);
+    avm_tablebucketsdestroy(t->numIndexed);
 }

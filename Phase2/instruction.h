@@ -83,7 +83,7 @@ typedef struct userfunc{
 
 extern vector <double> numConsts;
 extern vector <string*> stringConsts;
-extern vector <string*> libFuncs;
+extern vector <string*> libDefFuncs;
 extern vector <string*> userFuncs;
 extern vector <bool> boolConst;
 extern vector <instruction*> instructions;
@@ -120,7 +120,17 @@ void generate(vmopcode op,quad *q);
 void generate_relational(vmopcode op, quad* q);
 instruction* generate_Proc(vmopcode op,quad *q);
 void emit_instr(instruction*i);
+void make_operand(expr* e, vmarg* arg);
+unsigned consts_newstring(string* s);
+unsigned consts_newnumber(double n);
+unsigned libFuncs_newused(string* s);
+unsigned userFuncs_newused(string* s);
+unsigned consts_newbool(bool b);
+void generate_make_op(instruction* i, quad* q);
+void quad_to_instr(void* void_quad);
 
+void instruction_to_binary(instruction *i);
+void print_instruction(instruction* i, int step);
 
 enum avm_memcell_t {
     number_m,
@@ -153,6 +163,8 @@ void avm_tabledestroy(avm_table* t);
 avm_memcell* avm_tablegetelem(avm_memcell *key);
 void avm_tablesetelem(avm_memcell* key, avm_memcell* value);
 
+
+
 static void avm_initstack(void);
 
 struct avm_table_bucket{
@@ -171,56 +183,16 @@ struct avm_table{
     unsigned total;
 };
 
-void avm_tableincrefcounter(avm_table* t){
-    ++t->refCounter;
-}
+void avm_tableincrefcounter(avm_table* t);
+void avm_tabledecrefcounter(avm_table* t);
+void avm_tablebucketsinit(avm_table_bucket** p);
 
-void avm_tabledecrefcounter(avm_table* t){
-    assert(t->refCounter>0);
-    if(!--t->refCounter){
-        avm_tabledestroy(t);
-    }
-}
-
-void avm_tablebucketsinit(avm_table_bucket** p){
-    for(unsigned i = 0; i < AVM_TABLE_HASHSIZE; ++i){
-        p[i] = (avm_table_bucket*) 0;
-    }
-}
-
-avm_table* avm_tablenew(void){
-    avm_table* t = new avm_table;
-    AVM_WIPEOUT(*t);
-    t->refCounter = t->total = 0;
-    avm_tablebucketsinit(t->boolIndexed);
-    avm_tablebucketsinit(t->strIndexed);
-    avm_tablebucketsinit(t->libIndexed);
-    avm_tablebucketsinit(t->funcIndexed);
-    avm_tablebucketsinit(t->numIndexed);
-    return t;
-}
+avm_table* avm_tablenew(void);
 
 void avm_memcellclear(avm_memcell* m);
 
-void avm_tablebucketsdestroy(avm_table_bucket**p){
-    for(unsigned i = 0; i <AVM_TABLE_HASHSIZE;++i,++p){
-        for(avm_table_bucket* b = *p;b;){
-            avm_table_bucket* del = b;
-            b = b->next;
-            avm_memcellclear(&del->key);
-            avm_memcellclear(&del->value);
-            free(del);
-       }
-       p[i] = (avm_table_bucket*) 0;
-    }
-}
+void avm_tablebucketsdestroy(avm_table_bucket**p);
 
-void avm_tabledestroy (avm_table* t){
-    avm_tablebucketsdestroy(t->boolIndexed);
-    avm_tablebucketsdestroy(t->strIndexed);
-    avm_tablebucketsdestroy(t->libIndexed);
-    avm_tablebucketsdestroy(t->funcIndexed);
-    avm_tablebucketsdestroy(t->numIndexed);
-}
+void avm_tabledestroy (avm_table* t);
 
 #endif
