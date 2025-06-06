@@ -86,8 +86,6 @@ void print_quads(const string& filename = "") {
             cerr << "Error: Failed to open output file " << out_filename << endl;
         }
     }
-
-    // Print header
     *out_stream << "NO.  OPCODE          RESULT      ARG1        ARG2        LABEL\n\n";
     
     for (unsigned i = 0; i < quads.size(); i++) {
@@ -95,8 +93,6 @@ void print_quads(const string& filename = "") {
         string result_str = "";
         string arg1_str = "";
         string arg2_str = "";
-        
-        // Convert result to string
         if (q->result) {
             if (q->result->type == constint_e) 
                 result_str = to_string(q->result->value.intValue);
@@ -109,8 +105,6 @@ void print_quads(const string& filename = "") {
             else if (q->result->sym) 
                 result_str = q->result->sym->getName();
         }
-        
-        // Convert arg1 to string
         if (q->arg1) {
             if (q->arg1->type == constint_e) 
                 arg1_str = to_string(q->arg1->value.intValue);
@@ -123,8 +117,6 @@ void print_quads(const string& filename = "") {
             else if (q->arg1->sym) 
                 arg1_str = q->arg1->sym->getName();
         }
-        
-        // Convert arg2 to string
         if (q->arg2) {
             if (q->arg2->type == constint_e) 
                 arg2_str = to_string(q->arg2->value.intValue);
@@ -137,8 +129,6 @@ void print_quads(const string& filename = "") {
             else if (q->arg2->sym) 
                 arg2_str = q->arg2->sym->getName();
         }
-        
-        // Format and output the quad
         *out_stream << "#" << (i+1) << left << setw(4) << " " 
              << setw(15) << quadString[q->op]
              << setw(12) << result_str
@@ -149,8 +139,6 @@ void print_quads(const string& filename = "") {
         }
         *out_stream << endl;
     }
-    
-    // Close file if it was opened
     if (outfile.is_open()) {
         outfile.close();
     }
@@ -164,8 +152,3 @@ expr* newTempExpr() {
     }
     return symToExpr(sym);
 }
-
-// unsigned nextquad() {
-//     return currQuad;
-// }
-

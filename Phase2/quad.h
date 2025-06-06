@@ -7,10 +7,10 @@ extern int tmpCount;
 
 typedef enum iopcode{
     assign,
-    sub,
     add,
-    div_op,
+    sub,
     mul,
+    div_op,
     mod,
     uminus,
     and_op,
@@ -22,16 +22,17 @@ typedef enum iopcode{
     if_greatereq,
     if_less,
     if_greater,
-    jump,
-    param,
     call,
+    param,
     return_op,
     getretval,
     funcstart,
     funcend,
     tablecreate,
     tablegetelem,
-    tablesetelem
+    jump,
+    tablesetelem,
+    nop
 } iopcode;
 
 extern char quadString[26][32];
@@ -48,7 +49,7 @@ typedef struct quad {
 void print_quads();
 void enumToString();
 void emit(iopcode op, expr* arg1, expr* arg2, expr* result);
-expr* newTempExpr(string F_callee);
+expr* newTempExpr();
 unsigned nextquad();
 void emit(iopcode op, expr* arg1, expr* arg2, expr* result, int label);
 #endif

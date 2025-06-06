@@ -7,6 +7,8 @@
 #include "headerLib.h"
 #include <fstream>
 
+extern vector<string*> libDefFuncs;
+
 FILE*       instructions_out;
 FILE*       binary;
 
@@ -47,6 +49,8 @@ int main(int argc, char *argv[]) {
     }
     for (const char* function : libFuncs) {
         symbolTable.insert(function, 0, 0, LIB_FUNC);
+        string* str = new string(function);
+        libDefFuncs.push_back(str);
     }
     yyparse();
     symbolTable.print();

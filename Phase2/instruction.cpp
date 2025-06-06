@@ -656,8 +656,12 @@ void readAbcFile(const string& filename) {
     }
     
     cout << "Reading .abc file: " << filename << endl;
-    
-    // Read in the order they were written
+    numConsts.clear();
+    stringConsts.clear();
+    libDefFuncs.clear();
+    userFuncs.clear();
+    boolConst.clear();
+    instructions.clear();
     readMagic(f);
     readNumbers(f);
     readStrings(f);

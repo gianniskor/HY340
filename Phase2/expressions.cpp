@@ -2,12 +2,15 @@
 #include <iostream>
 #include <cstring>
 
+
+
 using namespace std;
 extern int tmpCount;
 extern SymbolTable symbolTable;
 extern int yylineno;
 int flagg1 = 1;
 int flagg2 = 2;
+
 
 void setToNULL(expr* e){
     e->next = nullptr;
@@ -150,15 +153,6 @@ expr* evaluateNumber(expr* e, expr* e2, iopcode opcode) {
     
     return tmpExpr;
 }
-
-// void backpatch(list* list, unsigned label) {
-//     for (unsigned quadIndex : list->quadLabels) {
-//         quads[quadIndex]->label = label;
-//     }
-// }
-// void backpatch(unsigned quadIndex, unsigned label) {
-//     quads[quadIndex]->label = label;
-// }
 
 expr* evaluateUminus(expr* e){
     expr* tmpExpr = nullptr;
@@ -462,10 +456,6 @@ void incLoop(){
 
 void decLoop(){
     --loopCounter;
-    if(loopCounter == 0){
-        cerr << "weird, loopcounter negval" << endl;
-        exit(-1);
-    }
 }
 
 void incFunc(){
@@ -474,10 +464,6 @@ void incFunc(){
 
 void decFunc(){
     --funcCounter;
-    if(funcCounter == 0){
-        cerr << "weird, funcCounter negval" << endl;
-        exit(-1);
-    }
 }
 
 

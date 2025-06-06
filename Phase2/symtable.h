@@ -8,9 +8,23 @@
 
 using namespace std;
 
+extern vector<int> loopStack;
+
+extern int loopCounter;
+
+extern int globalOffset;
+extern int localOffset;
+
 typedef enum SymbolType {
     GLOBAL_VAR, LOCAL_VAR, FUNCTION_PARAM, USER_FUNC, LIB_FUNC
 }SymbolType;
+
+
+typedef enum scopespace_t{
+    programvar,
+    formalarg,
+    functionlocal
+} scopespace_t;
 
 
 class Symbol{
@@ -19,20 +33,22 @@ class Symbol{
         unsigned int Iaddress;
         unsigned int totalLoc;
         int functionscope;
-        int offset = -1;
-        //int funcJumpQuad;
+        //int offset = -1;
     public:
+        int offset = -1;
         int funcJumpQuad;
         string name;
         int scope;
+        //fix scopespace;
+        scopespace_t scopespace = programvar;
         int line;
         SymbolType type;
         bool active;
         string value;
         Symbol():
-            name(""), scope(0), line(0), type(), active(true), value(""),Iaddress(0), totalLoc(0) {}
+            name(""), scope(0), line(0), type(), active(true), value(""),Iaddress(0), totalLoc(0) ,scopespace(programvar){}
         Symbol(string name, int scope, int line, SymbolType type, string value) 
-            :name(name), scope(scope), line(line), type(type), active(true), value(value), Iaddress(0), totalLoc(0) {}
+            :name(name), scope(scope), line(line), type(type), active(true), value(value), Iaddress(0), totalLoc(0),scopespace(programvar) {}
         int getScope() const{
             return scope;
         }
@@ -102,15 +118,13 @@ class Symbol{
 int getOffset() const {
     return this->offset;
 }
- };
+};
 
 class SymbolTable{
     private:
 
         vector<vector <Symbol*>> scopeTable;
         unordered_map<string, vector<Symbol*>> nameTable;
-
-
     public:
     
     int currentScope;
@@ -131,38 +145,35 @@ class SymbolTable{
             scopeTable.push_back(vector<Symbol*>());
         }
         if (type == LIB_FUNC) {
-            // Can't redefine library functions
             auto symbols = lookup(name);
             for (auto& sym : symbols) {
                 if (sym->getType() == LIB_FUNC) {
-                    return sym; // Already exists
+                    return sym;
                 }
             }
         }
-        
-        // Check if symbol exists in the same scope
         Symbol* existingSymbol = lookupInScope(name, scope);
         if (existingSymbol != nullptr && existingSymbol->isActive()) {
-            // Cannot redefine a symbol in the same scope
             return nullptr;
         }
-        
-        // Check if it's a library function name (prevent shadowing)
         if (type != LIB_FUNC) {
             auto symbols = lookup(name);
             for (auto& sym : symbols) {
                 if (sym->getType() == LIB_FUNC) {
-                    // Cannot shadow library functions
                     return nullptr;
                 }
             }
         }
-        
-        // Create and add the new symbol
         Symbol* newSymbol = new Symbol(name, scope, line, type, value);
+        if (scope == 0) {
+            newSymbol->offset = globalOffset++;
+            newSymbol->scopespace = programvar;
+        } else {
+            //ksanades edw ligo
+            newSymbol->offset = localOffset++;
+            newSymbol->scopespace = programvar;
+        }
         scopeTable[scope].push_back(newSymbol);
-        
-        // Add to name table
         if (nameTable.find(name) == nameTable.end()) {
             nameTable[name] = vector<Symbol*>();
         }
@@ -171,15 +182,12 @@ class SymbolTable{
         return newSymbol;
     }
     
-    // Lookup a symbol by name (returns all matching symbols)
     vector<Symbol*> lookup(const string& name) {
         if (nameTable.find(name) != nameTable.end()) {
             return nameTable[name];
         }
         return vector<Symbol*>();
     }
-    
-    // Lookup active symbol in specific scope
     Symbol* lookupInScope(const string& name, int targetScope) {
         if (targetScope >= scopeTable.size()) {
             return nullptr;
@@ -192,7 +200,7 @@ class SymbolTable{
         return nullptr;
     }
     
-    // Lookup any symbol (active or not) in specific scope
+    //lookup any symbol in specific scope
     Symbol* lookupAnyInScope(const string& name, int targetScope) {
         if (targetScope >= scopeTable.size()) {
             return nullptr;
@@ -217,15 +225,15 @@ class SymbolTable{
         return nullptr;
     }
     
-    // Enter a new scope
     void enterScope() {
+        // loopStack.push_back(loopCounter);
+        // loopCounter = 0;
         currentScope++;
         if (currentScope >= scopeTable.size()) {
             scopeTable.push_back(vector<Symbol*>());
         }
     }
     
-    // Exit the current scope (mark symbols as inactive)
     void exitScope() {
         if (currentScope > 0) {
             for (auto* symbol : scopeTable[currentScope]) {
@@ -233,13 +241,14 @@ class SymbolTable{
             }
             currentScope--;
         }
+        // int i = loopStack.back();
+        // loopStack.pop_back();
     }
 
     int getCurrentScope() const {
         return currentScope;
     }
     
-    // Hide all symbols in a scope (mark as inactive)
     void hideScope(int scope) {
         if (scope < scopeTable.size()) {
             for (auto* symbol : scopeTable[scope]) {
@@ -278,15 +287,11 @@ unsigned int getTotalLoc(int functionScope) {
         printf("\n--------------------- Symbol Table ---------------------\n");
         printf("%-20s %-15s %-10s %-10s %s\n", "Name", "Type", "Line", "Scope", "Status");
         printf("--------------------------------------------------------\n");
-        
-        // First print library functions (scope 0)
         for (auto* symbol : scopeTable[0]) {
             if (symbol->getType() == LIB_FUNC) {
                 symbol->print();
             }
         }
-        
-        // Then print user symbols by ascending scope
         for (size_t scope = 0; scope < scopeTable.size(); scope++) {
             for (auto* symbol : scopeTable[scope]) {
                 if (symbol->getType() != LIB_FUNC) {
@@ -312,8 +317,12 @@ unsigned int getTotalLoc(int functionScope) {
             Symbol* newS;
             if(scope == 0){
                 newS = new Symbol(name,scope,line,GLOBAL_VAR,value);
+                // newS->offset = globalOffset++;      
+                // newS->scopespace = programvar;
             }else{
                 newS = new Symbol(name,scope,line,LOCAL_VAR,value);
+                // newS->offset = localOffset++;       
+                // newS->scopespace = functionlocal;
             }
             scopeTable[scope].push_back(newS);
             if (nameTable.find(name) == nameTable.end()) {
@@ -345,8 +354,16 @@ unsigned int getTotalLoc(int functionScope) {
             Symbol* newSymbol;
             if(scope == 0){
                 newSymbol = insert(name, scope, line, GLOBAL_VAR, value);
+                // if(newSymbol) {
+                //     newSymbol->offset = globalOffset++; 
+                //     newSymbol->scopespace = programvar; 
+                // }
             } else{
                 newSymbol = insert(name, scope, line, LOCAL_VAR, value);
+                // if(newSymbol) {
+                //     newSymbol->offset = localOffset++;     
+                //     newSymbol->scopespace = functionlocal; 
+                // }
             }
             if(newSymbol == nullptr) {
                 printf("Error: Failed to create global variable %s at line %d\n", name.c_str(), line);
