@@ -46,6 +46,6 @@ char* comment_line(int start, int end) {
         std::cout << "failed memory allocation in comment_line function" << std::endl;
         exit(-1);
     }
-    sprintf(str, "%d - %d", start, end);
+    snprintf(str, sizeof(str), "%d - %d", start, end);
     return str;
 }

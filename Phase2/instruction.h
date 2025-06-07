@@ -60,7 +60,8 @@ typedef enum vmarg_t{
     nil_a,
     userfunc_a,
     libfunc_a,
-    retval_a
+    retval_a,
+    undefined_a
 } vmarg_t;
 
 typedef struct vmarg{

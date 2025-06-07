@@ -30,12 +30,12 @@ typedef enum iopcode{
     funcend,
     tablecreate,
     tablegetelem,
-    jump,
-    tablesetelem,
+    
+    tablesetelem,jump,
     nop
 } iopcode;
 
-extern char quadString[26][32];
+extern char quadString[27][32];
 
 typedef struct quad {
     iopcode op;

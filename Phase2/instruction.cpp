@@ -425,7 +425,7 @@ void make_operand(expr* e, vmarg* arg){
             }
             
             arg->val = e->sym->offset;
-            switch (e->sym->scopespace) {  // Changed from 'scope' to 'scopespace'
+            switch (e->sym->scopespace) {
                 case programvar:
                     arg->type = global_a;
                     break;

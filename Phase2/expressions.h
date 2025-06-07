@@ -2,6 +2,7 @@
 #define __EXPR__
 #include <string>
 #include <cstdio>
+
 class Symbol;
 struct expr;
 struct quad;
@@ -30,15 +31,6 @@ typedef enum type_t {
 
     nil_e,
 } type_t;
-
-// struct list {
-//     vector<unsigned> quadLabels;
-//     void merge(list* other) {
-//         quadLabels.insert(quadLabels.end(), 
-//                           other->quadLabels.begin(), 
-//                           other->quadLabels.end());
-//     }
-// };
 
 
 
@@ -98,8 +90,6 @@ bool tmpCheck(expr* e);
 expr* evaluateNumber(expr* e, expr* e2, iopcode opcode);
 
 expr* newTempExpr();
-
-//void backpatch(list* list, unsigned label);
 
 expr* evaluateUminus(expr* e);
 
