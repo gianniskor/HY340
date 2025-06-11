@@ -1,10 +1,12 @@
 #ifndef __INSTR__
 #define __INSTR__
 
-#include <string>
+#include <cstring>
 #include <cstdio>
 #include <vector>
 #include <cassert>
+#include <set>
+
 using namespace std;
 
 #include "headerLib.h"
@@ -14,6 +16,8 @@ struct expr;
 struct quad;
 
 extern int magic_num;
+extern std::set<std::string> usedLibFunctions;
+
 #define AVM_STACKSIZE 4096
 #define AVM_TABLE_HASHSIZE 211
 #define AVM_WIPEOUT(m) memset(&(m),0,sizeof(m))
@@ -100,6 +104,7 @@ extern vector <double> numConsts;
 extern vector <string*> stringConsts;
 extern vector <string*> libDefFuncs;
 extern vector <string*> userFuncs;
+extern std::set<std::string> usedLibFunctions;
 extern vector <bool> boolConst;
 extern vector <instruction*> instructions;
 

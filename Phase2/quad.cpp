@@ -13,15 +13,15 @@ int currQuad = 0;
 
 
 static unsigned temp_count = 0;
-/// FIX THIS, EINAI ME KAKO
+/// FIX THIS, EINAI ME KAKO 
 
 
-char quadString[27][32] = {
-    "assign","add", "sub",  "mul", "div", "mod", "uminus",
+char quadString[26][32] = {
+    "assign", "sub", "add", "div", "mul", "mod", "uminus",
     "and", "or", "not", "if_eq", "if_noteq", "if_lesseq",
-    "if_greatereq", "if_less", "if_greater", "call", "param",
-    "return", "getretval", "funcstart", "funcend",
-    "tablecreate", "tablegetelem", "tablesetelem","jump","nop"
+    "if_greatereq", "if_less", "if_greater", "jump", "param",
+    "call", "return", "getretval", "funcstart", "funcend",
+    "tablecreate", "tablegetelem", "tablesetelem"
 };
 
 
@@ -50,7 +50,7 @@ void emit(iopcode op, expr* arg1, expr* arg2, expr* result, int label){
 }
 
 expr* newetempvar(){
-    string name = "_t%u" + to_string(temp_count++);
+    string name = "_t" + to_string(temp_count++); //evgala ena %u
     Symbol* tempsym = symbolTable.insert(name, symbolTable.currentScope, yylineno, LOCAL_VAR);
 
     if (tempsym == nullptr) {
@@ -82,7 +82,7 @@ void print_quads(const string& filename = "") {
             cerr << "Error: Failed to open output file " << out_filename << endl;
         }
     }
-    *out_stream << "NO.  OPCODE          RESULT      ARG1        ARG2        LABEL\n\n";
+    *out_stream << "QUAD#  OPCODE          RESULT      ARG1        ARG2        LABEL\n------------------------------------------------------------------\n";
     
     for (unsigned i = 0; i < quads.size(); i++) {
         quad* q = quads[i];
@@ -125,7 +125,7 @@ void print_quads(const string& filename = "") {
             else if (q->arg2->sym) 
                 arg2_str = q->arg2->sym->getName();
         }
-        *out_stream << "#" << (i+1) << left << setw(4) << " " 
+        *out_stream << (i+1) << ":" << left << setw(4) << " " 
              << setw(15) << quadString[q->op]
              << setw(12) << result_str
              << setw(12) << arg1_str

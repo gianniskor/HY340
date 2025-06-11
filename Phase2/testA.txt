@@ -1,1 +1,10 @@
-function(){[];}
+function simple_print(x) {
+
+	print(x);
+}
+
+y = "hello";
+
+if (x == 1) {
+    print y;
+} 

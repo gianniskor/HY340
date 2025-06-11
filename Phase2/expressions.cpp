@@ -98,6 +98,7 @@ expr* symToExpr(Symbol* symToExpr){
     }
     return e;
 }
+
 bool validNumberExpr(expr *e) {
     if (!e) return false;
     if (e->type == constint_e || e->type == constdouble_e) 

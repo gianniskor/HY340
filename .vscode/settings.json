@@ -1,13 +1,11 @@
 {
     "files.associations": {
-        ".fantomasignore": "ignore",
         "ostream": "cpp",
         "iostream": "cpp",
         "iosfwd": "cpp",
         "variant": "cpp",
         "__config": "cpp",
         "__nullptr": "cpp",
-        "string": "cpp",
-        "cmath": "cpp"
+        "string": "cpp"
     }
 }

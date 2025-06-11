@@ -17,8 +17,8 @@
     int max_scope = 0;
     extern SymbolTable symbolTable; 
     static int anonCount = 0;
-    int localOffset = 0;
     int globalOffset = 0;
+    int localOffset = 0;
     int tmpCount = 0;
     int loopCounter = 0;
     int funcCounter = 0;

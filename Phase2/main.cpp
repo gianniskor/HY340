@@ -38,64 +38,7 @@ char libFuncs [][30]={
 
 extern void print_quads(const std::string& filename);
 
-void writeInstructionsFromAbc(const std::string& outputFilePath) {
-    // Verify the magic number before writing the file
-    if (magic_num != 163847504) { // Replace 163847504 with the expected magic number if different
-        std::cerr << "Error: Magic number mismatch! Expected 163847504, but found " << magic_num << "." << std::endl;
-        return; // Exit the function if the magic number is incorrect
-    }
-
-    std::cout << "Magic number verified: " << magic_num << std::endl;
-
-    FILE* outputFile = fopen(outputFilePath.c_str(), "w");
-    if (!outputFile) {
-        std::cerr << "Error: Cannot open file " << outputFilePath << " for writing." << std::endl;
-        return;
-    }
-
-    fprintf(outputFile, "*********** MAGIC NUMBER ***********\n");
-    fprintf(outputFile, "Magic number verified: %ld\n", (long int)magic_num);
-
-    fprintf(outputFile, "*********** NUMCONSTS ***********\n");
-    fprintf(outputFile, "numConsts: %lu\n", numConsts.size());
-    for (size_t i = 0; i < numConsts.size(); i++) {
-        fprintf(outputFile, "%zu: %lf\n", i, numConsts[i]);
-    }
-
-    fprintf(outputFile, "*********** STRING CONSTS ***********\n");
-    fprintf(outputFile, "stringConsts: %lu\n", stringConsts.size());
-    for (size_t i = 0; i < stringConsts.size(); i++) {
-        fprintf(outputFile, "%zu: %s\n", i, stringConsts[i]->c_str());
-    }
-
-    fprintf(outputFile, "*********** USER FUNCTIONS ***********\n");
-    fprintf(outputFile, "userFuncs: %lu\n", userFuncs.size());
-    for (size_t i = 0; i < userFuncs.size(); i++) {
-        fprintf(outputFile, "%zu: %s\n", i, userFuncs[i]->c_str());
-    }
-
-    fprintf(outputFile, "*********** LIB FUNCTIONS ***********\n");
-    fprintf(outputFile, "libFuncs: %lu\n", libDefFuncs.size());
-    for (size_t i = 0; i < libDefFuncs.size(); i++) {
-        fprintf(outputFile, "%zu: %s\n", i, libDefFuncs[i]->c_str());
-    }
-
-    fprintf(outputFile, "*********** BOOL CONSTS ***********\n");
-    fprintf(outputFile, "boolConsts: %lu\n", boolConst.size());
-    for (size_t i = 0; i < boolConst.size(); i++) {
-        fprintf(outputFile, "%zu: %s\n", i, boolConst[i] ? "true" : "false");
-    }
-
-    fprintf(outputFile, "*********** CODE ***********\n");
-    fprintf(outputFile, "Instructions: %lu\n", instructions.size());
-    for (size_t i = 0; i < instructions.size(); i++) {
-        print_instruction(instructions[i], i); // Assuming print_instruction can take a FILE* parameter
-    }
-
-    fclose(outputFile);
-}
-
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     if (argc > 1)
     {
         if (!(yyin = fopen(argv[1], "r")))
@@ -169,16 +112,52 @@ int main(int argc, char* argv[]) {
         fwrite(userFuncs[i]->c_str(), sizeof(char), len, binary);
     }
 
-    fprintf(instructions_out, "*********** LIB FUNCTIONS ***********\n");
-    fprintf(instructions_out, "libFuncs: %zu\n", libDefFuncs.size());
-    int libFuncsCount = libDefFuncs.size();
-    fwrite(&libFuncsCount, sizeof(int), 1, binary);
-    for(int i = 0; i < libDefFuncs.size(); i++){
-        fprintf(instructions_out, "%d: %s\n", i, libDefFuncs[i]->c_str());
-        int len = libDefFuncs[i]->length();
-        fwrite(&len, sizeof(int), 1, binary);
-        fwrite(libDefFuncs[i]->c_str(), sizeof(char), len, binary);
+    // fprintf(instructions_out, "*********** LIB FUNCTIONS ***********\n");
+    // fprintf(instructions_out, "libFuncs: %zu\n", libDefFuncs.size());
+    // int libFuncsCount = libDefFuncs.size();
+    // fwrite(&libFuncsCount, sizeof(int), 1, binary);
+    // for(int i = 0; i < libDefFuncs.size(); i++){
+    //     fprintf(instructions_out, "%d: %s\n", i, libDefFuncs[i]->c_str());
+    //     int len = libDefFuncs[i]->length();
+    //     fwrite(&len, sizeof(int), 1, binary);
+    //     fwrite(libDefFuncs[i]->c_str(), sizeof(char), len, binary);
+    // }
+
+    // ola ta library functions pou exoun oristei
+    for (const char* function : libFuncs) {
+        Symbol* sym = symbolTable.insert(function, 0, 0, LIB_FUNC);
+        sym->type = LIB_FUNC;
+        // cout << "Registered libfunc: " << function << endl; //tiponontai ola sosta
     }
+    
+    // printaroume ola ta library functions pou exoun oristei
+    fprintf(instructions_out, "*********** ALL LIB FUNCTIONS ***********\n");
+    for (size_t i = 0; i < libDefFuncs.size(); ++i) {
+        fprintf(instructions_out, "%zu: %s\n", i, libDefFuncs[i]->c_str());
+    }
+
+    fprintf(instructions_out, "*********** LIB FUNCTIONS (USED) ***********\n");
+
+    // psaxnoume gia tis vivliothikes pou xrisimopoiithikan
+    std::vector<std::string*> usedLibs;
+    for (auto* lib : libDefFuncs) {
+        if (usedLibFunctions.find(*lib) != usedLibFunctions.end()) {
+            usedLibs.push_back(lib);
+        }
+    }
+
+    // printaroume and writaroume used library functions
+    fprintf(instructions_out, "libFuncs: %zu\n", usedLibs.size());
+    int libFuncsCount = usedLibs.size();
+    fwrite(&libFuncsCount, sizeof(int), 1, binary);
+
+    for (size_t i = 0; i < usedLibs.size(); ++i) {
+        fprintf(instructions_out, "%zu: %s\n", i, usedLibs[i]->c_str());
+        int len = usedLibs[i]->length();
+        fwrite(&len, sizeof(int), 1, binary);
+        fwrite(usedLibs[i]->c_str(), sizeof(char), len, binary);
+    }
+
     fprintf(instructions_out, "*********** BOOL CONSTS ***********\n");
     fprintf(instructions_out, "boolConsts: %zu\n", boolConst.size());
     int boolCount = boolConst.size();
@@ -199,23 +178,21 @@ int main(int argc, char* argv[]) {
     fclose(instructions_out);
     fclose(binary);
 
-    //test
+    // test
     // unsigned sz;
     // fopen(binary_path.c_str(), "rb");
     // fseek(binary,0L,SEEK_END);
     // sz = ftell(binary);
     // rewind(binary);
-    readAbcFile(binary_path.c_str());
-    execute_cycle();
+    // readAbcFile(binary_path.c_str());
     
     // Now you can use the loaded data
     cout << "Loaded " << instructions.size() << " instructions" << endl;
     cout << "Loaded " << numConsts.size() << " number constants" << endl;
     cout << "Loaded " << stringConsts.size() << " string constants" << endl;
+    cout << "Loaded " << userFuncs.size() << " user functions" << endl;
+    cout << "Loaded " << boolConst.size() << " boolean constants" << endl;
+    cout << "Loaded " << usedLibs.size() << " used library functions" << endl;
     
-    // Create a new instruction output file from the loaded data
-    std::string newInstructionsPath = test_name + "_from_abc.instructions";
-    writeInstructionsFromAbc(newInstructionsPath);
-
     return 0;
 }
