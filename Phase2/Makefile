@@ -14,4 +14,4 @@ bisonC:
 	
 clean:
 	rm -f *.o a.out al.cpp yacc_output.txt syntax.hpp syntax.cpp al.hpp 
-	rm -rf outputs/
+	rm -rf *.quad *.instructions *.abc

@@ -64,6 +64,13 @@ typedef enum vmarg_t{
     undefined_a
 } vmarg_t;
 
+//giannis addition
+typedef void (*library_func_t)(void);
+library_func_t avm_getlibraryfunc(char* id);
+void avm_registerlibfunc(char* id, library_func_t addr);
+
+
+
 typedef struct vmarg{
     vmarg_t type;
     unsigned val;
@@ -82,6 +89,12 @@ typedef struct userfunc{
     unsigned localSize;
     const char* id;
 } userfunc;
+
+//giannis addition
+double consts_getnumber(unsigned index);
+char* consts_getstring(unsigned index);
+char* libfuncs_getused(unsigned index);
+userfunc* userfuncs_getfunc(unsigned index);
 
 extern vector <double> numConsts;
 extern vector <string*> stringConsts;
@@ -157,9 +170,28 @@ struct avm_memcell{
         char* libFuncVal;
     } data;
 };
+//giannis addition
+typedef void (*memclear_func_t)(avm_memcell*);
 
 extern avm_memcell stack[AVM_STACKSIZE];
 
+void memclear_string(avm_memcell* m);
+void memclear_table(avm_memcell* m);
+
+extern memclear_func_t memclearFuncs[];
+
+
+typedef char* (*tostring_func_t)(avm_memcell*);
+
+char* number_tostring(avm_memcell*);
+char* string_tostring(avm_memcell*);
+char* bool_tostring(avm_memcell*);
+char* table_tostring(avm_memcell*);
+char* userfunc_tostring(avm_memcell*);
+char* libfunc_tostring(avm_memcell*);
+char* nil_tostring(avm_memcell*);
+char* undef_tostring(avm_memcell*);
+//till here
 avm_table* avm_tablenew(void);
 void avm_tabledestroy(avm_table* t);
 avm_memcell* avm_tablegetelem(avm_memcell *key);
@@ -187,6 +219,36 @@ struct avm_table{
     unsigned total;
 };
 
+//giannis addition
+void execute_assign(instruction*);
+void execute_add(instruction*); 
+void execute_sub(instruction*);
+void execute_mul(instruction*);
+void execute_div(instruction*);
+void execute_mod(instruction*);
+void execute_uminus(instruction*);
+void execute_and(instruction*);
+void execute_or(instruction*);
+void execute_not(instruction*);
+void execute_jeq(instruction*);
+void execute_jne(instruction*);
+void execute_jle(instruction*);
+void execute_jge(instruction*);
+void execute_jlt(instruction*);
+void execute_jgt(instruction*);
+void execute_call(instruction*);
+void execute_pusharg(instruction*);
+void execute_ret(instruction*);
+void execute_getretval(instruction*);
+void execute_funcenter(instruction*);
+void execute_funcexit(instruction*);
+void execute_tablecreate(instruction*);
+void execute_tablegetelem(instruction*);
+void execute_tablesetelem(instruction*);
+void execute_jump(instruction*);
+void execute_nop(instruction*);
+
+//till here
 void avm_tableincrefcounter(avm_table* t);
 void avm_tabledecrefcounter(avm_table* t);
 void avm_tablebucketsinit(avm_table_bucket** p);
@@ -200,6 +262,9 @@ void avm_tablebucketsdestroy(avm_table_bucket**p);
 void avm_tabledestroy (avm_table* t);
 
 void readAbcFile(const string& filename);
+
+void execute_cycle();
+
 void readMagic(FILE* f);
 void readNumbers(FILE* f);
 void readStrings(FILE* f);
@@ -207,5 +272,4 @@ void readUserFunctions(FILE* f);
 void readLibFunctions(FILE* f);
 void readBoolConstants(FILE* f);
 void readInstructions(FILE* f);
-
 #endif

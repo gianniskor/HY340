@@ -73,13 +73,7 @@ void print_quads(const string& filename = "") {
     ostream* out_stream = &cout; 
     
     if (!filename.empty()) {
-        #ifdef _WIN32
-        system("if not exist outputs mkdir outputs");
-        #else
-        system("mkdir -p outputs");
-        #endif
-
-        string out_filename = "outputs/" + filename + ".quad";
+        string out_filename = filename + ".quad";
         outfile.open(out_filename);
         if (outfile.is_open()) {
             cout << "Writing quads to " << out_filename << endl;

@@ -38,7 +38,64 @@ char libFuncs [][30]={
 
 extern void print_quads(const std::string& filename);
 
-int main(int argc, char *argv[]) {
+void writeInstructionsFromAbc(const std::string& outputFilePath) {
+    // Verify the magic number before writing the file
+    if (magic_num != 163847504) { // Replace 163847504 with the expected magic number if different
+        std::cerr << "Error: Magic number mismatch! Expected 163847504, but found " << magic_num << "." << std::endl;
+        return; // Exit the function if the magic number is incorrect
+    }
+
+    std::cout << "Magic number verified: " << magic_num << std::endl;
+
+    FILE* outputFile = fopen(outputFilePath.c_str(), "w");
+    if (!outputFile) {
+        std::cerr << "Error: Cannot open file " << outputFilePath << " for writing." << std::endl;
+        return;
+    }
+
+    fprintf(outputFile, "*********** MAGIC NUMBER ***********\n");
+    fprintf(outputFile, "Magic number verified: %ld\n", (long int)magic_num);
+
+    fprintf(outputFile, "*********** NUMCONSTS ***********\n");
+    fprintf(outputFile, "numConsts: %lu\n", numConsts.size());
+    for (size_t i = 0; i < numConsts.size(); i++) {
+        fprintf(outputFile, "%zu: %lf\n", i, numConsts[i]);
+    }
+
+    fprintf(outputFile, "*********** STRING CONSTS ***********\n");
+    fprintf(outputFile, "stringConsts: %lu\n", stringConsts.size());
+    for (size_t i = 0; i < stringConsts.size(); i++) {
+        fprintf(outputFile, "%zu: %s\n", i, stringConsts[i]->c_str());
+    }
+
+    fprintf(outputFile, "*********** USER FUNCTIONS ***********\n");
+    fprintf(outputFile, "userFuncs: %lu\n", userFuncs.size());
+    for (size_t i = 0; i < userFuncs.size(); i++) {
+        fprintf(outputFile, "%zu: %s\n", i, userFuncs[i]->c_str());
+    }
+
+    fprintf(outputFile, "*********** LIB FUNCTIONS ***********\n");
+    fprintf(outputFile, "libFuncs: %lu\n", libDefFuncs.size());
+    for (size_t i = 0; i < libDefFuncs.size(); i++) {
+        fprintf(outputFile, "%zu: %s\n", i, libDefFuncs[i]->c_str());
+    }
+
+    fprintf(outputFile, "*********** BOOL CONSTS ***********\n");
+    fprintf(outputFile, "boolConsts: %lu\n", boolConst.size());
+    for (size_t i = 0; i < boolConst.size(); i++) {
+        fprintf(outputFile, "%zu: %s\n", i, boolConst[i] ? "true" : "false");
+    }
+
+    fprintf(outputFile, "*********** CODE ***********\n");
+    fprintf(outputFile, "Instructions: %lu\n", instructions.size());
+    for (size_t i = 0; i < instructions.size(); i++) {
+        print_instruction(instructions[i], i); // Assuming print_instruction can take a FILE* parameter
+    }
+
+    fclose(outputFile);
+}
+
+int main(int argc, char* argv[]) {
     if (argc > 1)
     {
         if (!(yyin = fopen(argv[1], "r")))
@@ -149,11 +206,16 @@ int main(int argc, char *argv[]) {
     // sz = ftell(binary);
     // rewind(binary);
     readAbcFile(binary_path.c_str());
+    execute_cycle();
     
     // Now you can use the loaded data
     cout << "Loaded " << instructions.size() << " instructions" << endl;
     cout << "Loaded " << numConsts.size() << " number constants" << endl;
     cout << "Loaded " << stringConsts.size() << " string constants" << endl;
     
+    // Create a new instruction output file from the loaded data
+    std::string newInstructionsPath = test_name + "_from_abc.instructions";
+    writeInstructionsFromAbc(newInstructionsPath);
+
     return 0;
 }
