@@ -300,4 +300,6 @@ void libfunc_input(void);
 
 void cleanup_libfuncs();
 
+unsigned char avm_tobool(avm_memcell* m);
+
 #endif

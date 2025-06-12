@@ -1,6 +1,11 @@
-x = 5 + 3;
-y = x * 2;
-la = (x + y)/2;
-print(x);
-print(y);
-print(la);
+b = 5;
+c = 10;
+d = 6;
+
+if (b < c) {
+        d = 1;
+}
+else {
+        d = 0;
+}
+print(d);

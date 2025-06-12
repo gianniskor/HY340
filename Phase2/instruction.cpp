@@ -85,6 +85,61 @@ tostring_func_t tostringFuncs[] = {
     nil_tostring,
     undef_tostring
 };
+
+typedef unsigned char (*tobool_func_t)(avm_memcell*);
+
+unsigned char number_tobool(avm_memcell* m) { 
+    assert(m && m->type == number_m);
+    return m->data.numVal != 0; 
+}
+
+unsigned char string_tobool(avm_memcell* m) { 
+    assert(m && m->type == string_m);
+    return m->data.strVal[0] != 0; 
+}
+
+unsigned char bool_tobool(avm_memcell* m) { 
+    assert(m && m->type == bool_m);
+    return m->data.boolVal; 
+}
+
+unsigned char table_tobool(avm_memcell* m) { 
+    assert(m && m->type == table_m);
+    return 1; 
+}
+
+unsigned char userfunc_tobool(avm_memcell* m) { 
+    assert(m && m->type == userfunc_m);
+    return 1; 
+}
+
+unsigned char libfunc_tobool(avm_memcell* m) { 
+    assert(m && m->type == libfunc_m);
+    return 1; 
+}
+
+unsigned char nil_tobool(avm_memcell* m) { 
+    assert(m && m->type == nil_m);
+    return 0; 
+}
+
+unsigned char undef_tobool(avm_memcell* m) {
+    assert(0);
+    return 0;
+}
+
+tobool_func_t toboolFuncs[] = {
+    number_tobool,
+    string_tobool,
+    bool_tobool,
+    table_tobool,
+    userfunc_tobool,
+    libfunc_tobool,
+    nil_tobool,
+    undef_tobool
+};
+
+
 typedef void (*execute_func_t)(instruction*);
 
 execute_func_t executeFuncs[] = {
@@ -969,7 +1024,7 @@ userfunc* userfuncs_getfunc(unsigned index) {
     assert(index < userFuncs.size());
     userfunc* func = new userfunc;
     func->address = index;
-    func->localSize = 0; // This should be set properly when implementing functions
+    func->localSize = 0; 
     return func;
 }
 
@@ -984,9 +1039,7 @@ void avm_warning (char *msg) {
 
 
 userfunc* avm_getfuncinfo(unsigned address) {
-/*
-to be done 
-*/
+
 }
 
 avm_memcell* avm_translate_operand(vmarg* arg, avm_memcell* reg) {
@@ -1009,7 +1062,7 @@ avm_memcell* avm_translate_operand(vmarg* arg, avm_memcell* reg) {
             return reg;
         case bool_a:
             reg->type = bool_m;
-            reg->data.boolVal = boolConst[arg->val];  // Fix this line
+            reg->data.boolVal = (arg->val == 1);
             return reg;
         case nil_a:
             reg->type = nil_m;
@@ -1022,8 +1075,18 @@ avm_memcell* avm_translate_operand(vmarg* arg, avm_memcell* reg) {
             reg->type = libfunc_m;
             reg->data.libFuncVal = libfuncs_getused(arg->val);
             return reg;
+        case label_a:
+            reg->type = number_m;
+            reg->data.numVal = arg->val;
+            return reg;
+        case undefined_a:
+            avm_error("Invalid operand type in avm_translate_operand");
+            executionFinished = 1;
+            return nullptr;
         default:
-            assert(0);
+            avm_error("Invalid operand type in avm_translate_operand");
+            executionFinished = 1;
+            return nullptr;
     }
 }
 
@@ -1050,7 +1113,6 @@ void avm_push_envvalue(unsigned val) {
 unsigned avm_get_envvalue(unsigned i) {
     assert(stack[i].type == number_m);
     double val = stack[i].data.numVal;
-    // Check if the value is a whole number and non-negative
     if (val < 0 || val != floor(val)) {
         avm_error("Invalid environment value");
         executionFinished = 1;
@@ -1071,7 +1133,6 @@ avm_memcell* avm_getactual(unsigned i) {
 
 void libfunc_print(void) {
     unsigned n = avm_totalactuals();
-    cerr << "lala" << endl;
     for (unsigned i = 0; i < n; ++i) {
         avm_memcell* arg = avm_getactual(i);
         char* s = avm_tostring(arg);
@@ -1335,6 +1396,8 @@ char* nil_tostring(avm_memcell* m) {
 char* undef_tostring(avm_memcell* m) {
     return strdup("undefined");
 }
+
+
 //copilot apla to ekana copy paste gia na kanei compile
 void execute_add(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
@@ -1453,64 +1516,172 @@ void execute_not(instruction* instr) {
     lv->data.boolVal = !rv->data.boolVal;
 }
 
-void execute_jeq(instruction* instr) {
-    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
-    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
+void execute_jlt(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
+    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
+    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
     
-    assert(rv1 && rv2);
-    assert(instr->result && instr->result->type == label_a);
+    assert(lv && rv1 && rv2);
+    
+    // Convert operands to numbers if they aren't already
+    if (rv1->type != number_m) {
+        avm_memcellclear(&bx);
+        bx.type = number_m;
+        bx.data.numVal = avm_tobool(rv1);
+        rv1 = &bx;
+    }
+    if (rv2->type != number_m) {
+        avm_memcellclear(&cx);
+        cx.type = number_m;
+        cx.data.numVal = avm_tobool(rv2);
+        rv2 = &cx;
+    }
+    
+    if (rv1->data.numVal < rv2->data.numVal) {
+        pc = lv->data.numVal;
+    } else {
+        pc++;  // Skip the jump if condition is false
+    }
+}
+
+void execute_jgt(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
+    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
+    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
+    
+    assert(lv && rv1 && rv2);
+    
+    // Convert operands to numbers if they aren't already
+    if (rv1->type != number_m) {
+        avm_memcellclear(&bx);
+        bx.type = number_m;
+        bx.data.numVal = avm_tobool(rv1);
+        rv1 = &bx;
+    }
+    if (rv2->type != number_m) {
+        avm_memcellclear(&cx);
+        cx.type = number_m;
+        cx.data.numVal = avm_tobool(rv2);
+        rv2 = &cx;
+    }
+    
+    if (rv1->data.numVal > rv2->data.numVal) {
+        pc = lv->data.numVal;
+    } else {
+        pc++;  // Skip the jump if condition is false
+    }
+}
+
+void execute_jle(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
+    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
+    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
+    
+    assert(lv && rv1 && rv2);
+    
+    // Convert operands to numbers if they aren't already
+    if (rv1->type != number_m) {
+        avm_memcellclear(&bx);
+        bx.type = number_m;
+        bx.data.numVal = avm_tobool(rv1);
+        rv1 = &bx;
+    }
+    if (rv2->type != number_m) {
+        avm_memcellclear(&cx);
+        cx.type = number_m;
+        cx.data.numVal = avm_tobool(rv2);
+        rv2 = &cx;
+    }
+    
+    if (rv1->data.numVal <= rv2->data.numVal) {
+        pc = lv->data.numVal;
+    } else {
+        pc++;  // Skip the jump if condition is false
+    }
+}
+
+void execute_jge(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
+    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
+    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
+    
+    assert(lv && rv1 && rv2);
+    
+    // Convert operands to numbers if they aren't already
+    if (rv1->type != number_m) {
+        avm_memcellclear(&bx);
+        bx.type = number_m;
+        bx.data.numVal = avm_tobool(rv1);
+        rv1 = &bx;
+    }
+    if (rv2->type != number_m) {
+        avm_memcellclear(&cx);
+        cx.type = number_m;
+        cx.data.numVal = avm_tobool(rv2);
+        rv2 = &cx;
+    }
+    
+    if (rv1->data.numVal >= rv2->data.numVal) {
+        pc = lv->data.numVal;
+    } else {
+        pc++;  // Skip the jump if condition is false
+    }
+}
+
+void execute_jeq(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
+    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
+    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
+    
+    assert(lv && rv1 && rv2);
     
     if (rv1->type == rv2->type) {
         if (rv1->type == number_m) {
-            if (rv1->data.numVal == rv2->data.numVal)
-                pc = instr->result->val;
+            if (rv1->data.numVal == rv2->data.numVal) {
+                pc = lv->data.numVal;
+            }
         }
         else if (rv1->type == string_m) {
-            if (strcmp(rv1->data.strVal, rv2->data.strVal) == 0)
-                pc = instr->result->val;
+            if (strcmp(rv1->data.strVal, rv2->data.strVal) == 0) {
+                pc = lv->data.numVal;
+            }
         }
         else if (rv1->type == bool_m) {
-            if (rv1->data.boolVal == rv2->data.boolVal)
-                pc = instr->result->val;
+            if (rv1->data.boolVal == rv2->data.boolVal) {
+                pc = lv->data.numVal;
+            }
         }
     }
 }
 
 void execute_jne(instruction* instr) {
-    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
-    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
+    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
+    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
+    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
     
-    assert(rv1 && rv2);
-    assert(instr->result && instr->result->type == label_a);
+    assert(lv && rv1 && rv2);
     
-    if (rv1->type == rv2->type) {
-        if (rv1->type == number_m) {
-            if (rv1->data.numVal != rv2->data.numVal)
-                pc = instr->result->val;
+    if (rv1->type != rv2->type) {
+        pc = lv->data.numVal;
+        return;
+    }
+    
+    if (rv1->type == number_m) {
+        if (rv1->data.numVal != rv2->data.numVal) {
+            pc = lv->data.numVal;
         }
-        else if (rv1->type == string_m) {
-            if (strcmp(rv1->data.strVal, rv2->data.strVal) != 0)
-                pc = instr->result->val;
+    }
+    else if (rv1->type == string_m) {
+        if (strcmp(rv1->data.strVal, rv2->data.strVal) != 0) {
+            pc = lv->data.numVal;
         }
-        else if (rv1->type == bool_m) {
-            if (rv1->data.boolVal != rv2->data.boolVal)
-                pc = instr->result->val;
+    }
+    else if (rv1->type == bool_m) {
+        if (rv1->data.boolVal != rv2->data.boolVal) {
+            pc = lv->data.numVal;
         }
     }
 }
-
-void execute_jle(instruction* instr) {
-}
-
-void execute_jge(instruction* instr) {
-}
-
-void execute_jlt(instruction* instr) {
-}
-
-void execute_jgt(instruction* instr) {
-}
-
 void execute_ret(instruction* instr) {
     unsigned oldTop = top;
     top = avm_get_envvalue(topsp + AVM_SAVEDTOP_OFFSET);
@@ -1538,8 +1709,9 @@ void execute_tablesetelem(instruction* instr) {
 }
 
 void execute_jump(instruction* instr) {
-    assert(instr->result && instr->result->type == label_a);
-    pc = instr->result->val;
+    avm_memcell* label = avm_translate_operand(instr->result, &ax);
+    assert(label && label->type == number_m);
+    pc = label->data.numVal;
 }
 
 void execute_nop(instruction* instr) {
@@ -1644,4 +1816,22 @@ void cleanup_libfuncs() {
         current = next;
     }
     LibHashTable = nullptr;
+}
+
+unsigned char avm_tobool(avm_memcell* m) {
+    if (!m) {
+        avm_error("Null memcell in avm_tobool");
+        executionFinished = 1;
+        return 0;
+    }
+    
+    if (m->type < 0 || m->type >= undef_m) {
+        char error_msg[100];
+        sprintf(error_msg, "Invalid memcell type in avm_tobool: %d", m->type);
+        avm_error(error_msg);
+        executionFinished = 1;
+        return 0;
+    }
+    
+    return (*toboolFuncs[m->type])(m);
 }
