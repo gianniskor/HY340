@@ -16,13 +16,14 @@ static unsigned temp_count = 0;
 /// FIX THIS, EINAI ME KAKO 
 
 
-char quadString[26][32] = {
-    "assign", "sub", "add", "div", "mul", "mod", "uminus",
+char quadString[27][32] = {
+    "assign","add", "sub",  "mul", "div", "mod", "uminus",
     "and", "or", "not", "if_eq", "if_noteq", "if_lesseq",
-    "if_greatereq", "if_less", "if_greater", "jump", "param",
-    "call", "return", "getretval", "funcstart", "funcend",
-    "tablecreate", "tablegetelem", "tablesetelem"
+    "if_greatereq", "if_less", "if_greater", "call", "param",
+    "return", "getretval", "funcstart", "funcend",
+    "tablecreate", "tablegetelem", "tablesetelem","jump","nop"
 };
+
 
 
 void emit(iopcode op, expr* arg1, expr* arg2, expr* result){

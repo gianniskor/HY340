@@ -35,7 +35,7 @@ typedef enum iopcode{
     nop
 } iopcode;
 
-extern char quadString[26][32];
+extern char quadString[27][32];
 
 typedef struct quad {
     iopcode op;
