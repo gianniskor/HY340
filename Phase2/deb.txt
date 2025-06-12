@@ -1,0 +1,6 @@
+x = 5 + 3;
+y = x * 2;
+la = (x + y)/2;
+print(x);
+print(y);
+print(la);

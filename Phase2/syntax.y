@@ -368,7 +368,31 @@ call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
                                                               expr* result = newTempExpr();
                                                               emit(getretval, nullptr, nullptr, result);
                                                               $$ = result;
+                                                              
 
+                                                              // expr* current = $3;
+                                                              // int paramCount = 0;
+
+                                                              // // Count parameters
+                                                              // while (current) {
+                                                              //     paramCount++;
+                                                              //     current = current->next;
+                                                              // }
+
+                                                              // // Reset to beginning and emit param instructions
+                                                              // current = $3;
+                                                              // while (current) {
+                                                              //     emit(param, current, nullptr, nullptr);
+                                                              //     current = current->next;
+                                                              // }
+                                                              
+                                                              // // Emit the call instruction
+                                                              // emit(call, nullptr, nullptr, $1);
+
+                                                              // // Get return value
+                                                              // expr* result = newTempExpr();
+                                                              // emit(getretval, nullptr, nullptr, result);
+                                                              // $$ = result;
                                                             }
             | lvalue callsuffix                             {
                                                               expr* current = $2;
@@ -392,6 +416,22 @@ call:       call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS   {
                                                               expr* result = newTempExpr();
                                                               emit(getretval, nullptr, nullptr, result);
                                                               $$ = result;
+
+
+                                                              // expr* current = $2;
+                                                              // // Emit param instructions for each argument
+                                                              // while (current) {
+                                                              //     emit(param, current, nullptr, nullptr);
+                                                              //     current = current->next;
+                                                              // }
+                                                              
+                                                              // // Emit the call instruction
+                                                              // emit(call, nullptr, nullptr, $1);
+
+                                                              // // Get return value
+                                                              // expr* result = newTempExpr();
+                                                              // emit(getretval, nullptr, nullptr, result);
+                                                              // $$ = result;
                                                             }
             | LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS {
                                                                                                     expr* current = $5;

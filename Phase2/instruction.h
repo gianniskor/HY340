@@ -199,7 +199,7 @@ void avm_tablesetelem(avm_memcell* key, avm_memcell* value);
 
 
 
-static void avm_initstack(void);
+void avm_initstack(void);
 
 struct avm_table_bucket{
     avm_memcell key;
@@ -272,4 +272,32 @@ void readUserFunctions(FILE* f);
 void readLibFunctions(FILE* f);
 void readBoolConstants(FILE* f);
 void readInstructions(FILE* f);
+
+typedef void (*library_func_t)(void);
+
+struct LibFuncsHashTable {
+    library_func_t func;
+    char* id;
+    LibFuncsHashTable* next;
+};
+
+extern LibFuncsHashTable* LibHashTable;
+extern unsigned total_globals;
+
+// Library function declarations
+void libfunc_print(void);
+void libfunc_typeof(void);
+void libfunc_totalarguments(void);
+void libfunc_argument(void);
+void libfunc_objecttotalmembers(void);
+void libfunc_sqrt(void);
+void libfunc_cos(void);
+void libfunc_sin(void);
+void libfunc_strtonum(void);
+void libfunc_objectcopy(void);
+void libfunc_objectmemberkeys(void);
+void libfunc_input(void);
+
+void cleanup_libfuncs();
+
 #endif

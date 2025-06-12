@@ -15,6 +15,9 @@ int instrStep = 1;
 int magic_num = 0;
 int totalNums = 0;
 
+LibFuncsHashTable* LibHashTable = nullptr;
+unsigned total_globals = 0;
+
 //giannis addition
 unsigned totalActuals = 0;
 unsigned char executionFinished = 0;
@@ -387,13 +390,22 @@ void generate_UMINUS(quad* q){
     }
     emit_instr(i);
 }
-
 void generate_PARAM(quad *q){
-    return;
+    instruction* i = generate_Proc(pusharg_v, q);
+    if(q->arg1) {
+        i->arg1 = new vmarg;
+        make_operand(q->arg1, i->arg1);
+    }
+    emit_instr(i);
 }
 
-void generate_CALL(quad *q){
-    return;
+void generate_CALL(quad *q) {
+    instruction* i = generate_Proc(callfunc_v, q);
+    if(q->result) {
+        i->result = new vmarg;
+        make_operand(q->result, i->result);
+    }
+    emit_instr(i);
 }
 
 void generate_GETRETVAL(quad *q){
@@ -484,11 +496,11 @@ unsigned consts_newbool(bool b){
     return boolConst.size() - 1;
 }
 
-static void avm_initstack(void){
-    for(unsigned i = 0;i < AVM_STACKSIZE; ++i){
-        AVM_WIPEOUT(stack[i]); stack[i].type = undef_m;
-    }
-}
+// static void avm_initstack(void){
+//     for(unsigned i = 0;i < AVM_STACKSIZE; ++i){
+//         AVM_WIPEOUT(stack[i]); stack[i].type = undef_m;
+//     }
+// }
 
 void make_operand(expr* e, vmarg* arg){
     switch(e->type){
@@ -797,11 +809,13 @@ void generate_relational(vmopcode op, quad* q){
     emit_instr(i);
 }
 
-void quad_to_instr(void* void_quad){
-    if(void_quad == nullptr){
+void quad_to_instr(void* void_quad) {
+    if(void_quad == nullptr) {
         return;
     }
     quad *q = (quad*) void_quad;
+
+    cout << "Converting quad to instruction: " << quadString[q->op] << endl;  // Add this line
     generators[q->op](q);
 }
 
@@ -915,16 +929,16 @@ avm_table* avm_tablenew(void){
     return t;
 }
 
-void avm_tablebucketsdestroy(avm_table_bucket**p){
-    for(unsigned i = 0; i <AVM_TABLE_HASHSIZE;++i,++p){
-        for(avm_table_bucket* b = *p;b;){
+void avm_tablebucketsdestroy(avm_table_bucket** p) {
+    for(unsigned i = 0; i < AVM_TABLE_HASHSIZE; ++i) {  // Remove the ++p
+        for(avm_table_bucket* b = p[i]; b;) {
             avm_table_bucket* del = b;
             b = b->next;
             avm_memcellclear(&del->key);
             avm_memcellclear(&del->value);
             free(del);
-       }
-       p[i] = (avm_table_bucket*) 0;
+        }
+        p[i] = nullptr;
     }
 }
 
@@ -936,13 +950,27 @@ void avm_tabledestroy (avm_table* t){
     avm_tablebucketsdestroy(t->numIndexed);
 }
 //giannis addition till the end
-double consts_getnumber(unsigned index){
+double consts_getnumber(unsigned index) {
+    assert(index < numConsts.size());
+    return numConsts[index];
 }
-char* consts_getstring(unsigned index){
+
+char* consts_getstring(unsigned index) {
+    assert(index < stringConsts.size());
+    return strdup(stringConsts[index]->c_str());
 }
-char* libfuncs_getused(unsigned index){
+
+char* libfuncs_getused(unsigned index) {
+    assert(index < libDefFuncs.size());
+    return strdup(libDefFuncs[index]->c_str());
 }
-userfunc* userfuncs_getfunc(unsigned index){
+
+userfunc* userfuncs_getfunc(unsigned index) {
+    assert(index < userFuncs.size());
+    userfunc* func = new userfunc;
+    func->address = index;
+    func->localSize = 0; // This should be set properly when implementing functions
+    return func;
 }
 
 void avm_error (char *msg) {
@@ -977,24 +1005,25 @@ avm_memcell* avm_translate_operand(vmarg* arg, avm_memcell* reg) {
             return reg;
         case string_a:
             reg->type = string_m;
-            reg->data.strVal = strdup(consts_getstring(arg->val));
+            reg->data.strVal = consts_getstring(arg->val);
             return reg;
         case bool_a:
             reg->type = bool_m;
-            reg->data.boolVal = arg->val;
+            reg->data.boolVal = boolConst[arg->val];  // Fix this line
             return reg;
         case nil_a:
             reg->type = nil_m;
             return reg;
         case userfunc_a:
             reg->type = userfunc_m;
-            reg->data.funcVal =arg->val;
+            reg->data.funcVal = arg->val;
             return reg;
         case libfunc_a: 
             reg->type = libfunc_m;
             reg->data.libFuncVal = libfuncs_getused(arg->val);
             return reg;
-        
+        default:
+            assert(0);
     }
 }
 
@@ -1014,15 +1043,20 @@ void avm_dec_top(void) {
 
 void avm_push_envvalue(unsigned val) {
     stack[top].type = number_m; 
-    stack[top].data.numVal = val;
+    stack[top].data.numVal = (double)val;
     avm_dec_top();
 }
 
 unsigned avm_get_envvalue(unsigned i) {
-    assert (stack[i].type == number_m);
-    unsigned val = (unsigned) stack[i].data.numVal;
-    assert(stack[i].data.numVal == ((double) val));
-    return val;
+    assert(stack[i].type == number_m);
+    double val = stack[i].data.numVal;
+    // Check if the value is a whole number and non-negative
+    if (val < 0 || val != floor(val)) {
+        avm_error("Invalid environment value");
+        executionFinished = 1;
+        return 0;
+    }
+    return (unsigned)val;
 }
 
 unsigned avm_totalactuals(void) {
@@ -1037,11 +1071,15 @@ avm_memcell* avm_getactual(unsigned i) {
 
 void libfunc_print(void) {
     unsigned n = avm_totalactuals();
+    cerr << "lala" << endl;
     for (unsigned i = 0; i < n; ++i) {
-        char* s=avm_tostring(avm_getactual(i));
-        puts(s);
+        avm_memcell* arg = avm_getactual(i);
+        char* s = avm_tostring(arg);
+        cout << s;  // Changed from cerr to cout
+        if (i < n-1) cout << " ";  // Add space between arguments
         free(s);
     }
+    cout << endl;  // Add newline at the end
 }
 
 void libfunc_input(void) {
@@ -1082,8 +1120,12 @@ void libfunc_input(void) {
     }
 }
 
-void avm_registerlibfunc(const char* id, library_func_t addr){
-    return ;
+void avm_registerlibfunc(const char* id, library_func_t addr) {
+    LibFuncsHashTable* entry = new LibFuncsHashTable;
+    entry->id = strdup(id);
+    entry->func = addr;
+    entry->next = LibHashTable;
+    LibHashTable = entry;
 }
 
 
@@ -1151,10 +1193,21 @@ void avm_assign(avm_memcell* lv, avm_memcell* rv) {
 }
 
 void execute_assign(instruction* instr) {
-    avm_memcell* lv = avm_translate_operand(instr->result, (avm_memcell*) 0);
+    avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     avm_memcell* rv = avm_translate_operand(instr->arg1, &ax);
-    assert(lv &&  ( &stack[AVM_STACKSIZE-1] >= lv && lv >= &stack[top] || lv == &retval));
+    
+    // Better assertion check
+    assert(lv);
     assert(rv);
+    
+    // Check if lv is within valid stack bounds or is retval
+    bool validLv = (lv >= &stack[0] && lv <= &stack[AVM_STACKSIZE-1]) || (lv == &retval);
+    if (!validLv) {
+        avm_error("Invalid left-value memory address in assignment");
+        executionFinished = 1;
+        return;
+    }
+    
     avm_assign(lv, rv);
 }
 
@@ -1192,54 +1245,59 @@ void execute_pusharg (instruction* instr) {
     avm_dec_top(); 
 }
 
-library_func_t avm_getlibraryfunc(char* id){
-/*
-to be done 
-*/
-}
+// library_func_t avm_getlibraryfunc(char* id){
+// /*
+// to be done 
+// */
+// }
 
-void avm_calllibfunc(char* id){
+void avm_calllibfunc(char* id) {
     library_func_t f = avm_getlibraryfunc(id);
     if (!f) {
-        avm_error(id);
+        avm_error("Undefined library function");
         executionFinished = 1;
-}
-else {
-    topsp= top;
+        return;
+    }
+    
+    topsp = top;
     totalActuals = 0;
     (*f)();
+    
     if (!executionFinished) {
-        execute_funcexit((instruction*) 0);
+        execute_funcexit((instruction*)0);
     }
-}
-
 }
 //ayto exei ki alla den einai mono ayta.
 void execute_call(instruction* instr) {
     avm_memcell* func = avm_translate_operand(instr->result, &ax);
     assert(func);
 
-    switch (func ->type) {
+    switch (func->type) {
         case userfunc_m: { 
+            // Save current environment before calling user function
+            avm_callsaveenvironment();
             pc = func->data.funcVal;
             assert(pc < AVM_ENDING_PC);
             assert(code[pc].opcode == enterfunc_v);
             break;
         }
         case string_m: {
+            // Save current environment before calling library function
+            avm_callsaveenvironment();
             avm_calllibfunc(func->data.strVal);
             break;
         }
         case libfunc_m: {
+            // Save current environment before calling library function
+            avm_callsaveenvironment();
             avm_calllibfunc(func->data.libFuncVal);
             break;
         }
         default: {
+            avm_error("Invalid function type in call");
             executionFinished = 1;
         }
     }
-           
-
 }
 //copilot apla to ekana copy paste gia na kanei compile
 char* number_tostring(avm_memcell* m) {
@@ -1284,6 +1342,8 @@ void execute_add(instruction* instr) {
     avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
 
     assert(lv && rv1 && rv2);
+    assert(rv1->type == number_m && rv2->type == number_m);
+    
     lv->type = number_m;
     lv->data.numVal = rv1->data.numVal + rv2->data.numVal;
 }
@@ -1294,6 +1354,8 @@ void execute_sub(instruction* instr) {
     avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
 
     assert(lv && rv1 && rv2);
+    assert(rv1->type == number_m && rv2->type == number_m);
+    
     lv->type = number_m;
     lv->data.numVal = rv1->data.numVal - rv2->data.numVal;
 }
@@ -1304,6 +1366,8 @@ void execute_mul(instruction* instr) {
     avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
 
     assert(lv && rv1 && rv2);
+    assert(rv1->type == number_m && rv2->type == number_m);
+    
     lv->type = number_m;
     lv->data.numVal = rv1->data.numVal * rv2->data.numVal;
 }
@@ -1314,6 +1378,8 @@ void execute_div(instruction* instr) {
     avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
 
     assert(lv && rv1 && rv2);
+    assert(rv1->type == number_m && rv2->type == number_m);
+    
     if (rv2->data.numVal == 0) {
         avm_error("Division by zero");
         executionFinished = 1;
@@ -1330,6 +1396,8 @@ void execute_mod(instruction* instr) {
     avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
 
     assert(lv && rv1 && rv2);
+    assert(rv1->type == number_m && rv2->type == number_m);
+    
     if (rv2->data.numVal == 0) {
         avm_error("Division by zero");
         executionFinished = 1;
@@ -1340,21 +1408,95 @@ void execute_mod(instruction* instr) {
 }
 
 void execute_uminus(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
+    avm_memcell* rv = avm_translate_operand(instr->arg1, &ax);
+    
+    assert(lv && rv);
+    assert(rv->type == number_m);
+    
+    lv->type = number_m;
+    lv->data.numVal = -rv->data.numVal;
 }
 
 void execute_and(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
+    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
+    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
+    
+    assert(lv && rv1 && rv2);
+    assert(rv1->type == bool_m && rv2->type == bool_m);
+    
+    lv->type = bool_m;
+    lv->data.boolVal = rv1->data.boolVal && rv2->data.boolVal;
 }
 
 void execute_or(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
+    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
+    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
+    
+    assert(lv && rv1 && rv2);
+    assert(rv1->type == bool_m && rv2->type == bool_m);
+    
+    lv->type = bool_m;
+    lv->data.boolVal = rv1->data.boolVal || rv2->data.boolVal;
 }
 
 void execute_not(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
+    avm_memcell* rv = avm_translate_operand(instr->arg1, &ax);
+    
+    assert(lv && rv);
+    assert(rv->type == bool_m);
+    
+    lv->type = bool_m;
+    lv->data.boolVal = !rv->data.boolVal;
 }
 
 void execute_jeq(instruction* instr) {
+    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
+    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
+    
+    assert(rv1 && rv2);
+    assert(instr->result && instr->result->type == label_a);
+    
+    if (rv1->type == rv2->type) {
+        if (rv1->type == number_m) {
+            if (rv1->data.numVal == rv2->data.numVal)
+                pc = instr->result->val;
+        }
+        else if (rv1->type == string_m) {
+            if (strcmp(rv1->data.strVal, rv2->data.strVal) == 0)
+                pc = instr->result->val;
+        }
+        else if (rv1->type == bool_m) {
+            if (rv1->data.boolVal == rv2->data.boolVal)
+                pc = instr->result->val;
+        }
+    }
 }
 
 void execute_jne(instruction* instr) {
+    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
+    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
+    
+    assert(rv1 && rv2);
+    assert(instr->result && instr->result->type == label_a);
+    
+    if (rv1->type == rv2->type) {
+        if (rv1->type == number_m) {
+            if (rv1->data.numVal != rv2->data.numVal)
+                pc = instr->result->val;
+        }
+        else if (rv1->type == string_m) {
+            if (strcmp(rv1->data.strVal, rv2->data.strVal) != 0)
+                pc = instr->result->val;
+        }
+        else if (rv1->type == bool_m) {
+            if (rv1->data.boolVal != rv2->data.boolVal)
+                pc = instr->result->val;
+        }
+    }
 }
 
 void execute_jle(instruction* instr) {
@@ -1370,9 +1512,20 @@ void execute_jgt(instruction* instr) {
 }
 
 void execute_ret(instruction* instr) {
+    unsigned oldTop = top;
+    top = avm_get_envvalue(topsp + AVM_SAVEDTOP_OFFSET);
+    pc = avm_get_envvalue(topsp + AVM_SAVEDPC_OFFSET);
+    topsp = avm_get_envvalue(topsp + AVM_SAVEDTOPSP_OFFSET);
+    
+    while (oldTop++ < top) {
+        avm_memcellclear(&stack[oldTop]);
+    }
 }
 
 void execute_getretval(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
+    assert(lv);
+    avm_assign(lv, &retval);
 }
 
 void execute_tablecreate(instruction* instr) {
@@ -1385,7 +1538,110 @@ void execute_tablesetelem(instruction* instr) {
 }
 
 void execute_jump(instruction* instr) {
+    assert(instr->result && instr->result->type == label_a);
+    pc = instr->result->val;
 }
 
 void execute_nop(instruction* instr) {
+    // Do nothing
+}
+
+
+void avm_initstack(void) {
+    // Initialize the stack
+    for (unsigned i = 0; i < AVM_STACKSIZE; i++) {
+        AVM_WIPEOUT(stack[i]);
+        stack[i].type = undef_m;
+    }
+    
+    // Initialize topsp and top correctly
+    topsp = AVM_STACKSIZE - 1;
+    top = AVM_STACKSIZE - 1;
+    
+    // Initialize global variables properly
+    total_globals = globalOffset;  // Set this to the number of globals you have
+    
+    // Register library functions
+    avm_registerlibfunc("print", libfunc_print);
+    avm_registerlibfunc("typeof", libfunc_typeof);
+    avm_registerlibfunc("totalarguments", libfunc_totalarguments);
+    avm_registerlibfunc("argument", libfunc_argument);
+    avm_registerlibfunc("objecttotalmembers", libfunc_objecttotalmembers);
+    avm_registerlibfunc("sqrt", libfunc_sqrt);
+    avm_registerlibfunc("cos", libfunc_cos);
+    avm_registerlibfunc("sin", libfunc_sin);
+}
+
+// void libfunc_print(void){
+//     return;
+// }
+void libfunc_typeof(void){
+    return;
+}
+void libfunc_totalarguments(void){
+    return;
+}
+void libfunc_argument(void){
+    return;
+}
+void libfunc_objecttotalmembers(void){
+    return;
+}
+void libfunc_sqrt(void){
+    return;
+}
+void libfunc_cos(void){
+    return;
+}
+void libfunc_sin(void){
+    return;
+}
+void libfunc_strtonum(void){
+    return;
+}
+void libfunc_objectcopy(void){
+    return;
+}
+void libfunc_objectmemberkeys(void){
+    return;
+}
+// void libfunc_input(void){
+//     return;
+// }
+
+// library_func_t avm_getlibraryfunc(char* id) {
+//     LibFuncsHashTable* entry = LibHashTable;
+//     while (entry) {
+//         if (strcmp(entry->id, id) == 0) {
+//             return entry->func;
+//         }
+//         entry = entry->next;
+//     }
+//     return nullptr;
+// }
+library_func_t avm_getlibraryfunc(char* id) {
+    if (strcmp(id, "print") == 0) return libfunc_print;
+    if (strcmp(id, "input") == 0) return libfunc_input;
+    if (strcmp(id, "typeof") == 0) return libfunc_typeof;
+    if (strcmp(id, "totalarguments") == 0) return libfunc_totalarguments;
+    if (strcmp(id, "argument") == 0) return libfunc_argument;
+    if (strcmp(id, "objecttotalmembers") == 0) return libfunc_objecttotalmembers;
+    if (strcmp(id, "sqrt") == 0) return libfunc_sqrt;
+    if (strcmp(id, "cos") == 0) return libfunc_cos;
+    if (strcmp(id, "sin") == 0) return libfunc_sin;
+    if (strcmp(id, "strtonum") == 0) return libfunc_strtonum;
+    if (strcmp(id, "objectcopy") == 0) return libfunc_objectcopy;
+    if (strcmp(id, "objectmemberkeys") == 0) return libfunc_objectmemberkeys;
+    return nullptr;
+}
+
+void cleanup_libfuncs() {
+    LibFuncsHashTable* current = LibHashTable;
+    while (current) {
+        LibFuncsHashTable* next = current->next;
+        free(current->id);
+        delete current;
+        current = next;
+    }
+    LibHashTable = nullptr;
 }

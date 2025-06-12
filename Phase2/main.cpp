@@ -19,6 +19,13 @@ extern int magic_num;
 extern int globalOffset;
 extern int localOffset;
 
+extern instruction* code;
+extern unsigned codeSize;
+extern unsigned pc;
+extern unsigned top;
+extern unsigned topsp;
+extern unsigned char executionFinished;
+
 SymbolTable symbolTable;
 vector<int> loopStack;
 char libFuncs [][30]={
@@ -45,7 +52,7 @@ void writeInstructionsFromAbc(const std::string& outputFilePath) {
         return; // Exit the function if the magic number is incorrect
     }
 
-    std::cout << "Magic number verified: " << magic_num << std::endl;
+    //std::cout << "Magic number verified: " << magic_num << std::endl;
 
     FILE* outputFile = fopen(outputFilePath.c_str(), "w");
     if (!outputFile) {
@@ -110,7 +117,7 @@ int main(int argc, char* argv[]) {
         libDefFuncs.push_back(str);
     }
     yyparse();
-    symbolTable.print();
+    //symbolTable.print();
 
     std::string input_file = argv[1]; 
     std::string test_name;
@@ -206,16 +213,41 @@ int main(int argc, char* argv[]) {
     // sz = ftell(binary);
     // rewind(binary);
     readAbcFile(binary_path.c_str());
-    execute_cycle();
+
+    // Initialize the stack
+    avm_initstack();
+
+    // Set up the code array
+    code = new instruction[instructions.size()];
+    for (size_t i = 0; i < instructions.size(); i++) {
+        code[i] = *instructions[i];
+    }
+    codeSize = instructions.size();
+
+    // Initialize execution variables
+    pc = 0;
+    top = AVM_STACKSIZE -1;
+    topsp = AVM_STACKSIZE -1;
+    executionFinished = 0;
+
+    while (!executionFinished) {
+        execute_cycle();
+    }
     
     // Now you can use the loaded data
-    cout << "Loaded " << instructions.size() << " instructions" << endl;
-    cout << "Loaded " << numConsts.size() << " number constants" << endl;
-    cout << "Loaded " << stringConsts.size() << " string constants" << endl;
+    // cout << "Loaded " << instructions.size() << " instructions" << endl;
+    // cout << "Loaded " << numConsts.size() << " number constants" << endl;
+    // cout << "Loaded " << stringConsts.size() << " string constants" << endl;
     
     // Create a new instruction output file from the loaded data
     std::string newInstructionsPath = test_name + "_from_abc.instructions";
     writeInstructionsFromAbc(newInstructionsPath);
+
+    // Clean up
+    delete[] code;
+    for (auto instr : instructions) {
+        delete instr;
+    }
 
     return 0;
 }

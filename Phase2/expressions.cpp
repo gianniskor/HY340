@@ -603,3 +603,34 @@ expr* lvaluesIncert(string name, int type){
     expr* e = symToExpr(ret);
     return e;
 }
+
+// expr* lvaluesIncert(string name, int type){
+//     Symbol *ret = nullptr;
+    
+//     // First check if it's a library function
+//     vector<Symbol*> symbols = symbolTable.lookup(name);
+//     for (auto& sym : symbols) {
+//         if (sym->getType() == LIB_FUNC) {
+//             return symToExpr(sym);  // Return library function expression
+//         }
+//     }
+    
+//     // If not a library function, proceed with normal variable logic
+//     if(type == 1){
+//        ret = symbolTable.local_lvalue(name,0,yylineno);
+//     }else if(type == 2){
+//         ret = symbolTable.local_lvalue(name,symbolTable.currentScope,yylineno);
+//     }else if(type == 3){
+//         ret = symbolTable.lvalue_default(name,symbolTable.currentScope,yylineno);
+//     }else{
+//         cerr << "unknown type in lvaluesIncert " << yylineno << endl;
+//     }
+    
+//     if(ret == nullptr) {
+//         cerr << "Failed to create symbol for " << name << " at line " << yylineno << endl;
+//         return nullptr;
+//     }
+    
+//     expr* e = symToExpr(ret);
+//     return e;
+// }
