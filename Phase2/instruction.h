@@ -158,6 +158,20 @@ enum avm_memcell_t {
     undef_m
 };
 
+struct incomplete_jump{
+    unsigned instrNo;
+    unsigned iaddress;
+    incomplete_jump* next;
+};
+
+extern incomplete_jump* ij_head;
+extern unsigned ij_total;
+
+void add_incomple_jump(unsigned instrNo,unsigned iaddress);
+
+
+
+
 struct avm_table;
 struct avm_memcell{
     avm_memcell_t type;
@@ -196,7 +210,7 @@ avm_table* avm_tablenew(void);
 void avm_tabledestroy(avm_table* t);
 avm_memcell* avm_tablegetelem(avm_memcell *key);
 void avm_tablesetelem(avm_memcell* key, avm_memcell* value);
-
+void patch_incomplete_jumps();
 
 
 void avm_initstack(void);

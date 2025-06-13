@@ -144,6 +144,7 @@ int main(int argc, char* argv[]) {
     for(int i = 0;i<quads.size();i++){
         quad_to_instr(quads[i]);
     }
+    patch_incomplete_jumps();
     magic_num = 163847504;
     fprintf(instructions_out, "magicnumber: %ld\n", (long int)163847504); fwrite(&magic_num, sizeof(long int), 1, binary);
     fprintf(instructions_out, "*********** NUMCONSTS ***********\n");

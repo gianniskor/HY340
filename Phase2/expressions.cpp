@@ -352,16 +352,8 @@ expr* evaluateBoolean(expr* e, expr* e2, iopcode opcode){
         tmpExpr = newTempExpr();
     }
     quad_counter = nextquad();
-    // expr* JumpPlus3 = newIntExpr(quad_counter+3);
-    // expr* JumpPlus5 = newIntExpr(quad_counter+5);
-    // expr* JumpPlus6 = newIntExpr(quad_counter+6);
     expr* JumpTrue = newBoolExpr(true);
     expr* JumpFalse = newBoolExpr(false);
-
-    // emit(opcode,e,e2,JumpPlus3);
-    // emit(assign,JumpFalse,nullptr,tmpExpr);
-    // emit(jump,nullptr,nullptr,JumpPlus5);
-    // emit(assign,JumpTrue,nullptr,tmpExpr);
     emit(opcode, e,e2,nullptr,quad_counter+3);
     emit(jump,nullptr,nullptr,nullptr,quad_counter+5);
     emit(assign,JumpTrue,nullptr,tmpExpr);

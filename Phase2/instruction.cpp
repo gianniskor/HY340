@@ -39,7 +39,8 @@ avm_memcell retval;
 #define AVM_SAVEDTOPSP_OFFSET +1
 #define AVM_STACKENV_SIZE 4
 
-
+incomplete_jump* ij_head = (incomplete_jump*) 0;
+unsigned ij_total = 0;
 
 
 typedef void (*generator_func_t)(quad*);
@@ -221,114 +222,37 @@ void generate_ASSIGN (quad *q){
 }
 
 void generate_NOT(quad* q) {
-    instruction* t;
-    
-    // First instruction: if arg1 == false jump to "result = true" instruction
-    t = new instruction;
-    t->opcode = jeq_v;
+    instruction* t = new instruction;
+    t->opcode = not_v;
     t->arg1 = new vmarg;
     make_operand(q->arg1, t->arg1);
-    t->arg2 = new vmarg;
-    t->arg2->type = bool_a;
-    t->arg2->val = consts_newbool(false);
-    t->result = new vmarg;
-    t->result->type = label_a;
-    t->result->val = nextquad() + 3;  // Jump to "true" assignment if arg1 is false
-    emit_instr(t);
-    
-    // Second instruction: result = false (when arg1 is true)
-    t = new instruction;
-    t->opcode = assign_v;
-    t->arg1 = new vmarg;
-    t->arg1->type = bool_a;
-    t->arg1->val = consts_newbool(false);
-    t->arg2 = nullptr;  // reset_operand
-    t->result = new vmarg;
-    make_operand(q->result, t->result);
-    emit_instr(t);
-    
-    // Third instruction: jump over "result = true" to end
-    t = new instruction;
-    t->opcode = jump_v;
-    t->arg1 = nullptr;  // reset_operand
-    t->arg2 = nullptr;  // reset_operand
-    t->result = new vmarg;
-    t->result->type = label_a;
-    t->result->val = nextquad() + 2;
-    emit_instr(t);
-    
-    // Fourth instruction: result = true (when arg1 is false)
-    t = new instruction;
-    t->opcode = assign_v;
-    t->arg1 = new vmarg;
-    t->arg1->type = bool_a;
-    t->arg1->val = consts_newbool(true);
-    t->arg2 = nullptr;  // reset_operand
     t->result = new vmarg;
     make_operand(q->result, t->result);
     emit_instr(t);
 }
 
 void generate_AND(quad *q){
-    instruction* t;
-    // First instruction: if arg1 == false jump to false-assignment
-    t = new instruction;
-    t->opcode = jeq_v;
+    instruction* t = new instruction;
+    t->opcode = and_v;
     t->arg1 = new vmarg;
     make_operand(q->arg1, t->arg1);
     t->arg2 = new vmarg;
-    t->arg2->type = bool_a;
-    t->arg2->val = consts_newbool(false);
+    make_operand(q->arg2, t->arg2);
     t->result = new vmarg;
-    t->result->type = label_a;
-    t->result->val = nextquad() + 4;  // Jump to false-assignment if arg1 is false
+    make_operand(q->result, t->result);
     emit_instr(t);
-    
-    // Second instruction: if arg2 == false jump to false-assignment
-    t = new instruction;
-    t->opcode = jeq_v;
+}
+
+void generate_OR(quad *q){
+    instruction* t = new instruction;
+    t->opcode = or_v;
     t->arg1 = new vmarg;
-    make_operand(q->arg2, t->arg1);
+    make_operand(q->arg1, t->arg1);
     t->arg2 = new vmarg;
-    t->arg2->type = bool_a;
-    t->arg2->val = consts_newbool(false);
-    t->result = new vmarg;
-    t->result->type = label_a;
-    t->result->val = nextquad() + 3;  // Jump to false-assignment if arg2 is false
-    emit_instr(t);
-    
-    // Third instruction: result = true (when both arg1 and arg2 are true)
-    t = new instruction;
-    t->opcode = assign_v;
-    t->arg1 = new vmarg;
-    t->arg1->type = bool_a;
-    t->arg1->val = consts_newbool(true);
-    t->arg2 = nullptr;  // reset_operand
+    make_operand(q->arg2, t->arg2);
     t->result = new vmarg;
     make_operand(q->result, t->result);
     emit_instr(t);
-    
-    // Fourth instruction: jump over false-assignment to end
-    t = new instruction;
-    t->opcode = jump_v;
-    t->arg1 = nullptr;  // reset_operand
-    t->arg2 = nullptr;  // reset_operand
-    t->result = new vmarg;
-    t->result->type = label_a;
-    t->result->val = nextquad() + 2;
-    emit_instr(t);
-    
-    // Fifth instruction: result = false (when either arg1 or arg2 is false)
-    t = new instruction;
-    t->opcode = assign_v;
-    t->arg1 = new vmarg;
-    t->arg1->type = bool_a;
-    t->arg1->val = consts_newbool(false);
-    t->arg2 = nullptr;
-    t->result = new vmarg;
-    make_operand(q->result, t->result);
-    emit_instr(t);
-    return;
 }
 
 void generate_JUMP(quad *q){
@@ -368,67 +292,6 @@ void generate_NOP(quad* q){
     emit_instr(i);
 }
 
-void generate_OR(quad *q){
-    instruction* t;
-    
-    // First instruction: if arg1 == true jump to true-assignment
-    t = new instruction;
-    t->opcode = jeq_v;
-    t->arg1 = new vmarg;
-    make_operand(q->arg1, t->arg1);
-    t->arg2 = new vmarg;
-    t->arg2->type = bool_a;
-    t->arg2->val = consts_newbool(true);
-    t->result = new vmarg;
-    t->result->type = label_a;
-    t->result->val = nextquad() + 4;  // Jump to true-assignment if arg1 is true
-    emit_instr(t);
-    
-    // Second instruction: if arg2 == true jump to true-assignment
-    t = new instruction;
-    t->opcode = jeq_v;
-    t->arg1 = new vmarg;
-    make_operand(q->arg2, t->arg1);
-    t->arg2 = new vmarg;
-    t->arg2->type = bool_a;
-    t->arg2->val = consts_newbool(true);
-    t->result = new vmarg;
-    t->result->type = label_a;
-    t->result->val = nextquad() + 3;  // Jump to true-assignment if arg2 is true
-    emit_instr(t);
-    
-    // Third instruction: result = false (when both arg1 and arg2 are false)
-    t = new instruction;
-    t->opcode = assign_v;
-    t->arg1 = new vmarg;
-    t->arg1->type = bool_a;
-    t->arg1->val = consts_newbool(false);
-    t->arg2 = nullptr;  // reset_operand
-    t->result = new vmarg;
-    make_operand(q->result, t->result);
-    emit_instr(t);
-    
-    // Fourth instruction: jump over true-assignment to end
-    t = new instruction;
-    t->opcode = jump_v;
-    t->arg1 = nullptr;  // reset_operand
-    t->arg2 = nullptr;  // reset_operand
-    t->result = new vmarg;
-    t->result->type = label_a;
-    t->result->val = nextquad() + 2;
-    emit_instr(t);
-    
-    // Fifth instruction: result = true (when either arg1 or arg2 is true)
-    t = new instruction;
-    t->opcode = assign_v;
-    t->arg1 = new vmarg;
-    t->arg1->type = bool_a;
-    t->arg1->val = consts_newbool(true);
-    t->arg2 = nullptr;
-    t->result = new vmarg;
-    make_operand(q->result, t->result);
-    emit_instr(t);
-}
 
 void generate_UMINUS(quad* q){
     instruction* i = generate_Proc(mul_v,q);
@@ -854,14 +717,16 @@ void generate_make_op(instruction* i, quad* q){
     return;
 }
 
-void generate_relational(vmopcode op, quad* q){
-    instruction* i = generate_Proc(op,q);
+void generate_relational(vmopcode op, quad* q) {
+    instruction* i = generate_Proc(op, q);
     generate_make_op(i, q);
     i->result = new vmarg;
     i->result->type = label_a;
-    i->result->val = q->label;
-    //patch incomplete jump
+    i->result->val = 0; // placeholder, will be patched later
     emit_instr(i);
+
+    // If the jump target is not yet known, add to incomplete jumps
+    add_incomple_jump(instructions.size() - 1, q->label);
 }
 
 void quad_to_instr(void* void_quad) {
@@ -869,7 +734,7 @@ void quad_to_instr(void* void_quad) {
         return;
     }
     quad *q = (quad*) void_quad;
-
+    q->taddress = instructions.size();
     cout << "Converting quad to instruction: " << quadString[q->op] << endl;  // Add this line
     generators[q->op](q);
 }
@@ -1062,7 +927,7 @@ avm_memcell* avm_translate_operand(vmarg* arg, avm_memcell* reg) {
             return reg;
         case bool_a:
             reg->type = bool_m;
-            reg->data.boolVal = (arg->val == 1);
+            reg->data.boolVal = boolConst[arg->val];
             return reg;
         case nil_a:
             reg->type = nil_m;
@@ -1136,8 +1001,8 @@ void libfunc_print(void) {
     for (unsigned i = 0; i < n; ++i) {
         avm_memcell* arg = avm_getactual(i);
         char* s = avm_tostring(arg);
-        cout << s;  // Changed from cerr to cout
-        if (i < n-1) cout << " ";  // Add space between arguments
+        cout << s;
+        if (i < n-1) cout << " ";
         free(s);
     }
     cout << endl;  // Add newline at the end
@@ -1537,10 +1402,18 @@ void execute_jlt(instruction* instr) {
         rv2 = &cx;
     }
     
-    if (rv1->data.numVal < rv2->data.numVal) {
-        pc = lv->data.numVal;
+    // If lv is a label, this is a jump instruction
+    if (lv->type == number_m && lv->data.numVal >= 0) {
+        if (rv1->data.numVal < rv2->data.numVal) {
+            pc = lv->data.numVal;
+        } else {
+            pc++;  // Skip the jump if condition is false
+        }
     } else {
-        pc++;  // Skip the jump if condition is false
+        // This is a boolean assignment
+        lv->type = bool_m;
+        lv->data.boolVal = (rv1->data.numVal < rv2->data.numVal);
+        pc++;
     }
 }
 
@@ -1565,10 +1438,18 @@ void execute_jgt(instruction* instr) {
         rv2 = &cx;
     }
     
-    if (rv1->data.numVal > rv2->data.numVal) {
-        pc = lv->data.numVal;
+    // If lv is a label, this is a jump instruction
+    if (lv->type == number_m && lv->data.numVal >= 0) {
+        if (rv1->data.numVal > rv2->data.numVal) {
+            pc = lv->data.numVal;
+        } else {
+            pc++;  // Skip the jump if condition is false
+        }
     } else {
-        pc++;  // Skip the jump if condition is false
+        // This is a boolean assignment
+        lv->type = bool_m;
+        lv->data.boolVal = (rv1->data.numVal > rv2->data.numVal);
+        pc++;
     }
 }
 
@@ -1593,10 +1474,18 @@ void execute_jle(instruction* instr) {
         rv2 = &cx;
     }
     
-    if (rv1->data.numVal <= rv2->data.numVal) {
-        pc = lv->data.numVal;
+    // If lv is a label, this is a jump instruction
+    if (lv->type == number_m && lv->data.numVal >= 0) {
+        if (rv1->data.numVal <= rv2->data.numVal) {
+            pc = lv->data.numVal;
+        } else {
+            pc++;  // Skip the jump if condition is false
+        }
     } else {
-        pc++;  // Skip the jump if condition is false
+        // This is a boolean assignment
+        lv->type = bool_m;
+        lv->data.boolVal = (rv1->data.numVal <= rv2->data.numVal);
+        pc++;
     }
 }
 
@@ -1621,10 +1510,18 @@ void execute_jge(instruction* instr) {
         rv2 = &cx;
     }
     
-    if (rv1->data.numVal >= rv2->data.numVal) {
-        pc = lv->data.numVal;
+    // If lv is a label, this is a jump instruction
+    if (lv->type == number_m && lv->data.numVal >= 0) {
+        if (rv1->data.numVal >= rv2->data.numVal) {
+            pc = lv->data.numVal;
+        } else {
+            pc++;  // Skip the jump if condition is false
+        }
     } else {
-        pc++;  // Skip the jump if condition is false
+        // This is a boolean assignment
+        lv->type = bool_m;
+        lv->data.boolVal = (rv1->data.numVal >= rv2->data.numVal);
+        pc++;
     }
 }
 
@@ -1635,22 +1532,46 @@ void execute_jeq(instruction* instr) {
     
     assert(lv && rv1 && rv2);
     
-    if (rv1->type == rv2->type) {
-        if (rv1->type == number_m) {
-            if (rv1->data.numVal == rv2->data.numVal) {
-                pc = lv->data.numVal;
+    // If lv is a label, this is a jump instruction
+    if (lv->type == number_m && lv->data.numVal >= 0) {
+        if (rv1->type == rv2->type) {
+            if (rv1->type == number_m) {
+                if (rv1->data.numVal == rv2->data.numVal) {
+                    pc = lv->data.numVal;
+                    return;
+                }
+            }
+            else if (rv1->type == string_m) {
+                if (strcmp(rv1->data.strVal, rv2->data.strVal) == 0) {
+                    pc = lv->data.numVal;
+                    return;
+                }
+            }
+            else if (rv1->type == bool_m) {
+                if (rv1->data.boolVal == rv2->data.boolVal) {
+                    pc = lv->data.numVal;
+                    return;
+                }
             }
         }
-        else if (rv1->type == string_m) {
-            if (strcmp(rv1->data.strVal, rv2->data.strVal) == 0) {
-                pc = lv->data.numVal;
+        pc++;  // Skip the jump if condition is false
+    } else {
+        // This is a boolean assignment
+        lv->type = bool_m;
+        if (rv1->type == rv2->type) {
+            if (rv1->type == number_m) {
+                lv->data.boolVal = (rv1->data.numVal == rv2->data.numVal);
             }
-        }
-        else if (rv1->type == bool_m) {
-            if (rv1->data.boolVal == rv2->data.boolVal) {
-                pc = lv->data.numVal;
+            else if (rv1->type == string_m) {
+                lv->data.boolVal = (strcmp(rv1->data.strVal, rv2->data.strVal) == 0);
             }
+            else if (rv1->type == bool_m) {
+                lv->data.boolVal = (rv1->data.boolVal == rv2->data.boolVal);
+            }
+        } else {
+            lv->data.boolVal = false;
         }
+        pc++;
     }
 }
 
@@ -1661,25 +1582,49 @@ void execute_jne(instruction* instr) {
     
     assert(lv && rv1 && rv2);
     
-    if (rv1->type != rv2->type) {
-        pc = lv->data.numVal;
-        return;
-    }
-    
-    if (rv1->type == number_m) {
-        if (rv1->data.numVal != rv2->data.numVal) {
+    // If lv is a label, this is a jump instruction
+    if (lv->type == number_m && lv->data.numVal >= 0) {
+        if (rv1->type != rv2->type) {
             pc = lv->data.numVal;
+            return;
         }
-    }
-    else if (rv1->type == string_m) {
-        if (strcmp(rv1->data.strVal, rv2->data.strVal) != 0) {
-            pc = lv->data.numVal;
+        
+        if (rv1->type == number_m) {
+            if (rv1->data.numVal != rv2->data.numVal) {
+                pc = lv->data.numVal;
+                return;
+            }
         }
-    }
-    else if (rv1->type == bool_m) {
-        if (rv1->data.boolVal != rv2->data.boolVal) {
-            pc = lv->data.numVal;
+        else if (rv1->type == string_m) {
+            if (strcmp(rv1->data.strVal, rv2->data.strVal) != 0) {
+                pc = lv->data.numVal;
+                return;
+            }
         }
+        else if (rv1->type == bool_m) {
+            if (rv1->data.boolVal != rv2->data.boolVal) {
+                pc = lv->data.numVal;
+                return;
+            }
+        }
+        pc++;  // Skip the jump if condition is false
+    } else {
+        // This is a boolean assignment
+        lv->type = bool_m;
+        if (rv1->type != rv2->type) {
+            lv->data.boolVal = true;
+        } else {
+            if (rv1->type == number_m) {
+                lv->data.boolVal = (rv1->data.numVal != rv2->data.numVal);
+            }
+            else if (rv1->type == string_m) {
+                lv->data.boolVal = (strcmp(rv1->data.strVal, rv2->data.strVal) != 0);
+            }
+            else if (rv1->type == bool_m) {
+                lv->data.boolVal = (rv1->data.boolVal != rv2->data.boolVal);
+            }
+        }
+        pc++;
     }
 }
 void execute_ret(instruction* instr) {
@@ -1748,14 +1693,99 @@ void avm_initstack(void) {
 //     return;
 // }
 void libfunc_typeof(void){
-    return;
+    unsigned n = avm_totalactuals();
+    if (n != 1) {
+        avm_error("typeof(), expects exactly one argument!");
+        executionFinished = 1;
+        return;
+    }
+    avm_memcell* arg = avm_getactual(0);
+    avm_memcellclear(&retval);
+    switch (arg->type) {
+        case number_m:
+            cout << "number" << endl;
+            retval.data.numVal = arg->data.numVal;
+            break;
+        case string_m:
+            cout << "string" << endl;
+            retval.data.strVal = strdup(arg->data.strVal);
+            break;
+        case bool_m:
+            cout << "bool" << endl;
+            retval.data.boolVal = arg->data.boolVal;
+            break;
+        case table_m:
+            cout << "table" << endl;
+            retval.data.tableVal = arg->data.tableVal;
+            break;
+        case userfunc_m:
+            cout << "userfunc" << endl;
+            retval.data.funcVal = arg->data.funcVal;
+            break;
+        case libfunc_m:
+            cout << "libfunc" << endl;
+            retval.data.libFuncVal = arg->data.libFuncVal;
+            break;
+        case nil_m:
+            cout << "nil" << endl;
+            break;
+        default:
+            avm_error("Invalid type in typeof()");
+            executionFinished = 1;
+            return;
+    }
+    retval.type = arg->type;
 }
+
 void libfunc_totalarguments(void){
-    return;
+    unsigned p_topsp = avm_get_envvalue(topsp + AVM_NUMACTUALS_OFFSET);
+    avm_memcellclear(&retval);
+    if (!p_topsp) {
+        avm_error("totalarguments() called outside of a function call!");
+        retval.type = nil_m;
+        executionFinished = 1;
+        return;
+    }
+    retval.type = number_m;
+    retval.data.numVal = avm_get_envvalue(p_topsp + AVM_NUMACTUALS_OFFSET);
+    cout << "Total arguments: " << retval.data.numVal << endl;
+    
 }
-void libfunc_argument(void){
-    return;
+
+void libfunc_argument(void) {
+    unsigned n = avm_totalactuals();
+    if (n != 1) {
+        avm_error("argument() expects exactly one argument!");
+        cout << "argument() expects exactly one argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    avm_memcell* arg0 = avm_getactual(0);
+    if (arg0->type != number_m || arg0->data.numVal < 0 || arg0->data.numVal != floor(arg0->data.numVal)) {
+        avm_error("argument() expects an integer index as argument!");
+        cout << "argument() expects an integer index as argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    unsigned i = (unsigned)arg0->data.numVal;
+
+    unsigned p_topsp = avm_get_envvalue(topsp + AVM_NUMACTUALS_OFFSET);
+    avm_memcellclear(&retval);
+    if (!p_topsp) {
+        retval.type = nil_m;
+        return;
+    }
+    unsigned total_args = avm_get_envvalue(p_topsp + AVM_NUMACTUALS_OFFSET);
+    if (i >= total_args) {
+        retval.type = nil_m;
+        return;
+    }
+    avm_memcell* arg = &stack[p_topsp + AVM_STACKENV_SIZE + 1 + i];
+    avm_assign(&retval, arg);
 }
+
 void libfunc_objecttotalmembers(void){
     return;
 }
@@ -1777,20 +1807,7 @@ void libfunc_objectcopy(void){
 void libfunc_objectmemberkeys(void){
     return;
 }
-// void libfunc_input(void){
-//     return;
-// }
 
-// library_func_t avm_getlibraryfunc(char* id) {
-//     LibFuncsHashTable* entry = LibHashTable;
-//     while (entry) {
-//         if (strcmp(entry->id, id) == 0) {
-//             return entry->func;
-//         }
-//         entry = entry->next;
-//     }
-//     return nullptr;
-// }
 library_func_t avm_getlibraryfunc(char* id) {
     if (strcmp(id, "print") == 0) return libfunc_print;
     if (strcmp(id, "input") == 0) return libfunc_input;
@@ -1834,4 +1851,26 @@ unsigned char avm_tobool(avm_memcell* m) {
     }
     
     return (*toboolFuncs[m->type])(m);
+}
+
+void patch_incomplete_jumps() {
+    incomplete_jump* x = ij_head;
+    while (x) {
+        if (x->iaddress == quads.size()) {
+            instructions[x->instrNo]->result->val = instructions.size();
+        } else {
+            instructions[x->instrNo]->result->val = quads[x->iaddress]->taddress;
+        }
+        x = x->next;
+    }
+}
+
+
+void add_incomple_jump(unsigned instrNo, unsigned iaddress) {
+    incomplete_jump* new_jump = new incomplete_jump;
+    new_jump->instrNo = instrNo;
+    new_jump->iaddress = iaddress;
+    new_jump->next = ij_head;
+    ij_head = new_jump;
+    ++ij_total;
 }
