@@ -1,2 +1,7 @@
-x = 1 < 2;
-print(x);
+vec3=[
+    {"x": vectors[0]},
+    {"y": vectors[1]}, 
+    {0 : "zero"}, 
+    {1 : "one"}
+];
+print(vec1[1]);

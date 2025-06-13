@@ -316,4 +316,9 @@ void cleanup_libfuncs();
 
 unsigned char avm_tobool(avm_memcell* m);
 
+// Add after the other function declarations
+avm_memcell* avm_tablegetelem(avm_table* table, avm_memcell* key);
+void avm_tablesetelem(avm_table* table, avm_memcell* key, avm_memcell* value);
+unsigned hash_string(const char* str);
+
 #endif

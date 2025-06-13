@@ -721,12 +721,19 @@ void generate_relational(vmopcode op, quad* q) {
     instruction* i = generate_Proc(op, q);
     generate_make_op(i, q);
     i->result = new vmarg;
-    i->result->type = label_a;
-    i->result->val = 0; // placeholder, will be patched later
-    emit_instr(i);
-
-    // If the jump target is not yet known, add to incomplete jumps
-    add_incomple_jump(instructions.size() - 1, q->label);
+    
+    // If q->label is set, this is a jump instruction
+    if (q->label) {
+        i->result->type = label_a;
+        i->result->val = 0;  // placeholder, will be patched later
+        emit_instr(i);
+        add_incomple_jump(instructions.size() - 1, q->label);
+    } else {
+        // This is a comparison operation
+        i->result->type = bool_a;
+        i->result->val = consts_newbool(false);  // Default value
+        emit_instr(i);
+    }
 }
 
 void quad_to_instr(void* void_quad) {
@@ -735,13 +742,11 @@ void quad_to_instr(void* void_quad) {
     }
     quad *q = (quad*) void_quad;
     q->taddress = instructions.size();
-    cout << "Converting quad to instruction: " << quadString[q->op] << endl;  // Add this line
+    cout << "Converting quad to instruction: " << quadString[q->op] << endl;
     generators[q->op](q);
 }
 
 
-
-// Add this function to your instruction.cpp file
 void avm_memcellclear(avm_memcell* m) {
     if (m == nullptr) return;
     
@@ -761,26 +766,35 @@ void avm_memcellclear(avm_memcell* m) {
     m->type = undef_m;
 }
 
-void print_instruction(instruction* i, int step){
-    if(i == nullptr){
+void print_instruction(instruction* i, int step) {
+    if (i == nullptr) {
         assert(0);
     }
-    vmarg* r = i->result;
-    vmarg* arg1 = i->arg1;
-    vmarg* arg2 = i->arg2;
-    //string opcode = instruction_opcode_names[i->opcode];
-    fprintf(instructions_out,"%d: instruction: %s ",step,instruction_opcode_names[i->opcode].c_str());
-    if(arg1){
-        fprintf(instructions_out,"arg1:(%s,%d) ",vmarg_names[arg1->type].c_str(),arg1->val);
+
+    // Print instruction number and opcode with nice formatting
+    fprintf(instructions_out, "%4d: %-12s | ", step, instruction_opcode_names[i->opcode].c_str());
+    
+    // Print arguments and result in a table-like format with consistent widths
+    if (i->arg1) {
+        fprintf(instructions_out, "arg1: %-8s %-4d | ", vmarg_names[i->arg1->type].c_str(), i->arg1->val);
+    } else {
+        fprintf(instructions_out, "%-19s | ", "");  // Changed from 20 to 19
     }
-    if(arg2){
-        fprintf(instructions_out,"arg2:(%s,%d) ",vmarg_names[arg2->type].c_str(),arg2->val);
+    
+    if (i->arg2) {
+        fprintf(instructions_out, "arg2: %-8s %-4d | ", vmarg_names[i->arg2->type].c_str(), i->arg2->val);
+    } else {
+        fprintf(instructions_out, "%-19s | ", "");  // Changed from 20 to 19
     }
-    if(r){
-        fprintf(instructions_out,"result:(%s,%d) ",vmarg_names[r->type].c_str(),r->val);
+    
+    if (i->result) {
+        fprintf(instructions_out, "result: %-8s %-4d | ", vmarg_names[i->result->type].c_str(), i->result->val);
+    } else {
+        fprintf(instructions_out, "%-21s | ", "");  // Changed from 20 to 21
     }
-    fprintf(instructions_out,"[srcLine:%d] ",i->srcLine);
-    fprintf(instructions_out, "\n");
+    
+    // Print source line at the end
+    fprintf(instructions_out, "line: %d\n", i->srcLine);
 }
 
 void instruction_to_binary(instruction *i){
@@ -1645,12 +1659,42 @@ void execute_getretval(instruction* instr) {
 }
 
 void execute_tablecreate(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
+    assert(lv);
+    
+    lv->type = table_m;
+    lv->data.tableVal = avm_tablenew();
+    lv->data.tableVal->total = 0;  // Initialize total to 0
 }
 
 void execute_tablegetelem(instruction* instr) {
+    avm_memcell* table = avm_translate_operand(instr->arg1, &ax);
+    avm_memcell* key = avm_translate_operand(instr->arg2, &bx);
+    avm_memcell* target = avm_translate_operand(instr->result, nullptr);
+    
+    assert(table && key && target);
+    assert(table->type == table_m);
+    
+    // Get the value from the table
+    avm_memcell* value = avm_tablegetelem(table->data.tableVal, key);
+    if (value) {
+        avm_assign(target, value);
+    } else {
+        // Initialize target as nil if key doesn't exist
+        target->type = nil_m;
+    }
 }
 
 void execute_tablesetelem(instruction* instr) {
+    avm_memcell* table = avm_translate_operand(instr->result, &ax);
+    avm_memcell* key = avm_translate_operand(instr->arg1, &bx);
+    avm_memcell* value = avm_translate_operand(instr->arg2, &cx);
+    
+    assert(table && key && value);
+    assert(table->type == table_m);
+    
+    // Set the value in the table
+    avm_tablesetelem(table->data.tableVal, key, value);
 }
 
 void execute_jump(instruction* instr) {
@@ -1873,4 +1917,107 @@ void add_incomple_jump(unsigned instrNo, unsigned iaddress) {
     new_jump->next = ij_head;
     ij_head = new_jump;
     ++ij_total;
+}
+
+// Helper function to get an element from a table
+avm_memcell* avm_tablegetelem(avm_table* table, avm_memcell* key) {
+    assert(table && key);
+    
+    // Handle numeric keys
+    if (key->type == number_m) {
+        unsigned index = (unsigned)key->data.numVal;
+        if (index < table->total && table->numIndexed[index]) {
+            return &table->numIndexed[index]->value;
+        }
+    }
+    // Handle string keys
+    else if (key->type == string_m) {
+        unsigned index = hash_string(key->data.strVal) % AVM_TABLE_HASHSIZE;
+        for (avm_table_bucket* b = table->strIndexed[index]; b; b = b->next) {
+            if (strcmp(b->key.data.strVal, key->data.strVal) == 0) {
+                return &b->value;
+            }
+        }
+    }
+    // Handle boolean keys
+    else if (key->type == bool_m) {
+        unsigned index = key->data.boolVal ? 1 : 0;
+        if (index < table->total && table->boolIndexed[index]) {
+            return &table->boolIndexed[index]->value;
+        }
+    }
+    
+    return nullptr;
+}
+
+// Helper function to set an element in a table
+void avm_tablesetelem(avm_table* table, avm_memcell* key, avm_memcell* value) {
+    assert(table && key && value);
+    
+    // Handle numeric keys
+    if (key->type == number_m) {
+        unsigned index = (unsigned)key->data.numVal;
+        if (index >= table->total) {
+            // Resize the table if needed
+            while (table->total <= index) {
+                avm_table_bucket* new_bucket = new avm_table_bucket;
+                new_bucket->key.type = number_m;
+                new_bucket->key.data.numVal = table->total;
+                new_bucket->value.type = nil_m;  // Initialize as nil
+                new_bucket->next = nullptr;
+                table->numIndexed[table->total] = new_bucket;
+                table->total++;
+            }
+        }
+        avm_assign(&table->numIndexed[index]->value, value);
+    }
+    // Handle string keys
+    else if (key->type == string_m) {
+        unsigned index = hash_string(key->data.strVal) % AVM_TABLE_HASHSIZE;
+        avm_table_bucket* b;
+        
+        // Look for existing key
+        for (b = table->strIndexed[index]; b; b = b->next) {
+            if (strcmp(b->key.data.strVal, key->data.strVal) == 0) {
+                avm_assign(&b->value, value);
+                return;
+            }
+        }
+        
+        // Create new bucket if key doesn't exist
+        b = new avm_table_bucket;
+        b->key.type = string_m;
+        b->key.data.strVal = strdup(key->data.strVal);
+        b->value.type = nil_m;  // Initialize as nil
+        b->next = table->strIndexed[index];
+        table->strIndexed[index] = b;
+        avm_assign(&b->value, value);
+    }
+    // Handle boolean keys
+    else if (key->type == bool_m) {
+        unsigned index = key->data.boolVal ? 1 : 0;
+        if (index >= table->total) {
+            // Resize the table if needed
+            while (table->total <= index) {
+                avm_table_bucket* new_bucket = new avm_table_bucket;
+                new_bucket->key.type = bool_m;
+                new_bucket->key.data.boolVal = (table->total == 1);
+                new_bucket->value.type = nil_m;  // Initialize as nil
+                new_bucket->next = nullptr;
+                table->boolIndexed[table->total] = new_bucket;
+                table->total++;
+            }
+        }
+        avm_assign(&table->boolIndexed[index]->value, value);
+    }
+}
+
+// Helper function to hash strings for table indexing
+unsigned hash_string(const char* str) {
+    unsigned hash = 5381;
+    int c;
+    while ((c = *str++)) {
+        hash = ((hash << 5) + hash) + c;
+    }
+    return hash;
 }
