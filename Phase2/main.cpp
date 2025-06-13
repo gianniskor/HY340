@@ -49,10 +49,8 @@ void writeInstructionsFromAbc(const std::string& outputFilePath) {
     // Verify the magic number before writing the file
     if (magic_num != 163847504) { // Replace 163847504 with the expected magic number if different
         std::cerr << "Error: Magic number mismatch! Expected 163847504, but found " << magic_num << "." << std::endl;
-        return; // Exit the function if the magic number is incorrect
+        return;
     }
-
-    //std::cout << "Magic number verified: " << magic_num << std::endl;
 
     FILE* outputFile = fopen(outputFilePath.c_str(), "w");
     if (!outputFile) {
@@ -96,7 +94,7 @@ void writeInstructionsFromAbc(const std::string& outputFilePath) {
     fprintf(outputFile, "*********** CODE ***********\n");
     fprintf(outputFile, "Instructions: %lu\n", instructions.size());
     for (size_t i = 0; i < instructions.size(); i++) {
-        print_instruction(instructions[i], i); // Assuming print_instruction can take a FILE* parameter
+        print_instruction(instructions[i], i);
     }
 
     fclose(outputFile);
@@ -117,8 +115,6 @@ int main(int argc, char* argv[]) {
         libDefFuncs.push_back(str);
     }
     yyparse();
-    //symbolTable.print();
-
     std::string input_file = argv[1]; 
     std::string test_name;
 
@@ -206,26 +202,13 @@ int main(int argc, char* argv[]) {
     }
     fclose(instructions_out);
     fclose(binary);
-
-    //test
-    // unsigned sz;
-    // fopen(binary_path.c_str(), "rb");
-    // fseek(binary,0L,SEEK_END);
-    // sz = ftell(binary);
-    // rewind(binary);
     readAbcFile(binary_path.c_str());
-
-    // Initialize the stack
     avm_initstack();
-
-    // Set up the code array
     code = new instruction[instructions.size()];
     for (size_t i = 0; i < instructions.size(); i++) {
         code[i] = *instructions[i];
     }
     codeSize = instructions.size();
-
-    // Initialize execution variables
     pc = 0;
     top = AVM_STACKSIZE -1;
     topsp = AVM_STACKSIZE -1;
@@ -234,17 +217,8 @@ int main(int argc, char* argv[]) {
     while (!executionFinished) {
         execute_cycle();
     }
-    
-    // Now you can use the loaded data
-    // cout << "Loaded " << instructions.size() << " instructions" << endl;
-    // cout << "Loaded " << numConsts.size() << " number constants" << endl;
-    // cout << "Loaded " << stringConsts.size() << " string constants" << endl;
-    
-    // Create a new instruction output file from the loaded data
     std::string newInstructionsPath = test_name + "_from_abc.instructions";
     writeInstructionsFromAbc(newInstructionsPath);
-
-    // Clean up
     delete[] code;
     for (auto instr : instructions) {
         delete instr;

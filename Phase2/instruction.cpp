@@ -18,7 +18,6 @@ int totalNums = 0;
 LibFuncsHashTable* LibHashTable = nullptr;
 unsigned total_globals = 0;
 
-//giannis addition
 unsigned totalActuals = 0;
 unsigned char executionFinished = 0;
 unsigned char pc = 0;
@@ -75,7 +74,6 @@ generator_func_t generators[] = {
     generate_NOP
 };
 
-//giannis addition
 tostring_func_t tostringFuncs[] = {
     number_tostring,
     string_tostring,
@@ -183,7 +181,6 @@ memclear_func_t memclearFuncs[] = {
     nullptr,
     nullptr
 };
-//till here
 
 void generate_ADD (quad* q){
     generate(add_v,q);
@@ -414,12 +411,6 @@ unsigned consts_newbool(bool b){
     return boolConst.size() - 1;
 }
 
-// static void avm_initstack(void){
-//     for(unsigned i = 0;i < AVM_STACKSIZE; ++i){
-//         AVM_WIPEOUT(stack[i]); stack[i].type = undef_m;
-//     }
-// }
-
 void make_operand(expr* e, vmarg* arg){
     switch(e->type){
         case var_e:
@@ -504,18 +495,15 @@ void emit_instr(instruction*i){
 void readMagic(FILE* f) {
     long int magic;
     fread(&magic, sizeof(long int), 1, f);
-    cerr <<"m: " <<magic << endl;
     if (magic != 163847504) {
         cerr << "Invalid magic number in .abc file" << endl;
         exit(1);
     }
-    cout << "Magic number verified: " << magic << endl;
 }
 
 void readNumbers(FILE* f) {
     int count;
     fread(&count, sizeof(int), 1, f);
-    cout << "Reading " << count << " number constants:" << endl;
     
     for(int i = 0; i < count; i++) {
         double num;
@@ -528,7 +516,6 @@ void readNumbers(FILE* f) {
 void readStrings(FILE* f) {
     int count;
     fread(&count, sizeof(int), 1, f);
-    cout << "Reading " << count << " string constants:" << endl;
     
     for(int i = 0; i < count; i++) {
         int len;
@@ -549,7 +536,6 @@ void readStrings(FILE* f) {
 void readUserFunctions(FILE* f) {
     int count;
     fread(&count, sizeof(int), 1, f);
-    cout << "Reading " << count << " user functions:" << endl;
     
     for(int i = 0; i < count; i++) {
         int len;
@@ -570,7 +556,6 @@ void readUserFunctions(FILE* f) {
 void readLibFunctions(FILE* f) {
     int count;
     fread(&count, sizeof(int), 1, f);
-    cout << "Reading " << count << " library functions:" << endl;
     
     for(int i = 0; i < count; i++) {
         int len;
@@ -591,26 +576,20 @@ void readLibFunctions(FILE* f) {
 void readBoolConstants(FILE* f) {
     int count;
     fread(&count, sizeof(int), 1, f);
-    cout << "Reading " << count << " boolean constants:" << endl;
-    
     for(int i = 0; i < count; i++) {
         bool b;
         fread(&b, sizeof(bool), 1, f);
         boolConst.push_back(b);
-        cout << i << ": " << (b ? "true" : "false") << endl;
     }
 }
 
 void readInstructions(FILE* f) {
     int count;
     fread(&count, sizeof(int), 1, f);
-    cout << "Reading " << count << " instructions:" << endl;
-    
     for(int i = 0; i < count; i++) {
         instruction* instr = new instruction;
         
         int opcode, result_type, result_val, arg1_type, arg1_val, arg2_type, arg2_val, srcLine;
-        
         fread(&opcode, sizeof(int), 1, f);
         fread(&result_type, sizeof(int), 1, f);
         fread(&result_val, sizeof(int), 1, f);
@@ -622,8 +601,6 @@ void readInstructions(FILE* f) {
         
         instr->opcode = (vmopcode)opcode;
         instr->srcLine = srcLine;
-        
-        // Create result vmarg if it exists
         if (result_type != -1) {
             instr->result = new vmarg;
             instr->result->type = (vmarg_t)result_type;
@@ -631,8 +608,6 @@ void readInstructions(FILE* f) {
         } else {
             instr->result = nullptr;
         }
-        
-        // Create arg1 vmarg if it exists
         if (arg1_type != -1) {
             instr->arg1 = new vmarg;
             instr->arg1->type = (vmarg_t)arg1_type;
@@ -640,8 +615,6 @@ void readInstructions(FILE* f) {
         } else {
             instr->arg1 = nullptr;
         }
-        
-        // Create arg2 vmarg if it exists
         if (arg2_type != -1) {
             instr->arg2 = new vmarg;
             instr->arg2->type = (vmarg_t)arg2_type;
@@ -651,9 +624,6 @@ void readInstructions(FILE* f) {
         }
         
         instructions.push_back(instr);
-        
-        // Print the instruction for verification
-        print_instruction(instr, i);
     }
 }
 
@@ -663,8 +633,6 @@ void readAbcFile(const string& filename) {
         cerr << "Cannot open .abc file: " << filename << endl;
         return;
     }
-    
-    cout << "Reading .abc file: " << filename << endl;
     numConsts.clear();
     stringConsts.clear();
     libDefFuncs.clear();
@@ -678,9 +646,7 @@ void readAbcFile(const string& filename) {
     readLibFunctions(f);
     readBoolConstants(f);
     readInstructions(f);
-    
     fclose(f);
-    cout << "Successfully loaded .abc file!" << endl;
 }
 
 //helper, vale se allo
@@ -721,17 +687,14 @@ void generate_relational(vmopcode op, quad* q) {
     instruction* i = generate_Proc(op, q);
     generate_make_op(i, q);
     i->result = new vmarg;
-    
-    // If q->label is set, this is a jump instruction
     if (q->label) {
         i->result->type = label_a;
-        i->result->val = 0;  // placeholder, will be patched later
+        i->result->val = 0;
         emit_instr(i);
         add_incomple_jump(instructions.size() - 1, q->label);
     } else {
-        // This is a comparison operation
         i->result->type = bool_a;
-        i->result->val = consts_newbool(false);  // Default value
+        i->result->val = consts_newbool(false); 
         emit_instr(i);
     }
 }
@@ -742,7 +705,6 @@ void quad_to_instr(void* void_quad) {
     }
     quad *q = (quad*) void_quad;
     q->taddress = instructions.size();
-    cout << "Converting quad to instruction: " << quadString[q->op] << endl;
     generators[q->op](q);
 }
 
@@ -750,7 +712,6 @@ void quad_to_instr(void* void_quad) {
 void avm_memcellclear(avm_memcell* m) {
     if (m == nullptr) return;
     
-    // Free dynamically allocated memory based on the cell's type
     if (m->type == string_m && m->data.strVal != nullptr) {
         delete[] m->data.strVal;
         m->data.strVal = nullptr;
@@ -761,8 +722,6 @@ void avm_memcellclear(avm_memcell* m) {
         delete[] m->data.libFuncVal;
         m->data.libFuncVal = nullptr;
     }
-    
-    // Set the type to undefined
     m->type = undef_m;
 }
 
@@ -770,30 +729,23 @@ void print_instruction(instruction* i, int step) {
     if (i == nullptr) {
         assert(0);
     }
-
-    // Print instruction number and opcode with nice formatting
     fprintf(instructions_out, "%4d: %-12s | ", step, instruction_opcode_names[i->opcode].c_str());
-    
-    // Print arguments and result in a table-like format with consistent widths
     if (i->arg1) {
         fprintf(instructions_out, "arg1: %-8s %-4d | ", vmarg_names[i->arg1->type].c_str(), i->arg1->val);
     } else {
-        fprintf(instructions_out, "%-19s | ", "");  // Changed from 20 to 19
+        fprintf(instructions_out, "%-19s | ", "");
     }
     
     if (i->arg2) {
         fprintf(instructions_out, "arg2: %-8s %-4d | ", vmarg_names[i->arg2->type].c_str(), i->arg2->val);
     } else {
-        fprintf(instructions_out, "%-19s | ", "");  // Changed from 20 to 19
+        fprintf(instructions_out, "%-19s | ", "");
     }
-    
     if (i->result) {
         fprintf(instructions_out, "result: %-8s %-4d | ", vmarg_names[i->result->type].c_str(), i->result->val);
     } else {
-        fprintf(instructions_out, "%-21s | ", "");  // Changed from 20 to 21
+        fprintf(instructions_out, "%-21s | ", "");
     }
-    
-    // Print source line at the end
     fprintf(instructions_out, "line: %d\n", i->srcLine);
 }
 
@@ -821,8 +773,7 @@ void instruction_to_binary(instruction *i){
         arg2_val = arg2->val;
     }
     int srcLine = i->srcLine;
-    
-    // Write the binary data to the file
+
     fwrite(&opcode, sizeof(int), 1, binary);
     fwrite(&result_type, sizeof(int), 1, binary);
     fwrite(&result_val, sizeof(int), 1, binary);
@@ -864,7 +815,7 @@ avm_table* avm_tablenew(void){
 }
 
 void avm_tablebucketsdestroy(avm_table_bucket** p) {
-    for(unsigned i = 0; i < AVM_TABLE_HASHSIZE; ++i) {  // Remove the ++p
+    for(unsigned i = 0; i < AVM_TABLE_HASHSIZE; ++i) {
         for(avm_table_bucket* b = p[i]; b;) {
             avm_table_bucket* del = b;
             b = b->next;
@@ -918,7 +869,10 @@ void avm_warning (char *msg) {
 
 
 userfunc* avm_getfuncinfo(unsigned address) {
-
+    userfunc* func = new userfunc;
+    func->address = address;
+    func->id = userFuncs[address]->c_str();
+    return func;
 }
 
 avm_memcell* avm_translate_operand(vmarg* arg, avm_memcell* reg) {
@@ -1014,12 +968,18 @@ void libfunc_print(void) {
     unsigned n = avm_totalactuals();
     for (unsigned i = 0; i < n; ++i) {
         avm_memcell* arg = avm_getactual(i);
-        char* s = avm_tostring(arg);
-        cout << s;
+        if (arg->type == table_m) {
+            char* s = avm_tostring(arg);
+            cout << s;
+            free(s);
+        } else {
+            char* s = avm_tostring(arg);
+            cout << s;
+            free(s);
+        }
         if (i < n-1) cout << " ";
-        free(s);
     }
-    cout << endl;  // Add newline at the end
+    cout << endl;
 }
 
 void libfunc_input(void) {
@@ -1031,6 +991,25 @@ void libfunc_input(void) {
             buffer[len - 1] = '\0';
         }
         
+        // Handle empty input
+        if (len <= 1) {
+            retval.type = string_m;
+            retval.data.strVal = strdup("");
+            return;
+        }
+        
+        // Try to parse as number first
+        char* endptr;
+        double num = strtod(buffer, &endptr);
+        
+        if (*endptr == '\0') {
+            // Successfully parsed as number
+            retval.type = number_m;
+            retval.data.numVal = num;
+            return;
+        }
+        
+        // If not a number, check for other types
         if (strcmp(buffer, "true") == 0) {
             retval.type = bool_m;
             retval.data.boolVal = true;
@@ -1044,19 +1023,13 @@ void libfunc_input(void) {
             retval.type = string_m;
             retval.data.strVal = strdup(buffer + 1); 
         } else {
-            char* endptr;
-            double num = strtod(buffer, &endptr);
-            
-            if (*endptr == '\0') {
-                retval.type = number_m;
-                retval.data.numVal = num;
-            } else {
-                retval.type = string_m;
-                retval.data.strVal = strdup(buffer);
-            }
+            // Default to string
+            retval.type = string_m;
+            retval.data.strVal = strdup(buffer);
         }
     } else {
-        retval.type = nil_m;
+        retval.type = string_m;
+        retval.data.strVal = strdup("");
     }
 }
 
@@ -1136,11 +1109,9 @@ void execute_assign(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     avm_memcell* rv = avm_translate_operand(instr->arg1, &ax);
     
-    // Better assertion check
     assert(lv);
     assert(rv);
-    
-    // Check if lv is within valid stack bounds or is retval
+
     bool validLv = (lv >= &stack[0] && lv <= &stack[AVM_STACKSIZE-1]) || (lv == &retval);
     if (!validLv) {
         avm_error("Invalid left-value memory address in assignment");
@@ -1185,12 +1156,6 @@ void execute_pusharg (instruction* instr) {
     avm_dec_top(); 
 }
 
-// library_func_t avm_getlibraryfunc(char* id){
-// /*
-// to be done 
-// */
-// }
-
 void avm_calllibfunc(char* id) {
     library_func_t f = avm_getlibraryfunc(id);
     if (!f) {
@@ -1207,14 +1172,13 @@ void avm_calllibfunc(char* id) {
         execute_funcexit((instruction*)0);
     }
 }
-//ayto exei ki alla den einai mono ayta.
+
 void execute_call(instruction* instr) {
     avm_memcell* func = avm_translate_operand(instr->result, &ax);
     assert(func);
 
     switch (func->type) {
-        case userfunc_m: { 
-            // Save current environment before calling user function
+        case userfunc_m: {
             avm_callsaveenvironment();
             pc = func->data.funcVal;
             assert(pc < AVM_ENDING_PC);
@@ -1222,13 +1186,11 @@ void execute_call(instruction* instr) {
             break;
         }
         case string_m: {
-            // Save current environment before calling library function
             avm_callsaveenvironment();
             avm_calllibfunc(func->data.strVal);
             break;
         }
         case libfunc_m: {
-            // Save current environment before calling library function
             avm_callsaveenvironment();
             avm_calllibfunc(func->data.libFuncVal);
             break;
@@ -1239,49 +1201,107 @@ void execute_call(instruction* instr) {
         }
     }
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 char* number_tostring(avm_memcell* m) {
     char* buffer = new char[64];
     snprintf(buffer, 64, "%.6g", m->data.numVal);
     return buffer;
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 char* string_tostring(avm_memcell* m) {
     return strdup(m->data.strVal);
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 char* bool_tostring(avm_memcell* m) {
     return strdup(m->data.boolVal ? "true" : "false");
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 char* table_tostring(avm_memcell* m) {
-    return strdup("[table]");
+    if (!m || m->type != table_m || !m->data.tableVal) {
+        return strdup("[table]");
+    }
+    
+    // If this is a table element (accessed via index), just return the value
+    if (m->data.tableVal->total == 1) {
+        // Find the first element
+        for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
+            avm_table_bucket* bucket = m->data.tableVal->numIndexed[i];
+            if (bucket) {
+                char* value_str = avm_tostring(&bucket->value);
+                return value_str;
+            }
+        }
+        for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
+            avm_table_bucket* bucket = m->data.tableVal->strIndexed[i];
+            if (bucket) {
+                char* value_str = avm_tostring(&bucket->value);
+                return value_str;
+            }
+        }
+    }
+    
+    // For full table display
+    string result = "[";
+    bool first = true;
+    
+    // Iterate through number-indexed elements
+    for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
+        avm_table_bucket* bucket = m->data.tableVal->numIndexed[i];
+        while (bucket) {
+            if (!first) result += ", ";
+            first = false;
+            
+            char* value_str = avm_tostring(&bucket->value);
+            result += value_str;
+            free(value_str);
+            
+            bucket = bucket->next;
+        }
+    }
+    
+    // Iterate through string-indexed elements
+    for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
+        avm_table_bucket* bucket = m->data.tableVal->strIndexed[i];
+        while (bucket) {
+            if (!first) result += ", ";
+            first = false;
+            
+            char* value_str = avm_tostring(&bucket->value);
+            result += value_str;
+            free(value_str);
+            
+            bucket = bucket->next;
+        }
+    }
+    
+    result += "]";
+    return strdup(result.c_str());
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 char* userfunc_tostring(avm_memcell* m) {
     char* buffer = new char[64];
     snprintf(buffer, 64, "[userfunc:%u]", m->data.funcVal);
     return buffer;
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 char* libfunc_tostring(avm_memcell* m) {
     return strdup(m->data.libFuncVal);
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 char* nil_tostring(avm_memcell* m) {
     return strdup("nil");
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 char* undef_tostring(avm_memcell* m) {
     return strdup("undefined");
 }
 
 
-//copilot apla to ekana copy paste gia na kanei compile
 void execute_add(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
     avm_memcell* rv2 = avm_translate_operand(instr->arg2, &bx);
+
 
     assert(lv && rv1 && rv2);
     assert(rv1->type == number_m && rv2->type == number_m);
@@ -1289,7 +1309,7 @@ void execute_add(instruction* instr) {
     lv->type = number_m;
     lv->data.numVal = rv1->data.numVal + rv2->data.numVal;
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 void execute_sub(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
@@ -1301,7 +1321,7 @@ void execute_sub(instruction* instr) {
     lv->type = number_m;
     lv->data.numVal = rv1->data.numVal - rv2->data.numVal;
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 void execute_mul(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
@@ -1313,7 +1333,7 @@ void execute_mul(instruction* instr) {
     lv->type = number_m;
     lv->data.numVal = rv1->data.numVal * rv2->data.numVal;
 }
-//copilot apla to ekana copy paste gia na kanei compile
+
 void execute_div(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
@@ -1331,7 +1351,6 @@ void execute_div(instruction* instr) {
     lv->data.numVal = rv1->data.numVal / rv2->data.numVal;
 }
 
-//copilot apla to ekana copy paste gia na kanei compile
 void execute_mod(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     avm_memcell* rv1 = avm_translate_operand(instr->arg1, &ax);
@@ -1395,266 +1414,29 @@ void execute_not(instruction* instr) {
     lv->data.boolVal = !rv->data.boolVal;
 }
 
-void execute_jlt(instruction* instr) {
-    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
-    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
-    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
-    
-    assert(lv && rv1 && rv2);
-    
-    // Convert operands to numbers if they aren't already
-    if (rv1->type != number_m) {
-        avm_memcellclear(&bx);
-        bx.type = number_m;
-        bx.data.numVal = avm_tobool(rv1);
-        rv1 = &bx;
-    }
-    if (rv2->type != number_m) {
-        avm_memcellclear(&cx);
-        cx.type = number_m;
-        cx.data.numVal = avm_tobool(rv2);
-        rv2 = &cx;
-    }
-    
-    // If lv is a label, this is a jump instruction
-    if (lv->type == number_m && lv->data.numVal >= 0) {
-        if (rv1->data.numVal < rv2->data.numVal) {
-            pc = lv->data.numVal;
-        } else {
-            pc++;  // Skip the jump if condition is false
-        }
-    } else {
-        // This is a boolean assignment
-        lv->type = bool_m;
-        lv->data.boolVal = (rv1->data.numVal < rv2->data.numVal);
-        pc++;
-    }
-}
+void execute_jlt(instruction* instr) {}
 
-void execute_jgt(instruction* instr) {
-    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
-    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
-    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
-    
-    assert(lv && rv1 && rv2);
-    
-    // Convert operands to numbers if they aren't already
-    if (rv1->type != number_m) {
-        avm_memcellclear(&bx);
-        bx.type = number_m;
-        bx.data.numVal = avm_tobool(rv1);
-        rv1 = &bx;
-    }
-    if (rv2->type != number_m) {
-        avm_memcellclear(&cx);
-        cx.type = number_m;
-        cx.data.numVal = avm_tobool(rv2);
-        rv2 = &cx;
-    }
-    
-    // If lv is a label, this is a jump instruction
-    if (lv->type == number_m && lv->data.numVal >= 0) {
-        if (rv1->data.numVal > rv2->data.numVal) {
-            pc = lv->data.numVal;
-        } else {
-            pc++;  // Skip the jump if condition is false
-        }
-    } else {
-        // This is a boolean assignment
-        lv->type = bool_m;
-        lv->data.boolVal = (rv1->data.numVal > rv2->data.numVal);
-        pc++;
-    }
-}
+void execute_jgt(instruction* instr) {}
 
-void execute_jle(instruction* instr) {
-    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
-    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
-    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
-    
-    assert(lv && rv1 && rv2);
-    
-    // Convert operands to numbers if they aren't already
-    if (rv1->type != number_m) {
-        avm_memcellclear(&bx);
-        bx.type = number_m;
-        bx.data.numVal = avm_tobool(rv1);
-        rv1 = &bx;
-    }
-    if (rv2->type != number_m) {
-        avm_memcellclear(&cx);
-        cx.type = number_m;
-        cx.data.numVal = avm_tobool(rv2);
-        rv2 = &cx;
-    }
-    
-    // If lv is a label, this is a jump instruction
-    if (lv->type == number_m && lv->data.numVal >= 0) {
-        if (rv1->data.numVal <= rv2->data.numVal) {
-            pc = lv->data.numVal;
-        } else {
-            pc++;  // Skip the jump if condition is false
-        }
-    } else {
-        // This is a boolean assignment
-        lv->type = bool_m;
-        lv->data.boolVal = (rv1->data.numVal <= rv2->data.numVal);
-        pc++;
-    }
-}
+void execute_jle(instruction* instr) {}
 
-void execute_jge(instruction* instr) {
-    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
-    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
-    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
-    
-    assert(lv && rv1 && rv2);
-    
-    // Convert operands to numbers if they aren't already
-    if (rv1->type != number_m) {
-        avm_memcellclear(&bx);
-        bx.type = number_m;
-        bx.data.numVal = avm_tobool(rv1);
-        rv1 = &bx;
-    }
-    if (rv2->type != number_m) {
-        avm_memcellclear(&cx);
-        cx.type = number_m;
-        cx.data.numVal = avm_tobool(rv2);
-        rv2 = &cx;
-    }
-    
-    // If lv is a label, this is a jump instruction
-    if (lv->type == number_m && lv->data.numVal >= 0) {
-        if (rv1->data.numVal >= rv2->data.numVal) {
-            pc = lv->data.numVal;
-        } else {
-            pc++;  // Skip the jump if condition is false
-        }
-    } else {
-        // This is a boolean assignment
-        lv->type = bool_m;
-        lv->data.boolVal = (rv1->data.numVal >= rv2->data.numVal);
-        pc++;
-    }
-}
+void execute_jge(instruction* instr) {}
 
-void execute_jeq(instruction* instr) {
-    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
-    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
-    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
-    
-    assert(lv && rv1 && rv2);
-    
-    // If lv is a label, this is a jump instruction
-    if (lv->type == number_m && lv->data.numVal >= 0) {
-        if (rv1->type == rv2->type) {
-            if (rv1->type == number_m) {
-                if (rv1->data.numVal == rv2->data.numVal) {
-                    pc = lv->data.numVal;
-                    return;
-                }
-            }
-            else if (rv1->type == string_m) {
-                if (strcmp(rv1->data.strVal, rv2->data.strVal) == 0) {
-                    pc = lv->data.numVal;
-                    return;
-                }
-            }
-            else if (rv1->type == bool_m) {
-                if (rv1->data.boolVal == rv2->data.boolVal) {
-                    pc = lv->data.numVal;
-                    return;
-                }
-            }
-        }
-        pc++;  // Skip the jump if condition is false
-    } else {
-        // This is a boolean assignment
-        lv->type = bool_m;
-        if (rv1->type == rv2->type) {
-            if (rv1->type == number_m) {
-                lv->data.boolVal = (rv1->data.numVal == rv2->data.numVal);
-            }
-            else if (rv1->type == string_m) {
-                lv->data.boolVal = (strcmp(rv1->data.strVal, rv2->data.strVal) == 0);
-            }
-            else if (rv1->type == bool_m) {
-                lv->data.boolVal = (rv1->data.boolVal == rv2->data.boolVal);
-            }
-        } else {
-            lv->data.boolVal = false;
-        }
-        pc++;
-    }
-}
+void execute_jeq(instruction* instr) {}
 
-void execute_jne(instruction* instr) {
-    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
-    avm_memcell* rv1 = avm_translate_operand(instr->arg1, &bx);
-    avm_memcell* rv2 = avm_translate_operand(instr->arg2, &cx);
-    
-    assert(lv && rv1 && rv2);
-    
-    // If lv is a label, this is a jump instruction
-    if (lv->type == number_m && lv->data.numVal >= 0) {
-        if (rv1->type != rv2->type) {
-            pc = lv->data.numVal;
-            return;
-        }
-        
-        if (rv1->type == number_m) {
-            if (rv1->data.numVal != rv2->data.numVal) {
-                pc = lv->data.numVal;
-                return;
-            }
-        }
-        else if (rv1->type == string_m) {
-            if (strcmp(rv1->data.strVal, rv2->data.strVal) != 0) {
-                pc = lv->data.numVal;
-                return;
-            }
-        }
-        else if (rv1->type == bool_m) {
-            if (rv1->data.boolVal != rv2->data.boolVal) {
-                pc = lv->data.numVal;
-                return;
-            }
-        }
-        pc++;  // Skip the jump if condition is false
-    } else {
-        // This is a boolean assignment
-        lv->type = bool_m;
-        if (rv1->type != rv2->type) {
-            lv->data.boolVal = true;
-        } else {
-            if (rv1->type == number_m) {
-                lv->data.boolVal = (rv1->data.numVal != rv2->data.numVal);
-            }
-            else if (rv1->type == string_m) {
-                lv->data.boolVal = (strcmp(rv1->data.strVal, rv2->data.strVal) != 0);
-            }
-            else if (rv1->type == bool_m) {
-                lv->data.boolVal = (rv1->data.boolVal != rv2->data.boolVal);
-            }
-        }
-        pc++;
-    }
-}
-void execute_ret(instruction* instr) {
-    unsigned oldTop = top;
-    top = avm_get_envvalue(topsp + AVM_SAVEDTOP_OFFSET);
-    pc = avm_get_envvalue(topsp + AVM_SAVEDPC_OFFSET);
-    topsp = avm_get_envvalue(topsp + AVM_SAVEDTOPSP_OFFSET);
-    
-    while (oldTop++ < top) {
-        avm_memcellclear(&stack[oldTop]);
-    }
-}
+void execute_jne(instruction* instr) {}
+
+void execute_ret(instruction* instr) {}
 
 void execute_getretval(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     assert(lv);
+    bool validLv = (lv >= &stack[0] && lv <= &stack[AVM_STACKSIZE-1]) || (lv == &retval);
+    if (!validLv) {
+        avm_error("Invalid left-value memory address in getretval");
+        executionFinished = 1;
+        return;
+    }
     avm_assign(lv, &retval);
 }
 
@@ -1662,67 +1444,67 @@ void execute_tablecreate(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     assert(lv);
     
+    bool validLv = (lv >= &stack[0] && lv <= &stack[AVM_STACKSIZE-1]) || (lv == &retval);
+    if (!validLv) {
+        avm_error("Invalid left-value memory address in tablecreate");
+        executionFinished = 1;
+        return;
+    }
+    
     lv->type = table_m;
     lv->data.tableVal = avm_tablenew();
-    lv->data.tableVal->total = 0;  // Initialize total to 0
 }
 
 void execute_tablegetelem(instruction* instr) {
+    avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     avm_memcell* table = avm_translate_operand(instr->arg1, &ax);
     avm_memcell* key = avm_translate_operand(instr->arg2, &bx);
-    avm_memcell* target = avm_translate_operand(instr->result, nullptr);
     
-    assert(table && key && target);
-    assert(table->type == table_m);
+    assert(lv && table && key);
     
-    // Get the value from the table
+    bool validLv = (lv >= &stack[0] && lv <= &stack[AVM_STACKSIZE-1]) || (lv == &retval);
+    if (!validLv) {
+        avm_error("Invalid left-value memory address in tablegetelem");
+        executionFinished = 1;
+        return;
+    }
+    
+    if (table->type != table_m) {
+        avm_error("Invalid table type in tablegetelem");
+        executionFinished = 1;
+        return;
+    }
+    
     avm_memcell* value = avm_tablegetelem(table->data.tableVal, key);
-    if (value) {
-        avm_assign(target, value);
+    if (!value) {
+        lv->type = nil_m;
     } else {
-        // Initialize target as nil if key doesn't exist
-        target->type = nil_m;
+        avm_assign(lv, value);
     }
 }
 
 void execute_tablesetelem(instruction* instr) {
-    avm_memcell* table = avm_translate_operand(instr->result, &ax);
-    avm_memcell* key = avm_translate_operand(instr->arg1, &bx);
-    avm_memcell* value = avm_translate_operand(instr->arg2, &cx);
+    avm_memcell* table = avm_translate_operand(instr->result, nullptr);
+    avm_memcell* key = avm_translate_operand(instr->arg1, &ax);
+    avm_memcell* value = avm_translate_operand(instr->arg2, &bx);
     
     assert(table && key && value);
-    assert(table->type == table_m);
     
-    // Set the value in the table
+    if (table->type != table_m) {
+        avm_error("Invalid table type in tablesetelem");
+        executionFinished = 1;
+        return;
+    }
+    
     avm_tablesetelem(table->data.tableVal, key, value);
 }
 
-void execute_jump(instruction* instr) {
-    avm_memcell* label = avm_translate_operand(instr->result, &ax);
-    assert(label && label->type == number_m);
-    pc = label->data.numVal;
-}
+void execute_jump(instruction* instr) {}
 
 void execute_nop(instruction* instr) {
-    // Do nothing
 }
 
-
-void avm_initstack(void) {
-    // Initialize the stack
-    for (unsigned i = 0; i < AVM_STACKSIZE; i++) {
-        AVM_WIPEOUT(stack[i]);
-        stack[i].type = undef_m;
-    }
-    
-    // Initialize topsp and top correctly
-    topsp = AVM_STACKSIZE - 1;
-    top = AVM_STACKSIZE - 1;
-    
-    // Initialize global variables properly
-    total_globals = globalOffset;  // Set this to the number of globals you have
-    
-    // Register library functions
+void initfuncstack(){
     avm_registerlibfunc("print", libfunc_print);
     avm_registerlibfunc("typeof", libfunc_typeof);
     avm_registerlibfunc("totalarguments", libfunc_totalarguments);
@@ -1732,10 +1514,18 @@ void avm_initstack(void) {
     avm_registerlibfunc("cos", libfunc_cos);
     avm_registerlibfunc("sin", libfunc_sin);
 }
+void avm_initstack(void) {
 
-// void libfunc_print(void){
-//     return;
-// }
+    for (unsigned i = 0; i < AVM_STACKSIZE; i++) {
+        AVM_WIPEOUT(stack[i]);
+        stack[i].type = undef_m;
+    }
+    topsp = AVM_STACKSIZE - 1;
+    top = AVM_STACKSIZE - 1;
+    total_globals = globalOffset;
+    initfuncstack();
+}
+
 void libfunc_typeof(void){
     unsigned n = avm_totalactuals();
     if (n != 1) {
@@ -1792,8 +1582,6 @@ void libfunc_totalarguments(void){
     }
     retval.type = number_m;
     retval.data.numVal = avm_get_envvalue(p_topsp + AVM_NUMACTUALS_OFFSET);
-    cout << "Total arguments: " << retval.data.numVal << endl;
-    
 }
 
 void libfunc_argument(void) {
@@ -1918,106 +1706,124 @@ void add_incomple_jump(unsigned instrNo, unsigned iaddress) {
     ij_head = new_jump;
     ++ij_total;
 }
+unsigned returnAVM_TABLE(double num){
+    double tmp;
+    tmp = (unsigned)num % AVM_TABLE_HASHSIZE;
+    return tmp;
+}
 
-// Helper function to get an element from a table
+unsigned returnKeyTableInt(double num) {
+    unsigned i = returnAVM_TABLE(num);
+    return i;
+}
+
+unsigned returnKeyTableStr(const char* str) {
+    unsigned hash = 0;
+    while (*str) {
+        hash = *str;
+        str++;
+    }
+    return hash % AVM_TABLE_HASHSIZE;
+}
+
 avm_memcell* avm_tablegetelem(avm_table* table, avm_memcell* key) {
-    assert(table && key);
+    if (!table || !key) return nullptr;
     
-    // Handle numeric keys
     if (key->type == number_m) {
         unsigned index = (unsigned)key->data.numVal;
-        if (index < table->total && table->numIndexed[index]) {
-            return &table->numIndexed[index]->value;
-        }
-    }
-    // Handle string keys
-    else if (key->type == string_m) {
-        unsigned index = hash_string(key->data.strVal) % AVM_TABLE_HASHSIZE;
-        for (avm_table_bucket* b = table->strIndexed[index]; b; b = b->next) {
-            if (strcmp(b->key.data.strVal, key->data.strVal) == 0) {
-                return &b->value;
+        unsigned count = 0;
+        for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
+            avm_table_bucket* bucket = table->numIndexed[i];
+            while (bucket) {
+                if (count == index) {
+                    return &bucket->value;
+                }
+                count++;
+                bucket = bucket->next;
             }
         }
+        
+        for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
+            avm_table_bucket* bucket = table->strIndexed[i];
+            while (bucket) {
+                if (count == index) {
+                    return &bucket->value;
+                }
+                count++;
+                bucket = bucket->next;
+            }
+        }
+        avm_warning("Table index out of bounds");
+        return nullptr;
     }
-    // Handle boolean keys
-    else if (key->type == bool_m) {
-        unsigned index = key->data.boolVal ? 1 : 0;
-        if (index < table->total && table->boolIndexed[index]) {
-            return &table->boolIndexed[index]->value;
+    
+    if (key->type == string_m) {
+        unsigned hash = returnKeyTableStr(key->data.strVal);
+        avm_table_bucket* bucket = table->strIndexed[hash];
+        
+        while (bucket) {
+            if (bucket->key.type == string_m && 
+                strcmp(bucket->key.data.strVal, key->data.strVal) == 0) {
+                return &bucket->value;
+            }
+            bucket = bucket->next;
         }
     }
     
+    avm_warning("Invalid key type in tablegetelem");
     return nullptr;
 }
 
-// Helper function to set an element in a table
 void avm_tablesetelem(avm_table* table, avm_memcell* key, avm_memcell* value) {
-    assert(table && key && value);
+    if (!table || !key || !value) return;
     
-    // Handle numeric keys
-    if (key->type == number_m) {
-        unsigned index = (unsigned)key->data.numVal;
-        if (index >= table->total) {
-            // Resize the table if needed
-            while (table->total <= index) {
-                avm_table_bucket* new_bucket = new avm_table_bucket;
-                new_bucket->key.type = number_m;
-                new_bucket->key.data.numVal = table->total;
-                new_bucket->value.type = nil_m;  // Initialize as nil
-                new_bucket->next = nullptr;
-                table->numIndexed[table->total] = new_bucket;
-                table->total++;
+    unsigned hash;
+    avm_table_bucket* bucket;
+    avm_table_bucket* new_bucket;
+    
+    switch (key->type) {
+        case number_m:
+            hash = returnKeyTableInt(key->data.numVal);
+            bucket = table->numIndexed[hash];
+            while (bucket) {
+                if (bucket->key.type == number_m && 
+                    bucket->key.data.numVal == key->data.numVal) {
+                    avm_assign(&bucket->value, value);
+                    return;
+                }
+                bucket = bucket->next;
             }
-        }
-        avm_assign(&table->numIndexed[index]->value, value);
-    }
-    // Handle string keys
-    else if (key->type == string_m) {
-        unsigned index = hash_string(key->data.strVal) % AVM_TABLE_HASHSIZE;
-        avm_table_bucket* b;
-        
-        // Look for existing key
-        for (b = table->strIndexed[index]; b; b = b->next) {
-            if (strcmp(b->key.data.strVal, key->data.strVal) == 0) {
-                avm_assign(&b->value, value);
-                return;
+            new_bucket = new avm_table_bucket();
+            new_bucket->key = *key;
+            avm_assign(&new_bucket->value, value);
+            new_bucket->next = table->numIndexed[hash];
+            table->numIndexed[hash] = new_bucket;
+            table->total++;
+            break;
+        case string_m:
+            hash = returnKeyTableStr(key->data.strVal);
+            bucket = table->strIndexed[hash];
+            while (bucket) {
+                if (bucket->key.type == string_m && 
+                    strcmp(bucket->key.data.strVal, key->data.strVal) == 0) {
+                    avm_assign(&bucket->value, value);
+                    return;
+                }
+                bucket = bucket->next;
             }
-        }
-        
-        // Create new bucket if key doesn't exist
-        b = new avm_table_bucket;
-        b->key.type = string_m;
-        b->key.data.strVal = strdup(key->data.strVal);
-        b->value.type = nil_m;  // Initialize as nil
-        b->next = table->strIndexed[index];
-        table->strIndexed[index] = b;
-        avm_assign(&b->value, value);
+            new_bucket = new avm_table_bucket();
+            new_bucket->key = *key;
+            avm_assign(&new_bucket->value, value);
+            new_bucket->next = table->strIndexed[hash];
+            table->strIndexed[hash] = new_bucket;
+            table->total++;
+            break;
+            
+        case nil_m:
+            break;
+            
+        default:
+            avm_warning("Invalid key type in tablesetelem");
+            break;
     }
-    // Handle boolean keys
-    else if (key->type == bool_m) {
-        unsigned index = key->data.boolVal ? 1 : 0;
-        if (index >= table->total) {
-            // Resize the table if needed
-            while (table->total <= index) {
-                avm_table_bucket* new_bucket = new avm_table_bucket;
-                new_bucket->key.type = bool_m;
-                new_bucket->key.data.boolVal = (table->total == 1);
-                new_bucket->value.type = nil_m;  // Initialize as nil
-                new_bucket->next = nullptr;
-                table->boolIndexed[table->total] = new_bucket;
-                table->total++;
-            }
-        }
-        avm_assign(&table->boolIndexed[index]->value, value);
-    }
-}
-
-// Helper function to hash strings for table indexing
-unsigned hash_string(const char* str) {
-    unsigned hash = 5381;
-    int c;
-    while ((c = *str++)) {
-        hash = ((hash << 5) + hash) + c;
-    }
-    return hash;
 }

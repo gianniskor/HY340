@@ -18,7 +18,13 @@ extern int magic_num;
 #define AVM_TABLE_HASHSIZE 211
 #define AVM_WIPEOUT(m) memset(&(m),0,sizeof(m))
 
-
+#define AVM_ENDING_PC codeSize
+#define AVM_MAX_INSTRUCTIONS 26
+#define AVM_NUMACTUALS_OFFSET +4
+#define AVM_SAVEDPC_OFFSET +3
+#define AVM_SAVEDTOP_OFFSET +2
+#define AVM_SAVEDTOPSP_OFFSET +1
+#define AVM_STACKENV_SIZE 4
 typedef enum vmopcode{
     assign_v=0,
     add_v=1,          
@@ -169,9 +175,6 @@ extern unsigned ij_total;
 
 void add_incomple_jump(unsigned instrNo,unsigned iaddress);
 
-
-
-
 struct avm_table;
 struct avm_memcell{
     avm_memcell_t type;
@@ -311,14 +314,14 @@ void libfunc_strtonum(void);
 void libfunc_objectcopy(void);
 void libfunc_objectmemberkeys(void);
 void libfunc_input(void);
-
+void avm_assign(avm_memcell* lv, avm_memcell* rv);
 void cleanup_libfuncs();
 
 unsigned char avm_tobool(avm_memcell* m);
-
-// Add after the other function declarations
-avm_memcell* avm_tablegetelem(avm_table* table, avm_memcell* key);
 void avm_tablesetelem(avm_table* table, avm_memcell* key, avm_memcell* value);
-unsigned hash_string(const char* str);
+avm_memcell* avm_tablegetelem(avm_table* table, avm_memcell* key);
+
+
+void freadInstr(FILE* f,int *a1,int *a2,int *a3,int *a4,int *a5,int *a6,int *a7,int *a8);
 
 #endif
