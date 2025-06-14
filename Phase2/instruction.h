@@ -318,6 +318,7 @@ void avm_assign(avm_memcell* lv, avm_memcell* rv);
 void cleanup_libfuncs();
 
 unsigned char avm_tobool(avm_memcell* m);
+void avm_error (char *msg);
 void avm_tablesetelem(avm_table* table, avm_memcell* key, avm_memcell* value);
 avm_memcell* avm_tablegetelem(avm_table* table, avm_memcell* key);
 

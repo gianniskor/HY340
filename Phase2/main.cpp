@@ -57,40 +57,40 @@ void writeInstructionsFromAbc(const std::string& outputFilePath) {
         return;
     }
 
-    fprintf(outputFile, "*********** MAGIC NUMBER ***********\n");
+    fprintf(outputFile, "·..·¯·..·¯ > MAGIC NUMBER < ¯·..·¯·..·\n");
     fprintf(outputFile, "Magic number verified: %ld\n", (long int)magic_num);
 
-    fprintf(outputFile, "*********** NUMCONSTS ***********\n");
+    fprintf(outputFile, "·..·¯·..·¯ > ARITHMETIC CONSTS < ¯·..·¯·..·\n");
     fprintf(outputFile, "numConsts: %lu\n", numConsts.size());
     for (size_t i = 0; i < numConsts.size(); i++) {
         fprintf(outputFile, "%zu: %lf\n", i, numConsts[i]);
     }
 
-    fprintf(outputFile, "*********** STRING CONSTS ***********\n");
+    fprintf(outputFile, "·..·¯·..·¯ > STRING CONSTS < ¯·..·¯·..·\n");
     fprintf(outputFile, "stringConsts: %lu\n", stringConsts.size());
     for (size_t i = 0; i < stringConsts.size(); i++) {
         fprintf(outputFile, "%zu: %s\n", i, stringConsts[i]->c_str());
     }
 
-    fprintf(outputFile, "*********** USER FUNCTIONS ***********\n");
+    fprintf(outputFile, "·..·¯·..·¯ > USER FUNCTIONS < ¯·..·¯·..·\n");
     fprintf(outputFile, "userFuncs: %lu\n", userFuncs.size());
     for (size_t i = 0; i < userFuncs.size(); i++) {
         fprintf(outputFile, "%zu: %s\n", i, userFuncs[i]->c_str());
     }
 
-    fprintf(outputFile, "*********** LIB FUNCTIONS ***********\n");
+    fprintf(outputFile, "·..·¯·..·¯ > LIB FUNCTIONS < ¯·..·¯·..·\n");
     fprintf(outputFile, "libFuncs: %lu\n", libDefFuncs.size());
     for (size_t i = 0; i < libDefFuncs.size(); i++) {
         fprintf(outputFile, "%zu: %s\n", i, libDefFuncs[i]->c_str());
     }
 
-    fprintf(outputFile, "*********** BOOL CONSTS ***********\n");
+    fprintf(outputFile, "·..·¯·..·¯ > BOOL CONSTS < ¯·..·¯·..·\n");
     fprintf(outputFile, "boolConsts: %lu\n", boolConst.size());
     for (size_t i = 0; i < boolConst.size(); i++) {
         fprintf(outputFile, "%zu: %s\n", i, boolConst[i] ? "true" : "false");
     }
 
-    fprintf(outputFile, "*********** CODE ***********\n");
+    fprintf(outputFile, "·..·¯·..·¯ > CODE < ¯·..·¯·..·\n");
     fprintf(outputFile, "Instructions: %lu\n", instructions.size());
     for (size_t i = 0; i < instructions.size(); i++) {
         print_instruction(instructions[i], i);
@@ -114,19 +114,19 @@ int main(int argc, char* argv[]) {
         libDefFuncs.push_back(str);
     }
     yyparse();
-    std::string input_file = argv[1]; 
-    std::string test_name;
+    string input_file = argv[1]; 
+    string test_name;
 
     size_t last_slash_pos = input_file.find_last_of("/\\");
     size_t dot_pos = input_file.find_last_of(".");
 
-    if (last_slash_pos == std::string::npos) {
+    if (last_slash_pos == string::npos) {
         last_slash_pos = 0; 
     } else {
         last_slash_pos++; 
     }
 
-    if (dot_pos == std::string::npos || dot_pos < last_slash_pos) {
+    if (dot_pos == string::npos || dot_pos < last_slash_pos) {
         test_name = input_file.substr(last_slash_pos);
     } else {
         test_name = input_file.substr(last_slash_pos, dot_pos - last_slash_pos);
@@ -141,8 +141,9 @@ int main(int argc, char* argv[]) {
     }
     patch_incomplete_jumps();
     magic_num = 163847504;
-    fprintf(instructions_out, "magicnumber: %ld\n", (long int)163847504); fwrite(&magic_num, sizeof(long int), 1, binary);
-    fprintf(instructions_out, "*********** NUMCONSTS ***********\n");
+    fprintf(instructions_out, "·..·¯·..·¯ > MAGIC NUMBER < ¯·..·¯·..·\n");
+    fprintf(instructions_out, "Magic number: %ld\n", (long int)163847504); fwrite(&magic_num, sizeof(long int), 1, binary);
+    fprintf(instructions_out, "·..·¯·..·¯ > ARITHMETIC CONSTS < ¯·..·¯·..·\n");
     fprintf(instructions_out, "numConsts: %lu\n", numConsts.size());
     int sizee = numConsts.size();
     fwrite(&sizee, sizeof(int), 1, binary);
@@ -150,7 +151,7 @@ int main(int argc, char* argv[]) {
         fprintf(instructions_out,"%d: %lf\n",i,numConsts[i]);
         fwrite(&numConsts[i],sizeof(double),1,binary);
     }
-    fprintf(instructions_out, "*********** STRING CONSTS ***********\n");
+    fprintf(instructions_out, "·..·¯·..·¯ > STRING CONSTS < ¯·..·¯·..·\n");
     fprintf(instructions_out, "stringConsts: %zu\n", stringConsts.size());
     int stringCount = stringConsts.size();
     fwrite(&stringCount, sizeof(int), 1, binary);
@@ -161,7 +162,7 @@ int main(int argc, char* argv[]) {
         fwrite(stringConsts[i]->c_str(), sizeof(char), len, binary);
     }
 
-    fprintf(instructions_out, "*********** USER FUNCTIONS ***********\n");
+    fprintf(instructions_out, "·..·¯·..·¯ > USER FUNCTIONS < ¯·..·¯·..·\n");
     fprintf(instructions_out, "userFuncs: %zu\n", userFuncs.size());
     int userFuncsCount = userFuncs.size();
     fwrite(&userFuncsCount, sizeof(int), 1, binary);
@@ -172,7 +173,7 @@ int main(int argc, char* argv[]) {
         fwrite(userFuncs[i]->c_str(), sizeof(char), len, binary);
     }
 
-    fprintf(instructions_out, "*********** LIB FUNCTIONS ***********\n");
+    fprintf(instructions_out, "·..·¯·..·¯ > LIB FUNCTIONS < ¯·..·¯·..·\n");
     fprintf(instructions_out, "libFuncs: %zu\n", libDefFuncs.size());
     int libFuncsCount = libDefFuncs.size();
     fwrite(&libFuncsCount, sizeof(int), 1, binary);
@@ -182,7 +183,7 @@ int main(int argc, char* argv[]) {
         fwrite(&len, sizeof(int), 1, binary);
         fwrite(libDefFuncs[i]->c_str(), sizeof(char), len, binary);
     }
-    fprintf(instructions_out, "*********** BOOL CONSTS ***********\n");
+    fprintf(instructions_out, "·..·¯·..·¯ > BOOL CONSTS < ¯·..·¯·..·\n");
     fprintf(instructions_out, "boolConsts: %zu\n", boolConst.size());
     int boolCount = boolConst.size();
     fwrite(&boolCount, sizeof(int), 1, binary);
@@ -191,7 +192,7 @@ int main(int argc, char* argv[]) {
         bool tmp_bool = boolConst[i];
         fwrite(&tmp_bool, sizeof(bool), 1, binary);
     }
-    fprintf(instructions_out, "*********** CODE ***********\n");
+    fprintf(instructions_out, "·..·¯·..·¯ > CODE < ¯·..·¯·..·\n");
     fprintf(instructions_out, "Instructions: %zu\n", instructions.size());
     int instructionsCount = instructions.size();
     fwrite(&instructionsCount, sizeof(int), 1, binary);

@@ -289,20 +289,44 @@ void generate_NOP(quad* q){
     emit_instr(i);
 }
 
-
+//ty, de ta exw teleiwsei akoma auta
+//ok
 void generate_UMINUS(quad* q){
-    instruction* i = generate_Proc(mul_v,q);
+    instruction* i = generate_Proc(uminus_v,q);
+    if(!i) {
+        avm_error("Failed to generate instruction in generate_UMINUS");
+        executionFinished = 1;
+        return;
+    }
+    
     if(q->arg1){
         i->arg1 = new vmarg;
+        if(!i->arg1) {
+            avm_error("Failed to allocate memory for arg1 in generate_UMINUS");
+            executionFinished = 1;
+            return;
+        }
         make_operand(q->arg1,i->arg1);
+    } else {
+        avm_error("Missing argument in generate_UMINUS");
+        executionFinished = 1;
+        return;
     }
-    i->arg2 = new vmarg;
-    i->arg2->val = consts_newnumber(-1);
-    i->arg2->type = number_a;
-    if(i->result){
+    
+    if(q->result){
         i->result = new vmarg;
+        if(!i->result) {
+            avm_error("Failed to allocate memory for result in generate_UMINUS");
+            executionFinished = 1;
+            return;
+        }
         make_operand(q->result,i->result);
+    } else {
+        avm_error("Missing result in generate_UMINUS");
+        executionFinished = 1;
+        return;
     }
+    
     emit_instr(i);
 }
 void generate_PARAM(quad *q){
@@ -324,18 +348,38 @@ void generate_CALL(quad *q) {
 }
 
 void generate_GETRETVAL(quad *q){
+    instruction* i = generate_Proc(getretval_v, q);
+    if(q->result) {
+        i->result = new vmarg;
+        make_operand(q->result, i->result);
+    }
+    emit_instr(i);
     return;
 }
 
 void generate_FUNCSTART(quad *q){
+    instruction* i = generate_Proc(enterfunc_v, q);
+    if(q->result) {
+        i->result = new vmarg;
+        make_operand(q->result, i->result);
+    }
+    emit_instr(i);
     return;
 }
 
 void generate_FUNCEND(quad *q){
+    instruction* i = generate_Proc(exitfunc_v, q);
+    emit_instr(i);
     return;
 }
 
 void generate_RETURN(quad *q){
+    instruction* i = generate_Proc(ret_v, q);
+    if(q->arg1) {
+        i->arg1 = new vmarg;
+        make_operand(q->arg1, i->arg1);
+    }
+    emit_instr(i);
     return;
 }
 
@@ -447,7 +491,7 @@ void make_operand(expr* e, vmarg* arg){
         case newtable_e: {
             if (!e->sym) {
                 arg->type = nil_a;
-                arg->val = 0;
+                arg->val = 0; // to allaja apo 0 gia dokimi
                 break;
             }
             
@@ -489,6 +533,7 @@ void make_operand(expr* e, vmarg* arg){
         }
         case nil_e:{
             arg->type = nil_a;
+            // arg->val = NULL; // to prothsesa gia dokimi
             break;
         }
         case programfunc_e:{
@@ -759,16 +804,16 @@ void print_instruction(instruction* i, int step) {
     // Print header for first instruction
     if (step == 0) {
         fprintf(instructions_out, "\n");
-        fprintf(instructions_out, "%-4s | %-12s | %-12s | %-12s | %-12s | %-4s\n", 
+        fprintf(instructions_out, "%-4s | %-15s | %-12s | %-12s | %-12s | %-4s\n", 
                 "NO", "OP-CODE", "RES", "ARG1", "ARG2", "LINE");
-        fprintf(instructions_out, "------------------------------------------------\n");
+        fprintf(instructions_out, "---------------------------------------------------------------------------\n");
     }
     
     // Print instruction number
     fprintf(instructions_out, "%-4d | ", step);
     
     // Print opcode
-    fprintf(instructions_out, "%-12s | ", instruction_opcode_names[i->opcode].c_str());
+    fprintf(instructions_out, "%-15s | ", instruction_opcode_names[i->opcode].c_str());
     
     // Print result
     if (i->result) {
@@ -918,6 +963,7 @@ userfunc* avm_getfuncinfo(unsigned address) {
     userfunc* func = new userfunc;
     func->address = address;
     func->id = userFuncs[address]->c_str();
+    func->localSize = 0;
     return func;
 }
 
@@ -932,29 +978,71 @@ avm_memcell* avm_translate_operand(vmarg* arg, avm_memcell* reg) {
         case retval_a:
             return &retval;
         case number_a:
+            if (!reg) {
+                avm_memcell* temp = new avm_memcell;
+                temp->type = number_m;
+                temp->data.numVal = consts_getnumber(arg->val);
+                return temp;
+            }
             reg->type = number_m;
             reg->data.numVal = consts_getnumber(arg->val);
             return reg;
         case string_a:
+            if (!reg) {
+                avm_memcell* temp = new avm_memcell;
+                temp->type = string_m;
+                temp->data.strVal = consts_getstring(arg->val);
+                return temp;
+            }
             reg->type = string_m;
             reg->data.strVal = consts_getstring(arg->val);
             return reg;
         case bool_a:
+            if (!reg) {
+                avm_memcell* temp = new avm_memcell;
+                temp->type = bool_m;
+                temp->data.boolVal = boolConst[arg->val];
+                return temp;
+            }
             reg->type = bool_m;
             reg->data.boolVal = boolConst[arg->val];
             return reg;
         case nil_a:
+            if (!reg) {
+                avm_memcell* temp = new avm_memcell;
+                temp->type = nil_m;
+                // temp->data.funcVal = NULL; // to prosthesa gia dokimi
+                return temp;
+            }
             reg->type = nil_m;
             return reg;
         case userfunc_a:
+            if (!reg) {
+                avm_memcell* temp = new avm_memcell;
+                temp->type = userfunc_m;
+                temp->data.funcVal = arg->val;
+                return temp;
+            }
             reg->type = userfunc_m;
             reg->data.funcVal = arg->val;
             return reg;
         case libfunc_a: 
+            if (!reg) {
+                avm_memcell* temp = new avm_memcell;
+                temp->type = libfunc_m;
+                temp->data.libFuncVal = libfuncs_getused(arg->val);
+                return temp;
+            }
             reg->type = libfunc_m;
             reg->data.libFuncVal = libfuncs_getused(arg->val);
             return reg;
         case label_a:
+            if (!reg) {
+                avm_memcell* temp = new avm_memcell;
+                temp->type = number_m;
+                temp->data.numVal = arg->val;
+                return temp;
+            }
             reg->type = number_m;
             reg->data.numVal = arg->val;
             return reg;
@@ -1402,15 +1490,24 @@ void execute_mod(instruction* instr) {
         return;
     }
     lv->type = number_m;
-    lv->data.numVal = fmod(rv1->data.numVal, rv2->data.numVal);
+    lv->data.numVal = (int)rv1->data.numVal %(int)rv2->data.numVal;
 }
 
 void execute_uminus(instruction* instr) {
-    avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
-    avm_memcell* rv = avm_translate_operand(instr->arg1, &ax);
+    avm_memcell* lv = avm_translate_operand(instr->result, &ax);
+    avm_memcell* rv = avm_translate_operand(instr->arg1, &bx);
     
-    assert(lv && rv);
-    assert(rv->type == number_m);
+    if (!lv || !rv) {
+        avm_error("Invalid operands in execute_uminus");
+        executionFinished = 1;
+        return;
+    }
+    
+    if (rv->type != number_m) {
+        avm_error("Invalid operand type in execute_uminus");
+        executionFinished = 1;
+        return;
+    }
     
     lv->type = number_m;
     lv->data.numVal = -rv->data.numVal;
@@ -1657,25 +1754,213 @@ void libfunc_argument(void) {
 }
 
 void libfunc_objecttotalmembers(void){
-    return;
+    avm_memcell* arg = avm_getactual(0);
+    if (arg->type != table_m) {
+        avm_error("objecttotalmembers() expects a table as argument!");
+        cout << "objecttotalmembers() expects a table as argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    avm_table* table = arg->data.tableVal;
+    avm_memcellclear(&retval);
+    retval.type = number_m;
+    retval.data.numVal = table->total;
 }
+
 void libfunc_sqrt(void){
-    return;
+    unsigned n = avm_totalactuals();
+    if (n != 1) {
+        avm_error("sqrt() expects exactly one argument!");
+        cout << "sqrt() expects exactly one argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    avm_memcell* arg = avm_getactual(0);
+    if (arg->type != number_m || arg->data.numVal < 0) {
+        avm_error("sqrt() expects a non-negative number as argument!");
+        cout << "sqrt() expects a non-negative number as argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    retval.type = number_m;
+    retval.data.numVal = sqrt(arg->data.numVal);
 }
+
 void libfunc_cos(void){
-    return;
+    unsigned n = avm_totalactuals();
+    if (n != 1) {
+        avm_error("cos() expects exactly one argument!");
+        cout << "cos() expects exactly one argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    avm_memcell* arg = avm_getactual(0);
+    if (arg->type != number_m) {
+        avm_error("cos() expects a number as argument!");
+        cout << "cos() expects a number as argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    if (arg->data.numVal < 0) {
+        avm_error("cos() expects a positive number as argument!");
+        cout << "cos() expects a positive number as argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    
+    retval.type = number_m;
+    double res = cos(arg->data.numVal* (M_PI / 180.0));
+    if(res < 1e-2){
+        retval.data.numVal = 0;
+        return;
+    }
+    retval.data.numVal = cos(arg->data.numVal* (M_PI / 180.0)); 
 }
+
 void libfunc_sin(void){
-    return;
+    unsigned n = avm_totalactuals();
+    if (n != 1) {
+        avm_error("sin() expects exactly one argument!");
+        cout << "sin() expects exactly one argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    avm_memcell* arg = avm_getactual(0);
+    if (arg->type != number_m) {
+        avm_error("sin() expects a number as argument!");
+        cout << "sin() expects a number as argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    if (arg->data.numVal < 0) {
+        avm_error("sin() expects a positive number as argument!");
+        cout << "sin() expects a positive number as argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    retval.type = number_m;
+    double res = sin(arg->data.numVal* (M_PI / 180.0));
+    if(res < 1e-2){
+        retval.data.numVal = 0;
+        return;
+    }
+    retval.type = number_m;
+    retval.data.numVal = sin(arg->data.numVal * (M_PI / 180.0));
 }
+
 void libfunc_strtonum(void){
-    return;
+    unsigned n = avm_totalactuals();
+    if (n != 1) {
+        avm_error("strtonum() expects exactly one argument!");
+        cout << "strtonum() expects exactly one argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    avm_memcell* arg = avm_getactual(0);
+    if (arg->type != string_m) {
+        avm_error("strtonum() expects a string as argument!");
+        cout << "strtonum() expects a string as argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    char* endptr;
+    if (*endptr != '\0') {
+        avm_error("Invalid string format for strtonum()");
+        cout << "Invalid string format for strtonum()" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    double num = strtod(arg->data.strVal, &endptr);
+    retval.type = number_m;
+    retval.data.numVal = num;
 }
+//de peiraja ta tables, ekei pou eblepa nil_a ebala na einai to data = NULL, alla kai pali de leitougei, de to d
+//mh peirazeis ta tables
 void libfunc_objectcopy(void){
-    return;
+    unsigned n = avm_totalactuals();
+    if (n != 1) {
+        avm_error("objectcopy() expects exactly one argument!");
+        cout << "objectcopy() expects exactly one argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    avm_memcell* arg = avm_getactual(0);
+    if (arg->type != table_m) {
+        avm_error("objectcopy() expects a table as argument!");
+        cout << "objectcopy() expects a table as argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    avm_memcellclear(&retval);
+    retval.type = table_m;
+    retval.data.tableVal = avm_tablenew();
+    
+    for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
+        avm_table_bucket* bucket = arg->data.tableVal->numIndexed[i];
+        while (bucket) {
+            avm_table_bucket* new_bucket = returnTableBucket(retval.data.tableVal, &bucket->key, &bucket->value, i);
+            bucket = bucket->next;
+        }
+    }
+    for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
+        avm_table_bucket* bucket = arg->data.tableVal->strIndexed[i];
+        while (bucket) {
+            avm_table_bucket* new_bucket = returnTableBucket(retval.data.tableVal, &bucket->key, &bucket->value, i);
+            bucket = bucket->next;
+        }
+    }
 }
+
 void libfunc_objectmemberkeys(void){
-    return;
+    unsigned n = avm_totalactuals();
+    if (n != 1) {
+        avm_error("objectmemberkeys() expects exactly one argument!");
+        cout << "objectmemberkeys() expects exactly one argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    avm_memcell* arg = avm_getactual(0);
+    if (arg->type != table_m) {
+        avm_error("objectmemberkeys() expects a table as argument!");
+        cout << "objectmemberkeys() expects a table as argument!" << endl;
+        executionFinished = 1;
+        retval.type = nil_m;
+        return;
+    }
+    
+    avm_memcellclear(&retval);
+    retval.type = table_m;
+    retval.data.tableVal = avm_tablenew();
+    
+    for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
+        avm_table_bucket* bucket = arg->data.tableVal->numIndexed[i];
+        while (bucket) {
+            avm_table_bucket* new_bucket = returnTableBucket(retval.data.tableVal, &bucket->key, &bucket->value, i);
+            bucket = bucket->next;
+        }
+    }
+    for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
+        avm_table_bucket* bucket = arg->data.tableVal->strIndexed[i];
+        while (bucket) {
+            avm_table_bucket* new_bucket = returnTableBucket(retval.data.tableVal, &bucket->key, &bucket->value, i);
+            bucket = bucket->next;
+        }
+    }
 }
 
 library_func_t avm_getlibraryfunc(char* id) {
