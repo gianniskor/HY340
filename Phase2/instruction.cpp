@@ -441,17 +441,17 @@ string instruction_opcode_names[] = {
 };
 
 string vmarg_names[] = {
-    "label_a",
-    "global_a",
-    "formal_a",
-    "local_a",
-    "number_a",
-    "string_a",
-    "bool_a",
-    "nil_a",
-    "userfunc_a",
-    "libfunc_a",
-    "retval_a"
+    "LABEL",
+    "GLOBAL",
+    "FORMAL",
+    "LOCAL",
+    "NUM",
+    "STR",
+    "BOOL",
+    "NIL",
+    "USES-FUNC",
+    "LIB-FUNC",
+    "RET-VAL",
 };
 
 unsigned consts_newstring(string* s){
@@ -491,7 +491,7 @@ void make_operand(expr* e, vmarg* arg){
         case newtable_e: {
             if (!e->sym) {
                 arg->type = nil_a;
-                arg->val = 0; // to allaja apo 0 gia dokimi
+                arg->val = 0;
                 break;
             }
             
@@ -581,7 +581,6 @@ void readNumbers(FILE* f) {
         double num;
         fread(&num, sizeof(double), 1, f);
         numConsts.push_back(num);
-        cout << i << ": " << num << endl;
     }
 }
 
@@ -599,8 +598,6 @@ void readStrings(FILE* f) {
         
         string* str = new string(buffer);
         stringConsts.push_back(str);
-        cout << i << ": " << *str << endl;
-        
         delete[] buffer;
     }
 }
@@ -619,7 +616,6 @@ void readUserFunctions(FILE* f) {
         
         string* str = new string(buffer);
         userFuncs.push_back(str);
-        cout << i << ": " << *str << endl;
         
         delete[] buffer;
     }
@@ -639,7 +635,6 @@ void readLibFunctions(FILE* f) {
         
         string* str = new string(buffer);
         libDefFuncs.push_back(str);
-        cout << i << ": " << *str << endl;
         
         delete[] buffer;
     }
@@ -800,43 +795,32 @@ void print_instruction(instruction* i, int step) {
     if (i == nullptr) {
         assert(0);
     }
-    
-    // Print header for first instruction
     if (step == 0) {
         fprintf(instructions_out, "\n");
         fprintf(instructions_out, "%-4s | %-15s | %-12s | %-12s | %-12s | %-4s\n", 
                 "NO", "OP-CODE", "RES", "ARG1", "ARG2", "LINE");
         fprintf(instructions_out, "---------------------------------------------------------------------------\n");
     }
-    
-    // Print instruction number
     fprintf(instructions_out, "%-4d | ", step);
     
-    // Print opcode
     fprintf(instructions_out, "%-15s | ", instruction_opcode_names[i->opcode].c_str());
     
-    // Print result
     if (i->result) {
         fprintf(instructions_out, "%-12s | ", (string(vmarg_names[i->result->type]) + " " + to_string(i->result->val)).c_str());
     } else {
         fprintf(instructions_out, "%-12s | ", "");
     }
-    
-    // Print arg1
     if (i->arg1) {
         fprintf(instructions_out, "%-12s | ", (string(vmarg_names[i->arg1->type]) + " " + to_string(i->arg1->val)).c_str());
     } else {
         fprintf(instructions_out, "%-12s | ", "");
     }
     
-    // Print arg2
     if (i->arg2) {
         fprintf(instructions_out, "%-12s | ", (string(vmarg_names[i->arg2->type]) + " " + to_string(i->arg2->val)).c_str());
     } else {
         fprintf(instructions_out, "%-12s | ", "");
     }
-    
-    // Print line number
     fprintf(instructions_out, "%-4d\n", i->srcLine);
 }
 
@@ -1111,9 +1095,7 @@ void libfunc_print(void) {
             cout << s;
             free(s);
         }
-        if (i < n-1) cout << " ";
     }
-    cout << endl;
 }
 
 void libfunc_input(void) {
@@ -1124,26 +1106,19 @@ void libfunc_input(void) {
         if (len > 0 && buffer[len - 1] == '\n') {
             buffer[len - 1] = '\0';
         }
-        
-        // Handle empty input
         if (len <= 1) {
             retval.type = string_m;
             retval.data.strVal = strdup("");
             return;
         }
-        
-        // Try to parse as number first
         char* endptr;
         double num = strtod(buffer, &endptr);
         
         if (*endptr == '\0') {
-            // Successfully parsed as number
             retval.type = number_m;
             retval.data.numVal = num;
             return;
         }
-        
-        // If not a number, check for other types
         if (strcmp(buffer, "true") == 0) {
             retval.type = bool_m;
             retval.data.boolVal = true;
@@ -1157,7 +1132,6 @@ void libfunc_input(void) {
             retval.type = string_m;
             retval.data.strVal = strdup(buffer + 1); 
         } else {
-            // Default to string
             retval.type = string_m;
             retval.data.strVal = strdup(buffer);
         }
@@ -1242,7 +1216,6 @@ void avm_assign(avm_memcell* lv, avm_memcell* rv) {
 void execute_assign(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(instr->result, nullptr);
     avm_memcell* rv = avm_translate_operand(instr->arg1, &ax);
-    
     assert(lv);
     assert(rv);
 
@@ -1252,7 +1225,7 @@ void execute_assign(instruction* instr) {
         executionFinished = 1;
         return;
     }
-    
+   
     avm_assign(lv, rv);
 }
 
@@ -1672,38 +1645,38 @@ void libfunc_typeof(void){
     avm_memcellclear(&retval);
     switch (arg->type) {
         case number_m:
-            cout << "number" << endl;
-            retval.data.numVal = arg->data.numVal;
+            retval.type = string_m;
+            retval.data.strVal = strdup("number");
             break;
         case string_m:
-            cout << "string" << endl;
-            retval.data.strVal = strdup(arg->data.strVal);
+            retval.type = string_m;
+            retval.data.strVal = strdup("string");
             break;
         case bool_m:
-            cout << "bool" << endl;
-            retval.data.boolVal = arg->data.boolVal;
+            retval.type = string_m;
+            retval.data.strVal = strdup("boolean");
             break;
         case table_m:
-            cout << "table" << endl;
-            retval.data.tableVal = arg->data.tableVal;
+            retval.type = string_m;
+            retval.data.strVal = strdup("table");
             break;
         case userfunc_m:
-            cout << "userfunc" << endl;
-            retval.data.funcVal = arg->data.funcVal;
+            retval.type = string_m;
+            retval.data.strVal = strdup("userfunction");
             break;
         case libfunc_m:
-            cout << "libfunc" << endl;
-            retval.data.libFuncVal = arg->data.libFuncVal;
+            retval.type = string_m;
+            retval.data.strVal = strdup("libraryfunction");
             break;
         case nil_m:
-            cout << "nil" << endl;
+            retval.type = string_m;
+            retval.data.strVal = strdup("nil");
             break;
         default:
             avm_error("Invalid type in typeof()");
             executionFinished = 1;
             return;
     }
-    retval.type = arg->type;
 }
 
 void libfunc_totalarguments(void){
@@ -1875,19 +1848,19 @@ void libfunc_strtonum(void){
         return;
     }
     char* endptr;
+    double num = strtod(arg->data.strVal, &endptr);
     if (*endptr != '\0') {
+        //retval.type = nil_m;
         avm_error("Invalid string format for strtonum()");
         cout << "Invalid string format for strtonum()" << endl;
-        executionFinished = 1;
         retval.type = nil_m;
         return;
     }
-    double num = strtod(arg->data.strVal, &endptr);
     retval.type = number_m;
     retval.data.numVal = num;
 }
-//de peiraja ta tables, ekei pou eblepa nil_a ebala na einai to data = NULL, alla kai pali de leitougei, de to d
-//mh peirazeis ta tables
+
+
 void libfunc_objectcopy(void){
     unsigned n = avm_totalactuals();
     if (n != 1) {
@@ -1905,6 +1878,7 @@ void libfunc_objectcopy(void){
         retval.type = nil_m;
         return;
     }
+
     avm_memcellclear(&retval);
     retval.type = table_m;
     retval.data.tableVal = avm_tablenew();
@@ -1916,13 +1890,14 @@ void libfunc_objectcopy(void){
             bucket = bucket->next;
         }
     }
+
     for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
         avm_table_bucket* bucket = arg->data.tableVal->strIndexed[i];
         while (bucket) {
             avm_table_bucket* new_bucket = returnTableBucket(retval.data.tableVal, &bucket->key, &bucket->value, i);
             bucket = bucket->next;
         }
-    }
+    }   
 }
 
 void libfunc_objectmemberkeys(void){

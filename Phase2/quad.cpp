@@ -76,7 +76,6 @@ void print_quads(const string& filename = "") {
         string out_filename = filename + ".quad";
         outfile.open(out_filename);
         if (outfile.is_open()) {
-            cout << "Writing quads to " << out_filename << endl;
             out_stream = &outfile;
         } else {
             cerr << "Error: Failed to open output file " << out_filename << endl;

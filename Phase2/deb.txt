@@ -1,3 +1,2 @@
-x = 1 + 2;
-str = "lala";
-vect = [2,4];
+t[1] = input();
+print(t[1]);
