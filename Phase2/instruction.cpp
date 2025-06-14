@@ -340,33 +340,60 @@ void generate_RETURN(quad *q){
 }
 
 string instruction_opcode_names[] = {
-    "assign_v",
-    "add_v",          
-    "sub_v",
-    "mul_v",         
-    "div_v",          
-    "mod_v",
-    "uminus_v",       
-    "and_v",          
-    "or_v",
-    "not_v",          
-    "jeq_v",         
-    "jne_v",
-    "jle_v",          
-    "jge_v",          
-    "jlt_v",
-    "jgt_v",          
-    "callfunc_v",     
-    "pusharg_v",
-    "ret_v",    
-    "getretval_v",    
-    "enterfunc_v",    
-    "exitfunc_v",     
-    "tablecreate_v", 
-    "tablegetelem_v", 
-    "tablesetelem_v",
-    "jump_v",         
-    "nop_v"
+    // "assign_v",
+    // "add_v",          
+    // "sub_v",
+    // "mul_v",         
+    // "div_v",          
+    // "mod_v",
+    // "uminus_v",       
+    // "and_v",          
+    // "or_v",
+    // "not_v",          
+    // "jeq_v",         
+    // "jne_v",
+    // "jle_v",          
+    // "jge_v",          
+    // "jlt_v",
+    // "jgt_v",          
+    // "callfunc_v",     
+    // "pusharg_v",
+    // "ret_v",    
+    // "getretval_v",    
+    // "enterfunc_v",    
+    // "exitfunc_v",     
+    // "tablecreate_v", 
+    // "tablegetelem_v", 
+    // "tablesetelem_v",
+    // "jump_v",         
+    // "nop_v"
+    "ASSIGN",
+    "ADD",          
+    "SUB",
+    "MUL",         
+    "DIV",          
+    "MOD",
+    "UMINUS",       
+    "AND",          
+    "OR",
+    "NOT",          
+    "JUMP-E",         
+    "JUMP-NE",
+    "JUMP-LE",          
+    "JUMP-GE",          
+    "JUMP-LT",
+    "JUMP-GR",          
+    "CALL-FUNC",     
+    "PUSH-ARG",
+    "RET",    
+    "GET-RET-VAL",    
+    "ENTER-FUC",    
+    "EXIT-FUNC",     
+    "TABLE-CREATE", 
+    "TABLE-GET-ELEM", 
+    "TABLE-SET-ELEM",
+    "JUMP",         
+    "NOP"
 };
 
 string vmarg_names[] = {
@@ -670,7 +697,6 @@ void generate(vmopcode op,quad *q){
     emit_instr(i);
 }
 
-//helper, vale se allo
 void generate_make_op(instruction* i, quad* q){
     if(q->arg1){
         i->arg1 = new vmarg;
@@ -729,24 +755,44 @@ void print_instruction(instruction* i, int step) {
     if (i == nullptr) {
         assert(0);
     }
-    fprintf(instructions_out, "%4d: %-12s | ", step, instruction_opcode_names[i->opcode].c_str());
-    if (i->arg1) {
-        fprintf(instructions_out, "arg1: %-8s %-4d | ", vmarg_names[i->arg1->type].c_str(), i->arg1->val);
-    } else {
-        fprintf(instructions_out, "%-19s | ", "");
+    
+    // Print header for first instruction
+    if (step == 0) {
+        fprintf(instructions_out, "\n");
+        fprintf(instructions_out, "%-4s | %-12s | %-12s | %-12s | %-12s | %-4s\n", 
+                "NO", "OP-CODE", "RES", "ARG1", "ARG2", "LINE");
+        fprintf(instructions_out, "------------------------------------------------\n");
     }
     
-    if (i->arg2) {
-        fprintf(instructions_out, "arg2: %-8s %-4d | ", vmarg_names[i->arg2->type].c_str(), i->arg2->val);
-    } else {
-        fprintf(instructions_out, "%-19s | ", "");
-    }
+    // Print instruction number
+    fprintf(instructions_out, "%-4d | ", step);
+    
+    // Print opcode
+    fprintf(instructions_out, "%-12s | ", instruction_opcode_names[i->opcode].c_str());
+    
+    // Print result
     if (i->result) {
-        fprintf(instructions_out, "result: %-8s %-4d | ", vmarg_names[i->result->type].c_str(), i->result->val);
+        fprintf(instructions_out, "%-12s | ", (string(vmarg_names[i->result->type]) + " " + to_string(i->result->val)).c_str());
     } else {
-        fprintf(instructions_out, "%-21s | ", "");
+        fprintf(instructions_out, "%-12s | ", "");
     }
-    fprintf(instructions_out, "line: %d\n", i->srcLine);
+    
+    // Print arg1
+    if (i->arg1) {
+        fprintf(instructions_out, "%-12s | ", (string(vmarg_names[i->arg1->type]) + " " + to_string(i->arg1->val)).c_str());
+    } else {
+        fprintf(instructions_out, "%-12s | ", "");
+    }
+    
+    // Print arg2
+    if (i->arg2) {
+        fprintf(instructions_out, "%-12s | ", (string(vmarg_names[i->arg2->type]) + " " + to_string(i->arg2->val)).c_str());
+    } else {
+        fprintf(instructions_out, "%-12s | ", "");
+    }
+    
+    // Print line number
+    fprintf(instructions_out, "%-4d\n", i->srcLine);
 }
 
 void instruction_to_binary(instruction *i){
@@ -1220,10 +1266,7 @@ char* table_tostring(avm_memcell* m) {
     if (!m || m->type != table_m || !m->data.tableVal) {
         return strdup("[table]");
     }
-    
-    // If this is a table element (accessed via index), just return the value
     if (m->data.tableVal->total == 1) {
-        // Find the first element
         for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
             avm_table_bucket* bucket = m->data.tableVal->numIndexed[i];
             if (bucket) {
@@ -1239,12 +1282,8 @@ char* table_tostring(avm_memcell* m) {
             }
         }
     }
-    
-    // For full table display
     string result = "[";
     bool first = true;
-    
-    // Iterate through number-indexed elements
     for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
         avm_table_bucket* bucket = m->data.tableVal->numIndexed[i];
         while (bucket) {
@@ -1258,8 +1297,6 @@ char* table_tostring(avm_memcell* m) {
             bucket = bucket->next;
         }
     }
-    
-    // Iterate through string-indexed elements
     for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
         avm_table_bucket* bucket = m->data.tableVal->strIndexed[i];
         while (bucket) {
@@ -1505,6 +1542,7 @@ void execute_nop(instruction* instr) {
 }
 
 void initfuncstack(){
+    avm_registerlibfunc("input", libfunc_input);
     avm_registerlibfunc("print", libfunc_print);
     avm_registerlibfunc("typeof", libfunc_typeof);
     avm_registerlibfunc("totalarguments", libfunc_totalarguments);
@@ -1718,69 +1756,72 @@ unsigned returnKeyTableInt(double num) {
 }
 
 unsigned returnKeyTableStr(const char* str) {
-    unsigned hash = 0;
+    unsigned hash = 5381;
     while (*str) {
-        hash = *str;
+        hash = ((hash << 5) + hash) + *str;
         str++;
     }
     return hash % AVM_TABLE_HASHSIZE;
 }
 
+avm_table_bucket* find_bucket(avm_table_bucket* head, avm_memcell* key) {
+    while (head) {
+        if (key->type == number_m && head->key.type == number_m &&
+            head->key.data.numVal == key->data.numVal) {
+            return head;
+        }
+        if (key->type == string_m && head->key.type == string_m &&
+            strcmp(head->key.data.strVal, key->data.strVal) == 0) {
+            return head;
+        }
+        head = head->next;
+    }
+    return nullptr;
+}
+
 avm_memcell* avm_tablegetelem(avm_table* table, avm_memcell* key) {
     if (!table || !key) return nullptr;
     
-    if (key->type == number_m) {
-        unsigned index = (unsigned)key->data.numVal;
-        unsigned count = 0;
-        for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
-            avm_table_bucket* bucket = table->numIndexed[i];
-            while (bucket) {
-                if (count == index) {
-                    return &bucket->value;
-                }
-                count++;
-                bucket = bucket->next;
-            }
-        }
-        
-        for (unsigned i = 0; i < AVM_TABLE_HASHSIZE; i++) {
-            avm_table_bucket* bucket = table->strIndexed[i];
-            while (bucket) {
-                if (count == index) {
-                    return &bucket->value;
-                }
-                count++;
-                bucket = bucket->next;
-            }
-        }
-        avm_warning("Table index out of bounds");
-        return nullptr;
-    }
-    
-    if (key->type == string_m) {
-        unsigned hash = returnKeyTableStr(key->data.strVal);
-        avm_table_bucket* bucket = table->strIndexed[hash];
-        
-        while (bucket) {
-            if (bucket->key.type == string_m && 
-                strcmp(bucket->key.data.strVal, key->data.strVal) == 0) {
+    switch (key->type) {
+        case number_m: {
+            unsigned hash = returnKeyTableInt(key->data.numVal);
+            avm_table_bucket* bucket = find_bucket(table->numIndexed[hash], key);
+            if (bucket) {
                 return &bucket->value;
             }
-            bucket = bucket->next;
+            avm_warning("Table index out of bounds");
+            return nullptr;
         }
+        case string_m: {
+            unsigned hash = returnKeyTableStr(key->data.strVal);
+            avm_table_bucket* bucket = find_bucket(table->strIndexed[hash], key);
+            if (bucket) {
+                return &bucket->value;
+            }
+            return nullptr;
+        }
+        default:
+            avm_warning("Invalid key type in tablegetelem");
+            return nullptr;
     }
-    
-    avm_warning("Invalid key type in tablegetelem");
-    return nullptr;
+}
+
+
+avm_table_bucket* returnTableBucket(avm_table *table,avm_memcell* key, avm_memcell* value,unsigned hash){
+    avm_table_bucket* new_bucket = new avm_table_bucket();
+    new_bucket->key = *key;
+    avm_assign(&new_bucket->value, value);
+    new_bucket->next = table->numIndexed[hash];
+    table->numIndexed[hash] = new_bucket;
+    table->total++;
+    return new_bucket;
 }
 
 void avm_tablesetelem(avm_table* table, avm_memcell* key, avm_memcell* value) {
     if (!table || !key || !value) return;
-    
     unsigned hash;
     avm_table_bucket* bucket;
     avm_table_bucket* new_bucket;
-    
     switch (key->type) {
         case number_m:
             hash = returnKeyTableInt(key->data.numVal);
@@ -1793,12 +1834,7 @@ void avm_tablesetelem(avm_table* table, avm_memcell* key, avm_memcell* value) {
                 }
                 bucket = bucket->next;
             }
-            new_bucket = new avm_table_bucket();
-            new_bucket->key = *key;
-            avm_assign(&new_bucket->value, value);
-            new_bucket->next = table->numIndexed[hash];
-            table->numIndexed[hash] = new_bucket;
-            table->total++;
+            new_bucket = returnTableBucket(table, key, value, hash);
             break;
         case string_m:
             hash = returnKeyTableStr(key->data.strVal);
@@ -1811,17 +1847,10 @@ void avm_tablesetelem(avm_table* table, avm_memcell* key, avm_memcell* value) {
                 }
                 bucket = bucket->next;
             }
-            new_bucket = new avm_table_bucket();
-            new_bucket->key = *key;
-            avm_assign(&new_bucket->value, value);
-            new_bucket->next = table->strIndexed[hash];
-            table->strIndexed[hash] = new_bucket;
-            table->total++;
+            new_bucket = returnTableBucket(table, key, value, hash);
             break;
-            
         case nil_m:
             break;
-            
         default:
             avm_warning("Invalid key type in tablesetelem");
             break;

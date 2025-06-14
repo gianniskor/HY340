@@ -322,6 +322,5 @@ void avm_tablesetelem(avm_table* table, avm_memcell* key, avm_memcell* value);
 avm_memcell* avm_tablegetelem(avm_table* table, avm_memcell* key);
 
 
-void freadInstr(FILE* f,int *a1,int *a2,int *a3,int *a4,int *a5,int *a6,int *a7,int *a8);
-
+avm_table_bucket* returnTableBucket(avm_table *table, avm_memcell* key, avm_memcell* value, unsigned hash);
 #endif

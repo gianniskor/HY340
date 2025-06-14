@@ -1,12 +1,3 @@
-vect = [1,3,4];
-vect[2] = 2;
-vect[1] = "true";
-vect[0] = "true";
-x = vect[0];
-y = x;
-vec3=[
-    {"y": 2}
-];
-vec3["y"] = 5;
-vect.y = 4;
-print(vec3);
+x = 1 + 2;
+str = "lala";
+vect = [2,4];

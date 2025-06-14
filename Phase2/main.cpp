@@ -46,8 +46,7 @@ char libFuncs [][30]={
 extern void print_quads(const std::string& filename);
 
 void writeInstructionsFromAbc(const std::string& outputFilePath) {
-    // Verify the magic number before writing the file
-    if (magic_num != 163847504) { // Replace 163847504 with the expected magic number if different
+    if (magic_num != 163847504) {
         std::cerr << "Error: Magic number mismatch! Expected 163847504, but found " << magic_num << "." << std::endl;
         return;
     }
